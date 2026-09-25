@@ -13,45 +13,85 @@ function screen(...content: HTMLElement[]): HTMLElement {
   return root;
 }
 
-export function showSignIn(sb: SupabaseClient): void {
-  const msg = h("p", { class: "muted", role: "status" });
-  const email = h("input", { id: "gate-email", type: "email", required: true, autocomplete: "email", placeholder: "you@example.com" });
-  const btn = h("button", { class: "btn primary", type: "submit" }, "Send me a sign-in link");
-  const form = h(
-    "form",
-    {
-      class: "gate-form",
-      onsubmit: async (e: Event) => {
-        e.preventDefault();
-        btn.disabled = true;
-        msg.textContent = "Sending…";
-        // shouldCreateUser: false → only people invited in Supabase Auth get a link,
-        // so visitors of the public site can't create accounts in the project.
-        const { error } = await sb.auth.signInWithOtp({
-          email: email.value.trim(),
-          options: { emailRedirectTo: location.href.split("#")[0], shouldCreateUser: false },
-        });
-        btn.disabled = false;
-        const notInvited = error && (error.status === 422 || /signups? not allowed|not found/i.test(error.message));
-        msg.textContent =
-          error && !notInvited
-            ? `Couldn't send the link: ${error.message}`
-            : "If this email is on the trip list, a sign-in link is on its way. Open it on this device.";
-      },
-    },
-    h("div", { class: "field" }, h("label", { for: "gate-email", text: "Email" }), email),
-    btn,
-    msg,
-  );
-  screen(h("div", { class: "greet", text: "Praha by night" }), h("h1", { class: "gate-title", text: "Krysa" }), h("p", { text: "The team planner for the FrontKon week. Sign in to see the plan and the Rat Wall." }), form);
+/** Pulls a code from an invite link (`…/#trip=the-code`) and removes it from the address bar. */
+export function takeTripCodeFromUrl(): string | null {
+  const m = /(?:^#|&)trip=([^&]*)/.exec(location.hash);
+  if (!m) return null;
+  history.replaceState(null, "", location.pathname + location.search);
+  try {
+    return decodeURIComponent(m[1].replace(/\+/g, " "));
+  } catch {
+    return m[1];
+  }
 }
 
-export function showNotMember(sb: SupabaseClient, email?: string): void {
-  screen(
-    h("h1", { class: "gate-title", text: "Almost there" }),
-    h("p", { text: `${email ?? "This account"} isn't on the trip list yet. Ask the trip owner to add your email to the members list.` }),
-    h("button", { class: "btn", type: "button", onclick: () => sb.auth.signOut().then(() => location.reload()) }, "Sign out"),
-  );
+/**
+ * The only gate: a shared trip code, no accounts or emails. The device signs in
+ * anonymously only when a code is tried (so portfolio visitors create nothing),
+ * then `join_trip` checks the code in the database. Resolves once joined.
+ */
+export function joinWithTripCode(sb: SupabaseClient, fromLink: string | null): Promise<void> {
+  return new Promise((resolve) => {
+    const msg = h("p", { class: "err", role: "status" });
+    const input = h("input", { id: "gate-code", required: true, autocomplete: "off", autocapitalize: "none", spellcheck: "false", placeholder: "The code from your group chat" });
+    const btn = h("button", { class: "btn primary", type: "submit" }, "Join the trip");
+    const tryCode = async (code: string) => {
+      btn.disabled = true;
+      msg.textContent = "Checking…";
+      try {
+        const { data: s } = await sb.auth.getSession();
+        if (!s.session) {
+          const { error } = await sb.auth.signInAnonymously();
+          if (error) {
+            msg.textContent = /anonymous/i.test(error.message)
+              ? "Anonymous sign-ins are switched off in Supabase (see README)."
+              : `Couldn't connect: ${error.message}`;
+            return;
+          }
+        }
+        const { data, error } = await sb.rpc("join_trip", { p_code: code });
+        if (error) {
+          msg.textContent = error.message.includes("too many") ? "Too many wrong codes. Try again in an hour." : `Couldn't check the code: ${error.message}`;
+          return;
+        }
+        if (data !== true) {
+          msg.textContent = "That's not the trip code.";
+          input.focus();
+          return;
+        }
+        document.getElementById("gate")?.remove();
+        resolve();
+      } catch {
+        msg.textContent = "Couldn't reach the server. Check your connection and try again.";
+      } finally {
+        btn.disabled = false;
+      }
+    };
+    const form = h(
+      "form",
+      {
+        class: "gate-form",
+        onsubmit: (e: Event) => {
+          e.preventDefault();
+          const code = input.value.trim();
+          if (code) void tryCode(code);
+        },
+      },
+      h("div", { class: "field" }, h("label", { for: "gate-code", text: "Trip code" }), input),
+      btn,
+      msg,
+    );
+    screen(
+      h("div", { class: "greet", text: "Praha by night" }),
+      h("h1", { class: "gate-title", text: "Krysa" }),
+      h("p", { text: "The team planner for the FrontKon week. Enter the trip code to see the plan and the Rat Wall. You only need to do this once on each device." }),
+      form,
+    );
+    if (fromLink) {
+      input.value = fromLink;
+      void tryCode(fromLink);
+    } else input.focus();
+  });
 }
 
 /** First visit: ask for a display name so reactions and posts show who did them. */

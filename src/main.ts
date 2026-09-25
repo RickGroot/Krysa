@@ -3,7 +3,7 @@ import seed from "../supabase/seed/demo.json";
 import { LOCAL_DB_KEY, localRuntime } from "./data/local";
 import type { Json } from "./data/runtime";
 import { supabaseClient, supabaseRuntime } from "./data/supabase";
-import { ensureProfile, showDemoBanner, showNotMember, showSignIn } from "./ui/auth";
+import { ensureProfile, joinWithTripCode, showDemoBanner, takeTripCodeFromUrl } from "./ui/auth";
 import { boot } from "./ui/boot";
 import { todayIso } from "./lib/dates";
 import { shiftTrip } from "./lib/demo";
@@ -29,6 +29,22 @@ function demoData(): Record<string, Json> {
   return shiftTrip(seed as Record<string, Record<string, unknown>>, today) as Record<string, Json>;
 }
 
+const JOINED_KEY = "krysa-joined";
+const remembered = (): boolean => {
+  try {
+    return localStorage.getItem(JOINED_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const remember = (): void => {
+  try {
+    localStorage.setItem(JOINED_KEY, "1");
+  } catch {
+    /* private mode: fine, the code check runs again next time */
+  }
+};
+
 async function start(): Promise<void> {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     boot(localRuntime(demoData()));
@@ -36,18 +52,19 @@ async function start(): Promise<void> {
     return;
   }
   const sb = supabaseClient(SUPABASE_URL, SUPABASE_KEY);
+  const fromLink = takeTripCodeFromUrl();
   const { data } = await sb.auth.getSession();
-  const session = data.session;
-  if (!session) {
-    showSignIn(sb);
-    return;
+  let member = false;
+  if (data.session) {
+    const { data: isMember, error } = await sb.rpc("is_member");
+    // Offline (or a hiccup): trust that this device joined before, so the cached plan still opens.
+    member = error ? remembered() : isMember === true;
   }
-  const { data: member, error } = await sb.rpc("is_member");
-  if (error || !member) {
-    showNotMember(sb, session.user.email);
-    return;
-  }
-  await ensureProfile(sb, session.user);
+  if (!member) await joinWithTripCode(sb, fromLink);
+  remember();
+  const { data: after } = await sb.auth.getSession();
+  if (!after.session) throw new Error("No session after joining");
+  await ensureProfile(sb, after.session.user);
   boot(await supabaseRuntime(sb));
   sb.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT") location.reload();

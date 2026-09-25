@@ -5,20 +5,40 @@
 -- a schema is the closest thing). It works the same in a project of its own.
 --
 -- Run once in the SQL editor, then add `krysa` to the exposed schemas of the
--- Data API (see README). Safe to run again.
+-- Data API and turn on anonymous sign-ins (see README). Safe to run again.
+--
+-- Access works with a shared trip code instead of accounts: the app signs each
+-- device in anonymously, and `join_trip(code)` adds that device to `members`
+-- when the code is right. Codes are stored hashed and only the SQL editor can
+-- see or change them.
 --
 -- Model: one `docs` table that stores every document as JSON under a path like
 -- "events/abc123", mirroring how the app reads and writes data.
 
 create schema if not exists krysa;
 
--- Who is allowed in. Add each traveller's email here (lower case).
--- Owners can remove anyone's Rat Wall posts; everyone else only their own.
+-- Devices that entered a valid trip code. Owners can remove anyone's Rat Wall
+-- posts; everyone else only their own.
 create table if not exists krysa.members (
-  email text primary key check (email = lower(email)),
-  is_owner boolean not null default false
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  is_owner boolean not null default false,
+  joined_at timestamptz not null default now()
 );
-alter table krysa.members add column if not exists is_owner boolean not null default false;
+
+-- Trip codes, hashed. An owner code also makes the device an owner.
+create table if not exists krysa.codes (
+  code_hash text primary key,
+  is_owner boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- Wrong guesses, to slow down anyone trying codes.
+create table if not exists krysa.join_failures (
+  id bigint generated always as identity primary key,
+  user_id uuid not null,
+  at timestamptz not null default now()
+);
+create index if not exists join_failures_user_idx on krysa.join_failures (user_id, at);
 
 -- Display names for reactions, posts and the rat-catching scoreboard.
 create table if not exists krysa.profiles (
@@ -46,10 +66,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  select exists (
-    select 1 from krysa.members m
-    where m.email = lower(coalesce(auth.jwt() ->> 'email', ''))
-  );
+  select exists (select 1 from krysa.members m where m.user_id = auth.uid());
 $$;
 
 create or replace function krysa.is_owner()
@@ -59,10 +76,47 @@ stable
 security definer
 set search_path = ''
 as $$
-  select exists (
-    select 1 from krysa.members m
-    where m.is_owner and m.email = lower(coalesce(auth.jwt() ->> 'email', ''))
-  );
+  select exists (select 1 from krysa.members m where m.user_id = auth.uid() and m.is_owner);
+$$;
+
+-- Codes are compared case-insensitively, ignoring spaces at the ends.
+create or replace function krysa.hash_code(p_code text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  select encode(sha256(convert_to(lower(btrim(p_code)), 'UTF8')), 'hex');
+$$;
+
+-- Called by the app with the code someone typed. Returns true when it matched.
+-- Five wrong guesses per device per hour, then it refuses.
+create or replace function krysa.join_trip(p_code text)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_owner boolean;
+begin
+  if v_uid is null then
+    raise exception 'not signed in' using errcode = '28000';
+  end if;
+  if (select count(*) from krysa.join_failures f where f.user_id = v_uid and f.at > now() - interval '1 hour') >= 5 then
+    raise exception 'too many wrong codes, try again in an hour' using errcode = 'P0001';
+  end if;
+  select c.is_owner into v_owner from krysa.codes c where c.code_hash = krysa.hash_code(coalesce(p_code, ''));
+  if not found then
+    insert into krysa.join_failures (user_id) values (v_uid);
+    return false;
+  end if;
+  insert into krysa.members (user_id, is_owner) values (v_uid, v_owner)
+  on conflict (user_id) do update set is_owner = krysa.members.is_owner or excluded.is_owner;
+  return true;
+end;
 $$;
 
 -- Objects merge recursively; arrays and scalars replace (same rule as the app).
@@ -113,18 +167,22 @@ revoke all on schema krysa from public, anon;
 grant usage on schema krysa to authenticated, service_role;
 revoke all on all tables in schema krysa from public, anon;
 revoke all on all functions in schema krysa from public, anon;
+-- `codes` and `join_failures` get no grants: only the SQL editor and
+-- `join_trip` (security definer) can touch them.
 grant select on krysa.members to authenticated;
 grant select, insert, update on krysa.profiles to authenticated;
 grant select, insert, update, delete on krysa.docs to authenticated;
-grant execute on function krysa.is_member(), krysa.is_owner(), krysa.jsonb_deep_merge(jsonb, jsonb), krysa.docs_merge(text, jsonb) to authenticated;
+grant execute on function krysa.is_member(), krysa.is_owner(), krysa.join_trip(text), krysa.jsonb_deep_merge(jsonb, jsonb), krysa.docs_merge(text, jsonb) to authenticated;
 grant all on all tables in schema krysa to service_role;
 grant execute on all functions in schema krysa to service_role;
 
 alter table krysa.members enable row level security;
+alter table krysa.codes enable row level security;
+alter table krysa.join_failures enable row level security;
 alter table krysa.profiles enable row level security;
 alter table krysa.docs enable row level security;
 
--- Members can see the member list (to know who's on the trip); nobody edits it from the app.
+-- Members can see the member list; only join_trip adds to it.
 drop policy if exists members_read on krysa.members;
 create policy members_read on krysa.members for select to authenticated using (krysa.is_member());
 
@@ -168,6 +226,10 @@ drop policy if exists krysa_uploads_delete on storage.objects;
 create policy krysa_uploads_delete on storage.objects for delete to authenticated
   using (bucket_id = 'krysa-uploads' and krysa.is_member());
 
--- Then let people in (lower case), and invite the same addresses under
--- Authentication → Users so they can get a sign-in link:
--- insert into krysa.members (email, is_owner) values ('you@example.com', true), ('friend@example.com', false);
+-- Then set the trip code (and optionally an owner code) in the SQL editor.
+-- Pick something long enough that it can't be guessed, e.g. three random words:
+-- insert into krysa.codes (code_hash, is_owner) values
+--   (krysa.hash_code('your trip code'), false),
+--   (krysa.hash_code('your owner code'), true);
+-- New code later: delete from krysa.codes; then insert again. To also kick out
+-- devices that already joined: delete from krysa.members;

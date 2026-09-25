@@ -34,7 +34,8 @@ interface DocRow {
 export function supabaseClient(url: string, publishableKey: string): SupabaseClient {
   return createClient(url, publishableKey, {
     db: { schema: SCHEMA },
-    auth: { persistSession: true, detectSessionInUrl: true, flowType: "pkce" },
+    // Devices sign in anonymously with a trip code; there are no email links to pick up.
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   }) as unknown as SupabaseClient;
 }
 

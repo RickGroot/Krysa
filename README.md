@@ -30,22 +30,29 @@ Without Supabase keys the app runs in **demo mode**: a made-up trip stored in yo
 
 Krysa keeps everything in its own Postgres schema (`krysa`) and storage bucket (`krysa-uploads`). Supabase has no folders, so the schema is the "subfolder": the app can live in a personal project next to other things, or in a project of its own.
 
+There are no accounts or emails. Everyone gets in with a shared **trip code**: each device signs in anonymously the first time someone types the code (or opens an invite link), and the database checks the code before letting that device in.
+
 1. Pick a project at [supabase.com](https://supabase.com), or create one.
 2. In the **SQL editor**, run [`supabase/schema.sql`](supabase/schema.sql). It creates, all inside `krysa`:
    - `docs`: every document as JSON under a path like `events/abc123`, kept live with Realtime
-   - `members`: the emails that are allowed in, and who's an owner
+   - `members`: devices that entered a valid code, and who's an owner
+   - `codes`: the trip code(s), stored hashed and invisible to the app
    - `profiles`: display names
    - the private `krysa-uploads` bucket (20 MB per file)
    - row level security so only members can read or write, and only the poster or an owner can remove a Rat Wall post
-3. **Project Settings → API → Exposed schemas** (Data API settings): add `krysa`. Without this the app gets "permission denied" errors. See [Using custom schemas](https://supabase.com/docs/guides/api/using-custom-schemas).
-4. Let people in. Add them to the member list:
+3. Set the trip code in the SQL editor. Use something that can't be guessed, like three random words. The owner code is optional and also lets that device remove anyone's Rat Wall posts:
    ```sql
-   insert into krysa.members (email, is_owner) values ('you@example.com', true), ('friend@example.com', false);
+   insert into krysa.codes (code_hash, is_owner) values
+     (krysa.hash_code('your trip code'), false),
+     (krysa.hash_code('your owner code'), true);
    ```
-   Then invite the same addresses under **Authentication → Users → Invite user**. The sign-in form never creates accounts, so visitors of the public site can't sign up to your project.
-5. **Authentication → URL configuration:** add your GitHub Pages URL and `http://localhost:5173` to the Redirect URLs. If the project is shared with other apps, leave the Site URL as it is.
+4. **Project Settings → Data API → Exposed schemas**: add `krysa`. Without this the app gets "permission denied" errors. See [Using custom schemas](https://supabase.com/docs/guides/api/using-custom-schemas).
+5. **Authentication → Sign In / Providers**: turn on **anonymous sign-ins**. See [Anonymous sign-ins](https://supabase.com/docs/guides/auth/auth-anonymous). If other apps share this project, check that their tables don't let every signed-in user in (for example policies like `to authenticated using (true)`): anonymous users count as signed in too.
 6. Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (**Project Settings → API keys**; a legacy anon key also works as `VITE_SUPABASE_ANON_KEY`).
-7. Optionally load data: add `SUPABASE_SECRET_KEY` to `.env`, then run `pnpm seed` for the demo trip or `pnpm seed my-trip.private.json` for your own. Files ending in `.private.json` are ignored by git. Re-running only adds missing documents. Never commit or deploy the secret key.
+7. Share the site and the code with the group. An invite link fills the code in for them: `https://<user>.github.io/<repo>/#trip=your-trip-code` (spaces become `%20`). The code is removed from the address bar as soon as the page opens.
+8. Optionally load data: add `SUPABASE_SECRET_KEY` to `.env`, then run `pnpm seed` for the demo trip or `pnpm seed my-trip.private.json` for your own. Files ending in `.private.json` are ignored by git. Re-running only adds missing documents. Never commit or deploy the secret key.
+
+**Changing the code:** `delete from krysa.codes;` and insert a new one. Devices that already joined stay in; `delete from krysa.members;` sends everyone back to the code screen.
 
 ## Deploying to GitHub Pages
 
@@ -84,15 +91,18 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 
 ## Security notes
 
-- **The site is public, the data isn't.** GitHub Pages serves the app to anyone, but every read and write goes through row level security and requires a signed-in member. Anonymous requests can't even see the `krysa` schema.
+- **The site is public, the data isn't.** GitHub Pages serves the app to anyone, but every read and write goes through row level security and requires a device that entered the trip code. Requests without a session can't even see the `krysa` schema, and visitors who never type a code create nothing in Supabase.
+- **The trip code is the only key.** Anyone who has it gets full access, so share it only in your group chat. Codes are stored as SHA-256 hashes, and each device gets five wrong guesses per hour.
 - **The publishable key is public by design.** RLS protects the data. The secret key is only for `pnpm seed` on your own machine.
-- **Nothing personal ships with the app.** No emails, names or booking details are built into the bundle; who's an owner lives in the database. A test fails if the demo seed ever contains booking codes.
+- **Nothing personal ships with the app.** No codes, emails, names or booking details are built into the bundle; who's an owner lives in the database. A test fails if the demo seed ever contains booking codes.
 - **Booking codes:** a booking code plus a surname lets anyone change a booking, so add them in the app only if you're comfortable with every member seeing them. The app masks them until you tap "Show".
 - User-generated content is treated as untrusted: the UI builds DOM with `textContent`, and meme options are checked against allow-lists (`normMeme`).
 
 ## Shortcuts and known limits
 
-- **Supabase mode hasn't run against a real project yet.** The SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (member access, deep merge, strangers and anonymous users blocked, delete rules). Expect small fixes on first connect.
+- **Supabase mode hasn't run against a real project yet.** The SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (joining with a code, the guess limit, deep merge, strangers blocked, delete rules), and the code screen was checked in a browser. Expect small fixes on first connect.
+- **A device is a member, not a person.** Clearing the browser's data means entering the code again, and posts from the old session can then only be removed by an owner. Anonymous users are never cleaned up automatically; delete old ones under Authentication → Users if you like.
+- **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
 - **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests. The UI was checked by hand in a browser.
 - **Check-in timings are only known for KLM.** Other airlines get a cautious default (reminder from 24 hours before, bag drop closing 45 minutes before). Add airlines in `checkInRule`.
