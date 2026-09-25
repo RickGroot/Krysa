@@ -48,7 +48,7 @@ There are no accounts or emails. Everyone gets in with a shared **trip code**: e
    ```
 4. **Project Settings → Data API → Exposed schemas**: add `krysa`. Without this the app gets "permission denied" errors. See [Using custom schemas](https://supabase.com/docs/guides/api/using-custom-schemas).
 5. **Authentication → Sign In / Providers**: turn on **anonymous sign-ins**. See [Anonymous sign-ins](https://supabase.com/docs/guides/auth/auth-anonymous). If other apps share this project, check that their tables don't let every signed-in user in (for example policies like `to authenticated using (true)`): anonymous users count as signed in too.
-6. Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (**Project Settings → API keys**; a legacy anon key also works as `VITE_SUPABASE_ANON_KEY`).
+6. Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (**Project Settings → API keys**; a legacy anon key also works as `VITE_SUPABASE_ANON_KEY`). Snippets for other frameworks name them differently (like `NEXT_PUBLIC_SUPABASE_URL`): the values are the same, but Vite only passes on names that start with `VITE_`.
 7. Share the site and the code with the group. An invite link fills the code in for them: `https://<user>.github.io/<repo>/#trip=your-trip-code` (spaces become `%20`). The code is removed from the address bar as soon as the page opens.
 8. Optionally load data: add `SUPABASE_SECRET_KEY` to `.env`, then run `pnpm seed` for the demo trip or `pnpm seed my-trip.private.json` for your own. Files ending in `.private.json` are ignored by git. Re-running only adds missing documents. Never commit or deploy the secret key.
 
@@ -100,13 +100,13 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 
 ## Shortcuts and known limits
 
-- **Supabase mode hasn't run against a real project yet.** The SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (joining with a code, the guess limit, deep merge, strangers blocked, delete rules), and the code screen was checked in a browser. Expect small fixes on first connect.
+- **Supabase mode is only tested by hand.** It ran against a real project (a wrong code, joining with the right one, live updates between two browsers, uploading and deleting a Rat Wall post), and the SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (the guess limit, deep merge, strangers blocked, delete rules).
 - **A device is a member, not a person.** Clearing the browser's data means entering the code again, and posts from the old session can then only be removed by an owner. Anonymous users are never cleaned up automatically; delete old ones under Authentication → Users if you like.
 - **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
 - **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests. The UI was checked by hand in a browser.
 - **Check-in timings are only known for KLM.** Other airlines get a cautious default (reminder from 24 hours before, bag drop closing 45 minutes before). Add airlines in `checkInRule`.
 - **Offline is read-only.** The service worker caches the app shell and the last known data. Writes need a connection.
-- **Undo is client-side.** A delete can be undone for 8 seconds from the same device. There's no server-side history.
+- **Undo is client-side.** A delete can be undone for 8 seconds from the same device. There's no server-side history. An uploaded file is only removed from storage once those 8 seconds are up, so closing or reloading the app sooner leaves the file behind in the bucket (it no longer shows in the app).
 - **Uploads use signed URLs that expire after an hour.** The app refreshes them when it re-renders.
 - **One shared trip.** There's no concept of multiple trips or teams.
