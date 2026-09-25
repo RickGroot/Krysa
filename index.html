@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Krysa · Prague Week</title>
+<meta name="description" content="The rat-themed team planner for the FrontKon week in Prague.">
+<meta name="theme-color" content="#151a2d">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Archivo:wdth,wght@62..125,800&family=Anton&family=Comic+Neue:wght@700&display=swap">
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="hero-slot" id="hero-slot" aria-hidden="true"></div>
+  <div class="stage-in">
+  <header class="top">
+    <div class="hd">
+      <div class="greet" id="greet">Dobrý den</div>
+      <h1 id="title">Prague week</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <button class="krysa-btn" id="krysa" type="button" aria-label="Krysa the house rat. Tap for a rat fact."></button>
+  </header>
+  <div class="hero-text" id="hero-text"></div>
+  </div>
+</div>
+<div class="wrap">
+  <main id="main"><p class="empty">The rats are fetching the plan…</p></main>
+</div>
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button role="tab" data-tab="rats" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="7" r="3.2"/><circle cx="17.5" cy="7" r="3.2"/><path d="M12 21c-4.2 0-7-3-7-6.8C5 11 8 9 12 9s7 2 7 5.2C19 18 16.2 21 12 21z"/><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M9.3 13.6h.01M14.7 13.6h.01" stroke-width="2.4"/></svg><span>Rats</span><span class="count" id="c-rats"></span></button>
+  <button role="tab" data-tab="plan" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2"/></svg><span>Plan</span></button>
+  <button role="tab" data-tab="flights" aria-selected="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 15.5v-2l-8-4.8V3.8a1.5 1.5 0 0 0-3 0v4.9l-8 4.8v2l8-2.3v4.9L8 19.6V21l3.5-.9L15 21v-1.4l-2-1.5v-4.9z"/></svg><span>Flights</span></button>
+  <button role="tab" data-tab="ideas" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg><span>Ideas</span><span class="count" id="c-ideas"></span></button>
+  <button role="tab" id="more-btn" aria-selected="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg><span>More</span><span class="count" id="c-todo"></span></button>
+</nav>
+<button class="fab" id="fab" hidden>+ Add</button>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

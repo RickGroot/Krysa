@@ -1,0 +1,27 @@
+{
+  "name": "krysa-prague",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Krysa: the rat-themed team planner for the FrontKon week in Prague (PWA).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.lib.json && tsc -p tsconfig.json",
+    "seed": "node --env-file=.env scripts/seed.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.1"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.1"
+  }
+}

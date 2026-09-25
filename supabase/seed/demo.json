@@ -1,0 +1,783 @@
+{
+ "trip/info": {
+  "title": "FrontKon week in Prague",
+  "startDate": "2026-10-04",
+  "endDate": "2026-10-10",
+  "hotelName": "Apartment in Staré Město",
+  "hotelAddress": "Staroměstské náměstí, 110 00 Praha 1",
+  "baseLat": 50.0875,
+  "baseLng": 14.4213,
+  "eurCzk": 24.3,
+  "notes": "Demo trip: the people, flights and costs are made up. FrontKon day is at O2 Universum in Praha 9."
+ },
+ "people/alex": {
+  "name": "Alex",
+  "arrive": "2026-10-04T11:05",
+  "arriveBy": "KR404 from AMS",
+  "depart": "2026-10-10T17:10",
+  "departBy": "KR418 to AMS",
+  "notes": "",
+  "phone": ""
+ },
+ "people/sam": {
+  "name": "Sam",
+  "arrive": "2026-10-04T11:05",
+  "arriveBy": "KR404 from AMS",
+  "depart": "2026-10-10T17:10",
+  "departBy": "KR418 to AMS",
+  "notes": "",
+  "phone": ""
+ },
+ "people/jules": {
+  "name": "Jules",
+  "arrive": "2026-10-05T11:05",
+  "arriveBy": "KR404 from AMS",
+  "depart": "2026-10-10T17:10",
+  "departBy": "KR418 to AMS",
+  "notes": "",
+  "phone": ""
+ },
+ "flights/out-1": {
+  "airline": "Krysa Air",
+  "flight": "KR404",
+  "date": "2026-10-04",
+  "dep": "09:40",
+  "arr": "11:05",
+  "from": "AMS",
+  "to": "PRG",
+  "people": [
+   "alex",
+   "sam"
+  ]
+ },
+ "flights/out-2": {
+  "airline": "Krysa Air",
+  "flight": "KR404",
+  "date": "2026-10-05",
+  "dep": "09:40",
+  "arr": "11:05",
+  "from": "AMS",
+  "to": "PRG",
+  "people": [
+   "jules"
+  ]
+ },
+ "flights/home": {
+  "airline": "Krysa Air",
+  "flight": "KR418",
+  "date": "2026-10-10",
+  "dep": "17:10",
+  "arr": "18:35",
+  "from": "PRG",
+  "to": "AMS",
+  "people": [
+   "alex",
+   "sam",
+   "jules"
+  ]
+ },
+ "events/land-1": {
+  "date": "2026-10-04",
+  "time": "11:05",
+  "endTime": "",
+  "kind": "travel",
+  "title": "Alex & Sam land (KR404)",
+  "notes": "Allow about 45 min into town.",
+  "lat": 50.1008,
+  "lng": 14.26,
+  "location": "Václav Havel Airport"
+ },
+ "events/dinner-1": {
+  "date": "2026-10-04",
+  "time": "19:00",
+  "endTime": "",
+  "kind": "food",
+  "title": "Czech dinner at Lokál Dlouhááá",
+  "notes": "Booked for three. Tank Pilsner, obviously.",
+  "location": "Lokál Dlouhááá, Dlouhá 33",
+  "lat": 50.0903,
+  "lng": 14.426
+ },
+ "events/coffee-2": {
+  "date": "2026-10-05",
+  "time": "08:30",
+  "endTime": "",
+  "kind": "coffee",
+  "title": "Coffee at Onesip",
+  "notes": "",
+  "location": "Onesip Coffee, Haštalská 15",
+  "lat": 50.0907,
+  "lng": 14.4227
+ },
+ "events/work-2": {
+  "date": "2026-10-05",
+  "time": "09:30",
+  "endTime": "12:30",
+  "kind": "work",
+  "title": "Work block",
+  "notes": "Laptops out at the apartment.",
+  "location": "Apartment"
+ },
+ "events/land-2": {
+  "date": "2026-10-05",
+  "time": "11:05",
+  "endTime": "",
+  "kind": "travel",
+  "title": "Jules lands (KR404)",
+  "notes": "Allow about 45 min into town.",
+  "lat": 50.1008,
+  "lng": 14.26,
+  "location": "Václav Havel Airport"
+ },
+ "events/letna-2": {
+  "date": "2026-10-05",
+  "time": "18:00",
+  "endTime": "",
+  "kind": "night",
+  "title": "Sunset beers at Letná",
+  "notes": "",
+  "location": "Letná beer garden, Letenské sady 341",
+  "lat": 50.0962,
+  "lng": 14.4236
+ },
+ "events/frontkon": {
+  "date": "2026-10-06",
+  "time": "10:00",
+  "endTime": "18:00",
+  "kind": "work",
+  "title": "FrontKon 2026",
+  "location": "O2 Universum, Českomoravská 2345/17, Praha 9",
+  "lat": 50.1042,
+  "lng": 14.493,
+  "notes": "Frontend conference, 3 stages. Metro B from Můstek to Českomoravská (6 stops)."
+ },
+ "events/pinkasu-3": {
+  "date": "2026-10-06",
+  "time": "19:00",
+  "endTime": "",
+  "kind": "food",
+  "title": "Pilsner and dinner at U Pinkasů",
+  "notes": "",
+  "location": "U Pinkasů, Jungmannovo nám. 16",
+  "lat": 50.0833,
+  "lng": 14.4237
+ },
+ "events/charles-4": {
+  "date": "2026-10-07",
+  "time": "07:10",
+  "endTime": "",
+  "kind": "sight",
+  "title": "Charles Bridge at sunrise",
+  "notes": "",
+  "location": "Karlův most",
+  "lat": 50.0865,
+  "lng": 14.4114,
+  "draft": true
+ },
+ "events/castle-4": {
+  "date": "2026-10-07",
+  "time": "14:00",
+  "endTime": "",
+  "kind": "sight",
+  "title": "Castle + Strahov monastery brewery",
+  "notes": "Tram 22 up, walk down.",
+  "location": "Klášterní pivovar Strahov, Strahovské nádvoří 301",
+  "lat": 50.0862,
+  "lng": 14.3895
+ },
+ "events/sisters-5": {
+  "date": "2026-10-08",
+  "time": "12:30",
+  "endTime": "",
+  "kind": "food",
+  "title": "Chlebíčky at Sisters",
+  "notes": "",
+  "location": "Sisters Bistro, Dlouhá 39",
+  "lat": 50.0906,
+  "lng": 14.4266
+ },
+ "events/hemingway-5": {
+  "date": "2026-10-08",
+  "time": "20:00",
+  "endTime": "",
+  "kind": "night",
+  "title": "Cocktails at Hemingway Bar",
+  "notes": "",
+  "location": "Hemingway Bar, Karolíny Světlé 26",
+  "lat": 50.0839,
+  "lng": 14.415
+ },
+ "events/dox-6": {
+  "date": "2026-10-09",
+  "time": "11:00",
+  "endTime": "",
+  "kind": "sight",
+  "title": "DOX contemporary art",
+  "notes": "",
+  "location": "DOX, Poupětova 1",
+  "lat": 50.1066,
+  "lng": 14.4485,
+  "draft": true
+ },
+ "events/field-6": {
+  "date": "2026-10-09",
+  "time": "19:30",
+  "endTime": "",
+  "kind": "food",
+  "title": "Team dinner at Field",
+  "notes": "The splurge night.",
+  "location": "Field, U Milosrdných 12",
+  "lat": 50.0907,
+  "lng": 14.4203
+ },
+ "events/louvre-7": {
+  "date": "2026-10-10",
+  "time": "10:00",
+  "endTime": "",
+  "kind": "coffee",
+  "title": "Breakfast at Café Louvre",
+  "notes": "",
+  "location": "Café Louvre, Národní 22",
+  "lat": 50.082,
+  "lng": 14.419
+ },
+ "events/home": {
+  "date": "2026-10-10",
+  "time": "17:10",
+  "endTime": "",
+  "kind": "travel",
+  "title": "Everyone flies home (KR418)",
+  "notes": "Be at the airport two hours early.",
+  "lat": 50.1008,
+  "lng": 14.26,
+  "location": "Václav Havel Airport"
+ },
+ "ideas/anonymous": {
+  "kind": "night",
+  "lat": 50.0853,
+  "link": "https://www.anonymousbar.cz/en",
+  "lng": 14.4197,
+  "location": "AnonymouS Bar, Michalská 12",
+  "notes": "Theatrical cocktails a few minutes' walk away. Daily 17–02, book online.",
+  "title": "AnonymouS Bar",
+  "votes": {}
+ },
+ "ideas/charles": {
+  "kind": "sight",
+  "lat": 50.0865,
+  "link": "",
+  "lng": 14.4114,
+  "location": "Karlův most",
+  "notes": "Sunrise is around 7:10 in early October. Only time you'll have it almost to yourselves.",
+  "title": "Charles Bridge at sunrise",
+  "votes": {}
+ },
+ "ideas/cross": {
+  "kind": "night",
+  "lat": 50.1087,
+  "link": "https://www.crossclub.cz/en/english/",
+  "lng": 14.4436,
+  "location": "Cross Club, Plynární 23",
+  "notes": "Steampunk industrial club in Holešovice. Café from 14:00, club late into the night.",
+  "title": "Cross Club",
+  "votes": {
+   "sam": true
+  }
+ },
+ "ideas/dox": {
+  "kind": "sight",
+  "lat": 50.1066,
+  "link": "https://www.dox.cz/en",
+  "lng": 14.4485,
+  "location": "DOX, Poupětova 1",
+  "notes": "Big contemporary art centre with a wooden airship on the roof. Tue–Sun 11–19, closed Mondays.",
+  "title": "DOX contemporary art",
+  "votes": {
+   "jules": true
+  }
+ },
+ "ideas/ema": {
+  "kind": "coffee",
+  "lat": 50.0897,
+  "link": "https://www.emaespressobar.cz/en/na-florenci",
+  "lng": 14.4336,
+  "location": "EMA Espresso Bar, Na Florenci 3",
+  "notes": "Prague specialty coffee staple, good laptop spot. Weekdays 8–18, weekends 10–18.",
+  "title": "EMA Espresso Bar",
+  "votes": {}
+ },
+ "ideas/field": {
+  "kind": "food",
+  "lat": 50.0907,
+  "link": "https://www.fieldrestaurant.cz/en/",
+  "lng": 14.4203,
+  "location": "Field, U Milosrdných 12",
+  "notes": "The splurge option. Book well ahead; they only hold a table for 15 minutes.",
+  "title": "Field (Michelin star)",
+  "votes": {
+   "sam": true,
+   "jules": true
+  }
+ },
+ "ideas/havelska": {
+  "kind": "food",
+  "lat": 50.085,
+  "link": "",
+  "lng": 14.421,
+  "location": "Havelské tržiště, Havelská 13",
+  "notes": "Fruit and souvenir stalls around the corner. Open daily, good for a quick wander.",
+  "title": "Havelská market",
+  "votes": {}
+ },
+ "ideas/hemingway": {
+  "kind": "night",
+  "lat": 50.0839,
+  "link": "https://www.hemingwaybar.cz/bar-prague/",
+  "lng": 14.415,
+  "location": "Hemingway Bar, Karolíny Světlé 26",
+  "notes": "One of the best cocktail bars in town. Phone bookings only: +420 773 974 764.",
+  "title": "Hemingway Bar",
+  "votes": {}
+ },
+ "ideas/josefov": {
+  "kind": "sight",
+  "lat": 50.0899,
+  "link": "",
+  "lng": 14.418,
+  "location": "Josefov, Široká",
+  "notes": "Synagogues and the Old Jewish Cemetery. Closed Saturdays and Jewish holidays, so check dates.",
+  "title": "Jewish Quarter (Josefov)",
+  "votes": {}
+ },
+ "ideas/kafka": {
+  "kind": "sight",
+  "lat": 50.0822,
+  "link": "",
+  "lng": 14.4203,
+  "location": "Kafka head, Quadrio, Spálená",
+  "notes": "David Černý's 42-layer steel head. Weirdly hypnotic, 5 minutes away.",
+  "title": "Rotating Kafka head",
+  "votes": {
+   "alex": true
+  }
+ },
+ "ideas/kantyna": {
+  "kind": "food",
+  "lat": 50.0833,
+  "link": "",
+  "lng": 14.4292,
+  "location": "Kantýna, Politických vězňů 5",
+  "notes": "Butcher shop meets canteen: pick your cut at the counter. Check hours before going.",
+  "title": "Kantýna",
+  "votes": {}
+ },
+ "ideas/klementinum": {
+  "kind": "sight",
+  "lat": 50.0864,
+  "link": "",
+  "lng": 14.4163,
+  "location": "Klementinum, Mariánské náměstí 5",
+  "notes": "Baroque library hall and astronomical tower, guided tours only.",
+  "title": "Klementinum library",
+  "votes": {}
+ },
+ "ideas/lennon": {
+  "kind": "sight",
+  "lat": 50.0862,
+  "link": "",
+  "lng": 14.4067,
+  "location": "Lennon Wall, Velkopřevorské náměstí",
+  "notes": "Quick stop on the way to the castle.",
+  "title": "Lennon Wall",
+  "votes": {}
+ },
+ "ideas/letna": {
+  "kind": "night",
+  "lat": 50.0962,
+  "link": "https://www.letenskyzamecek.cz/en/zahradky",
+  "lng": 14.4236,
+  "location": "Letná beer garden, Letenské sady 341",
+  "notes": "View over the bridges. Seasonal (April–October, weather permitting).",
+  "title": "Sunset beers at Letná beer garden",
+  "votes": {
+   "alex": true,
+   "jules": true
+  }
+ },
+ "ideas/lokal": {
+  "kind": "food",
+  "lat": 50.0903,
+  "link": "https://lokal-dlouha.ambi.cz/en/",
+  "lng": 14.426,
+  "location": "Lokál Dlouhááá, Dlouhá 33",
+  "notes": "Tank Pilsner and proper Czech food. Always full, so book on the website.",
+  "title": "Czech dinner at Lokál Dlouhááá",
+  "votes": {
+   "alex": true,
+   "sam": true,
+   "jules": true
+  }
+ },
+ "ideas/louvre": {
+  "kind": "coffee",
+  "lat": 50.082,
+  "link": "https://www.cafelouvre.cz/en",
+  "lng": 14.419,
+  "location": "Café Louvre, Národní 22",
+  "notes": "Grand old café from 1902, with a billiards room. Good for breakfast.",
+  "title": "Café Louvre",
+  "votes": {}
+ },
+ "ideas/mlejnice": {
+  "kind": "food",
+  "lat": 50.0862,
+  "link": "https://restaurace-mlejnice.cz/en/",
+  "lng": 14.4213,
+  "location": "Mlejnice, Kožná 14",
+  "notes": "Classic Czech pub steps from Old Town Square. Daily 11–23, takes bookings.",
+  "title": "Mlejnice",
+  "votes": {}
+ },
+ "ideas/naplavka": {
+  "kind": "night",
+  "lat": 50.072,
+  "link": "",
+  "lng": 14.4145,
+  "location": "Náplavka, Rašínovo nábřeží",
+  "notes": "Boats and bars along the embankment. Best on a dry evening.",
+  "title": "Náplavka riverside bars",
+  "votes": {}
+ },
+ "ideas/nasemaso": {
+  "kind": "food",
+  "lat": 50.0906,
+  "link": "https://nasemaso.ambi.cz/en/",
+  "lng": 14.4266,
+  "location": "Naše maso, Dlouhá 39",
+  "notes": "Butcher counter serving burgers and meatloaf. Closed Sundays.",
+  "title": "Naše maso",
+  "votes": {}
+ },
+ "ideas/onesip": {
+  "kind": "coffee",
+  "lat": 50.0907,
+  "link": "",
+  "lng": 14.4227,
+  "location": "Onesip Coffee, Haštalská 15",
+  "notes": "Tiny specialty bar. Opens 7:30 on weekdays.",
+  "title": "Onesip Coffee",
+  "votes": {}
+ },
+ "ideas/orloj": {
+  "kind": "sight",
+  "lat": 50.087,
+  "link": "",
+  "lng": 14.4207,
+  "location": "Staroměstské náměstí",
+  "notes": "Two minutes away. The clock does its apostle show on the hour.",
+  "title": "Old Town Square & Astronomical Clock",
+  "votes": {}
+ },
+ "ideas/petrin": {
+  "kind": "sight",
+  "lat": 50.0836,
+  "link": "",
+  "lng": 14.3951,
+  "location": "Petřín lookout tower",
+  "notes": "Mini Eiffel Tower with the best view of the city. Funicular up from Újezd.",
+  "title": "Petřín hill & lookout tower",
+  "votes": {}
+ },
+ "ideas/pinkasu": {
+  "kind": "food",
+  "lat": 50.0833,
+  "link": "https://www.upinkasu.cz/",
+  "lng": 14.4237,
+  "location": "U Pinkasů, Jungmannovo nám. 16",
+  "notes": "Historic Pilsner pub, pouring since 1843. Daily 10–22:30, book indoor tables online.",
+  "title": "U Pinkasů",
+  "votes": {}
+ },
+ "ideas/riegrovy": {
+  "kind": "night",
+  "lat": 50.0785,
+  "link": "",
+  "lng": 14.4425,
+  "location": "Riegrovy sady, Vinohrady",
+  "notes": "Sunset over the city from the park. Seasonal and hours vary, check before going.",
+  "title": "Riegrovy sady beer garden",
+  "votes": {}
+ },
+ "ideas/sisters": {
+  "kind": "food",
+  "lat": 50.0906,
+  "link": "",
+  "lng": 14.4266,
+  "location": "Sisters Bistro, Dlouhá 39",
+  "notes": "Open-faced Czech sandwiches done properly. Quick lunch, same arcade as Naše maso.",
+  "title": "Chlebíčky at Sisters",
+  "votes": {}
+ },
+ "ideas/strahov": {
+  "kind": "sight",
+  "lat": 50.0862,
+  "link": "https://www.klasterni-pivovar.cz/",
+  "lng": 14.3895,
+  "location": "Klášterní pivovar Strahov, Strahovské nádvoří 301",
+  "notes": "Combine Prague Castle with a beer at the top of the hill. Brewery open daily 10–22.",
+  "title": "Castle + Strahov monastery brewery",
+  "votes": {}
+ },
+ "ideas/tram22": {
+  "kind": "sight",
+  "lat": 50.0817,
+  "link": "",
+  "lng": 14.4185,
+  "location": "Národní třída tram stop",
+  "notes": "Scenic ride through Malá Strana. Get off at Pražský hrad and walk down.",
+  "title": "Tram 22 up to the castle",
+  "votes": {}
+ },
+ "ideas/tygr": {
+  "kind": "night",
+  "lat": 50.0852,
+  "link": "https://www.uzlatehotygra.cz/en/",
+  "lng": 14.418,
+  "location": "U Zlatého tygra, Husova 17",
+  "notes": "Legendary regulars' Pilsner pub where Havel took Clinton. Opens 15:00; arrive then or book.",
+  "title": "U Zlatého tygra",
+  "votes": {}
+ },
+ "ideas/vinograf": {
+  "kind": "night",
+  "lat": 50.0852,
+  "link": "",
+  "lng": 14.4318,
+  "location": "Vinograf, Senovážné nám. 23",
+  "notes": "Czech and Moravian wines by the glass. Closed Sundays.",
+  "title": "Vinograf wine bar",
+  "votes": {}
+ },
+ "ideas/vysehrad": {
+  "kind": "sight",
+  "lat": 50.0645,
+  "link": "",
+  "lng": 14.418,
+  "location": "Vyšehrad, V Pevnosti",
+  "notes": "Quieter than the castle, views from the ramparts. Nice walk along the river.",
+  "title": "Walk up to Vyšehrad",
+  "votes": {}
+ },
+ "ideas/zizkov": {
+  "kind": "sight",
+  "lat": 50.081,
+  "link": "",
+  "lng": 14.451,
+  "location": "Žižkovská věž, Mahlerovy sady 1",
+  "notes": "Brutalist tower with Černý's crawling babies. Observation deck on top.",
+  "title": "Žižkov TV Tower",
+  "votes": {}
+ },
+ "todos/pid": {
+  "text": "Install the PID Lítačka app for tram tickets",
+  "due": "2026-10-04",
+  "owner": "Everyone",
+  "done": true
+ },
+ "todos/lokal": {
+  "text": "Book Lokál Dlouhááá for the first night",
+  "due": "2026-09-30",
+  "owner": "Sam",
+  "done": true
+ },
+ "todos/field": {
+  "text": "Book a table at Field for the team dinner",
+  "due": "2026-10-05",
+  "owner": "Jules",
+  "done": false
+ },
+ "todos/hemingway": {
+  "text": "Call Hemingway Bar to reserve cocktails",
+  "due": "2026-10-06",
+  "owner": "Alex",
+  "done": false
+ },
+ "todos/badges": {
+  "text": "Pick up FrontKon badges at the entrance",
+  "due": "",
+  "owner": "Everyone",
+  "done": false
+ },
+ "todos/souvenirs": {
+  "text": "Find a Krysa souvenir for the office",
+  "due": "",
+  "owner": "",
+  "done": false
+ },
+ "expenses/taxi": {
+  "what": "Taxi from the airport",
+  "amount": 650,
+  "currency": "CZK",
+  "paidBy": "alex",
+  "split": [
+   "alex",
+   "sam"
+  ],
+  "date": "2026-10-04",
+  "createdAt": "2026-10-04T12:10:00Z"
+ },
+ "expenses/lokal": {
+  "what": "Dinner at Lokál",
+  "amount": 1840,
+  "currency": "CZK",
+  "paidBy": "sam",
+  "split": [
+   "alex",
+   "sam"
+  ],
+  "date": "2026-10-04",
+  "createdAt": "2026-10-04T21:30:00Z"
+ },
+ "expenses/coffee": {
+  "what": "Coffee round at Onesip",
+  "amount": 285,
+  "currency": "CZK",
+  "paidBy": "alex",
+  "split": [
+   "alex",
+   "sam"
+  ],
+  "date": "2026-10-05",
+  "createdAt": "2026-10-05T08:45:00Z"
+ },
+ "expenses/cleaning": {
+  "what": "Apartment cleaning fee",
+  "amount": 45,
+  "currency": "EUR",
+  "paidBy": "jules",
+  "split": [
+   "alex",
+   "sam",
+   "jules"
+  ],
+  "date": "2026-10-05",
+  "createdAt": "2026-10-05T14:00:00Z"
+ },
+ "rats/m1": {
+  "type": "meme",
+  "by": "alex",
+  "createdAt": "2026-10-04T15:20:00Z",
+  "caption": "Priorities",
+  "squeaks": {
+   "sam": true,
+   "jules": true
+  },
+  "stickers": [],
+  "layout": "classic",
+  "bg": "tram",
+  "top": "FRONTKON TOMORROW",
+  "bottom": "ME: ONE MORE PILSNER",
+  "face": "smug",
+  "item": "beer",
+  "hat": "party",
+  "fur": "hooded"
+ },
+ "rats/m2": {
+  "type": "meme",
+  "by": "sam",
+  "createdAt": "2026-10-04T21:40:00Z",
+  "caption": "Live from O2 Universum",
+  "squeaks": {
+   "alex": true
+  },
+  "stickers": [],
+  "layout": "news",
+  "bg": "prague",
+  "top": "LOCAL RAT ATTENDS FRONTKON",
+  "bottom": "Rat reportedly asked \"is there cheese\" during Q&A • Pilsner supplies stable",
+  "face": "shocked",
+  "hat": "propeller",
+  "item": "coffee"
+ },
+ "rats/m3": {
+  "type": "meme",
+  "by": "jules",
+  "createdAt": "2026-10-05T12:05:00Z",
+  "caption": "Calling it now",
+  "squeaks": {
+   "alex": true,
+   "sam": true,
+   "jules": true
+  },
+  "stickers": [],
+  "layout": "duo",
+  "bg": "sunburst",
+  "top": "DAY 1",
+  "bottom": "DAY 5",
+  "face": "happy",
+  "face2": "dead",
+  "gear": "lanyard"
+ },
+ "rats/m4": {
+  "type": "meme",
+  "by": "alex",
+  "createdAt": "2026-10-05T13:30:00Z",
+  "caption": "",
+  "squeaks": {},
+  "stickers": [],
+  "layout": "boarding",
+  "bg": "sky",
+  "top": "CAPTAIN KRYSA",
+  "bottom": "Please remain seated until the cheese has fully stopped",
+  "hat": "pilot",
+  "item": "boarding",
+  "fur": "white"
+ },
+ "rats/m5": {
+  "type": "meme",
+  "by": "sam",
+  "createdAt": "2026-10-05T16:10:00Z",
+  "caption": "Deep fried for your pleasure",
+  "squeaks": {
+   "jules": true
+  },
+  "stickers": [
+   "sparkles",
+   "fire"
+  ],
+  "layout": "classic",
+  "bg": "vapor",
+  "top": "TRUST ME",
+  "bottom": "I'M A SENIOR FRONTEND RAT",
+  "face": "crazy",
+  "hat": "crown",
+  "item": "sign",
+  "filter": "fried"
+ },
+ "rats/m6": {
+  "type": "meme",
+  "by": "jules",
+  "createdAt": "2026-10-05T17:45:00Z",
+  "caption": "Last seen near Havelská",
+  "squeaks": {
+   "alex": true,
+   "sam": true
+  },
+  "stickers": [],
+  "layout": "wanted",
+  "bg": "gold",
+  "top": "THE TRDELNÍK BANDIT",
+  "bottom": "For eating the last trdelník",
+  "face": "side",
+  "item": "trdelnik",
+  "gear": "mustache",
+  "fur": "agouti"
+ },
+ "ratgame/scores": {
+  "scores": {
+   "sam": 7,
+   "alex": 4,
+   "jules": 2
+  }
+ }
+}
