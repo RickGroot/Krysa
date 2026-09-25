@@ -223,8 +223,9 @@ drop policy if exists krysa_uploads_insert on storage.objects;
 create policy krysa_uploads_insert on storage.objects for insert to authenticated
   with check (bucket_id = 'krysa-uploads' and krysa.is_member());
 drop policy if exists krysa_uploads_delete on storage.objects;
+-- Same rule as Rat Wall posts: only whoever uploaded a file, or an owner, can remove it.
 create policy krysa_uploads_delete on storage.objects for delete to authenticated
-  using (bucket_id = 'krysa-uploads' and krysa.is_member());
+  using (bucket_id = 'krysa-uploads' and krysa.is_member() and (owner_id = auth.uid()::text or krysa.is_owner()));
 
 -- Then set the trip code (and optionally an owner code) in the SQL editor.
 -- Pick something long enough that it can't be guessed, e.g. three random words:

@@ -39,7 +39,7 @@ There are no accounts or emails. Everyone gets in with a shared **trip code**: e
    - `codes`: the trip code(s), stored hashed and invisible to the app
    - `profiles`: display names
    - the private `krysa-uploads` bucket (20 MB per file)
-   - row level security so only members can read or write, and only the poster or an owner can remove a Rat Wall post
+   - row level security so only members can read or write, and only the poster or an owner can remove a Rat Wall post or its uploaded file
 3. Set the trip code in the SQL editor. Use something that can't be guessed, like three random words. The owner code is optional and also lets that device remove anyone's Rat Wall posts:
    ```sql
    insert into krysa.codes (code_hash, is_owner) values
