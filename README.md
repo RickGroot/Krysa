@@ -21,6 +21,7 @@ Without Supabase keys the app runs in **demo mode**: a made-up trip stored in yo
 | --- | --- |
 | `pnpm dev` | Local dev server |
 | `pnpm build` | Production build into `dist/` |
+| `pnpm build:notify` | The push notification function as one file (`dist/notify/index.js`) for the Supabase dashboard |
 | `pnpm preview` | Serve the build locally (service worker active) |
 | `pnpm test` | Unit tests (Vitest) |
 | `pnpm typecheck` | Strict check of `src/lib`, `src/data` and tests, loose check of the UI |
@@ -58,22 +59,18 @@ There are no accounts or emails. Everyone gets in with a shared **trip code**: e
 
 Phones get a ping for the reminders the app already shows (online check-in opening, leaving for the airport, the next plan item within the hour, to-dos due or overdue) and for new Rat Wall posts. A Supabase Edge Function, [`krysa-notify`](supabase/functions/krysa-notify/), does the sending. pg_cron calls it every minute, it works out what's due with the same code as the app ([`src/lib/notify.ts`](src/lib/notify.ts)), and it sends each reminder or post once. Check-in and to-do nudges wait out the night (22:00–08:00 Prague time), and new posts arrive silently at night.
 
-1. Run [`supabase/schema.sql`](supabase/schema.sql) again (it's safe to re-run). It adds the push tables and functions, and a `created_at` column on `krysa.docs` so the function can tell which posts are new.
-2. **Database → Extensions:** turn on `pg_cron` and `pg_net`.
-3. Deploy the function with the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (on Windows: `scoop install supabase`):
-   ```bash
-   supabase login
-   supabase functions deploy krysa-notify --project-ref <project-ref> --use-api --no-verify-jwt
-   ```
-   `--use-api` bundles on Supabase's side, so there's no Docker, and it lets the function import `src/lib`. JWT verification is off because the function checks its own token instead (next step).
-4. In the SQL editor, once. The first line stores where the function lives, the second creates the random token only pg_cron and the function know, and the third starts the schedule:
+1. **Deploy the function**, from the dashboard (nothing to install) or with the CLI:
+   - **Dashboard:** run `pnpm build:notify`, which bundles the function into one file, `dist/notify/index.js`. Then go to **Edge Functions → Deploy a new function → Via Editor**, replace the example code with that file, name the function `krysa-notify` and click **Deploy function**. In the function's settings, turn off **Verify JWT with legacy secret**. The function checks its own token instead (step 3). That switch can turn itself back on when the function is updated, so check it after every redeploy.
+   - **CLI** ([install](https://supabase.com/docs/guides/local-development/cli/getting-started); on Windows `scoop install supabase`): run `supabase login`, then `supabase functions deploy krysa-notify --project-ref <project-ref> --use-api --no-verify-jwt`. `--use-api` bundles on Supabase's side (no Docker) and lets the function import `src/lib`.
+2. **Database → Extensions:** turn on `pg_cron` and `pg_net`. Then run [`supabase/schema.sql`](supabase/schema.sql) again (it's safe to re-run). It adds the push tables and functions, and a `created_at` column on `krysa.docs` so the function can tell which posts are new.
+3. In the SQL editor, once. The first line stores where the function lives, the second creates the random token only pg_cron and the function know, and the third starts the schedule:
    ```sql
    select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/krysa-notify', 'krysa_notify_url');
    select vault.create_secret(gen_random_uuid()::text || gen_random_uuid()::text, 'krysa_notify_token');
    select cron.schedule('krysa-notify', '* * * * *', 'select krysa.run_notify()');
    ```
    The function creates the key pair pushes are signed with (VAPID) on its first run, so there are no keys to generate or copy.
-5. In the app: **More → Notifications → Turn on**, on each device. iPhones and iPads only support this from the Home Screen: add Krysa there first (Share → Add to Home Screen), open it from there, then switch on. Notifications need the built app, so use `pnpm build` and `pnpm preview` to try them locally.
+4. In the app: **More → Notifications → Turn on**, on each device. iPhones and iPads only support this from the Home Screen: add Krysa there first (Share → Add to Home Screen), open it from there, then switch on. Notifications need the built app, so use `pnpm build` and `pnpm preview` to try them locally.
 
 **Is it running?** Each run's answer lands in `net._http_response`:
 
@@ -81,7 +78,7 @@ Phones get a ping for the reminders the app already shows (online check-in openi
 select created, status_code, content from net._http_response order by created desc limit 5;
 ```
 
-A healthy run returns 200 with `{"sent":0,"failed":0,"removed":0}`. A 401 usually means JWT verification is still on (deploy again with `--no-verify-jwt`), a 404 means the URL in Vault is wrong or the function isn't deployed, and a 500 includes the error. No rows at all means the schedule isn't running or a Vault secret is missing. **After the trip:** `select cron.unschedule('krysa-notify');`.
+A healthy run returns 200 with `{"sent":0,"failed":0,"removed":0}`. A 401 usually means JWT verification is still on (turn off **Verify JWT with legacy secret**, or deploy with `--no-verify-jwt`), a 404 means the URL in Vault is wrong or the function isn't deployed, and a 500 includes the error. No rows at all means the schedule isn't running or a Vault secret is missing. **After the trip:** `select cron.unschedule('krysa-notify');`.
 
 ## Deploying to GitHub Pages
 
