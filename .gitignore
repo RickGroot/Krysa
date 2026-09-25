@@ -8,3 +8,6 @@ dist
 
 # Your own trip data for `pnpm seed <file>`
 *.private.json
+
+# Supabase CLI state (made by `supabase functions deploy`)
+supabase/.temp

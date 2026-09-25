@@ -47,3 +47,41 @@ self.addEventListener("fetch", (e) => {
   }
   e.respondWith(staleWhileRevalidate(req));
 });
+
+// Push notifications from the krysa-notify Supabase function (see README).
+self.addEventListener("push", (e) => {
+  let m = {};
+  try {
+    m = e.data ? e.data.json() : {};
+  } catch {
+    m = { body: e.data ? e.data.text() : "" };
+  }
+  e.waitUntil(
+    self.registration.showNotification(m.title || "Krysa", {
+      body: m.body || "",
+      icon: "icons/icon-192.png",
+      tag: m.tag,
+      silent: !!m.silent,
+      data: { tab: m.tab, url: m.url },
+    }),
+  );
+});
+
+// Tapping one opens its link (the airline's check-in page), or the app on the right tab.
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const { tab, url } = e.notification.data || {};
+  e.waitUntil(
+    (async () => {
+      if (typeof url === "string" && url.startsWith("https://")) return self.clients.openWindow(url);
+      const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const app = wins.find((w) => w.url.startsWith(self.registration.scope));
+      if (app) {
+        await app.focus();
+        if (tab) app.postMessage({ krysaTab: tab });
+        return;
+      }
+      return self.clients.openWindow(tab ? `./#${tab}` : "./");
+    })(),
+  );
+});

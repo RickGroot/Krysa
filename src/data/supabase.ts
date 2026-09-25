@@ -11,6 +11,7 @@ import {
   type DocRef,
   type Json,
   type Profile,
+  type PushNS,
   type Runtime,
   type UserNS,
 } from "./runtime";
@@ -219,6 +220,23 @@ export async function supabaseRuntime(sb: SupabaseClient): Promise<Runtime> {
     },
   };
 
-  const table: Record<string, unknown> = { db, user: userNS, assets, downloads: browserDownloads() };
+  // Sending happens in the krysa-notify function; the app only registers this device.
+  const push: PushNS = {
+    async publicKey() {
+      const { data, error } = await sb.rpc("push_public_key");
+      if (error) throw toDataError(error);
+      return typeof data === "string" && data ? data : null;
+    },
+    async save(s, p) {
+      const { error } = await sb.rpc("push_subscribe", { p_endpoint: s.endpoint, p_p256dh: s.p256dh, p_auth: s.auth, p_reminders: p.reminders, p_posts: p.posts });
+      if (error) throw toDataError(error);
+    },
+    async remove(endpoint) {
+      const { error } = await sb.rpc("push_unsubscribe", { p_endpoint: endpoint });
+      if (error) throw toDataError(error);
+    },
+  };
+
+  const table: Record<string, unknown> = { db, user: userNS, assets, downloads: browserDownloads(), push };
   return { use: async (name: string) => table[name] ?? null };
 }

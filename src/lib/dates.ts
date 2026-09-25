@@ -40,6 +40,17 @@ export function nowLocalUTC(n: Date = new Date()): number {
   return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours(), n.getMinutes());
 }
 
+/**
+ * Wall-clock time in `timeZone` on the same scale as `dtUTC`. The app can use
+ * the device clock (`nowLocalUTC`); the notify function runs in UTC and can't.
+ */
+export function wallClockIn(timeZone: string, n: Date = new Date()): number {
+  const p: Record<string, string> = {};
+  const fmt = new Intl.DateTimeFormat("en-GB", { timeZone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  for (const x of fmt.formatToParts(n)) p[x.type] = x.value;
+  return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+}
+
 export function fmtClock(ms: number): string {
   const d = new Date(ms);
   return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;

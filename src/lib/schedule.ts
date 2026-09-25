@@ -1,5 +1,6 @@
-import { dtUTC, fmtClock, daysUntil } from "./dates";
-import { walkMinutes, type LatLng, DEFAULT_BASE } from "./geo";
+// Explicit .ts extensions: the notify function (Deno) imports this file too.
+import { dtUTC, fmtClock, daysUntil } from "./dates.ts";
+import { walkMinutes, type LatLng, DEFAULT_BASE } from "./geo.ts";
 
 export interface PlanEvent {
   id: string;

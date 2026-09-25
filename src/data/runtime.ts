@@ -57,6 +57,17 @@ export interface AssetsNS {
 export interface DownloadsNS {
   save(req: { filename: string; data: Blob | string }): Promise<{ status: "saved" }>;
 }
+export interface PushPrefs {
+  reminders: boolean;
+  posts: boolean;
+}
+/** Push notifications (Supabase only). The demo has no `push` namespace. */
+export interface PushNS {
+  /** The key browsers subscribe with; null until the notify function has run once. */
+  publicKey(): Promise<string | null>;
+  save(sub: { endpoint: string; p256dh: string; auth: string }, prefs: PushPrefs): Promise<void>;
+  remove(endpoint: string): Promise<void>;
+}
 export interface Runtime {
   use(name: string): Promise<unknown>;
 }

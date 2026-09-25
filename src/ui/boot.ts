@@ -5,6 +5,7 @@ import { editEvent, editExpense, editIdea, editPerson, editTodo } from "./editor
 import { editFlight } from "./flights";
 import { ratSays, setupIdle } from "./idle";
 import { postRat } from "./maker";
+import { syncPush } from "./push";
 import { goTab, openMore } from "./stage";
 import { render } from "./tabs";
 import type { Runtime } from "../data/runtime";
@@ -14,14 +15,17 @@ document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.addEventList
 document.getElementById("more-btn").addEventListener("click",openMore);
 document.getElementById("fab").addEventListener("click",()=>({plan:()=>editEvent(),ideas:()=>editIdea(),todo:()=>editTodo(),money:()=>editExpense(),info:()=>editPerson(),rats:()=>postRat(),flights:()=>editFlight()})[S.tab]());
 if(TABS.includes(location.hash.slice(1)))S.tab=location.hash.slice(1);
+// A tapped notification (public/sw.js) asks the open app to show its tab.
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{const t=e.data&&e.data.krysaTab;if(TABS.includes(t))goTab(t)});
 document.getElementById("krysa").append(krysa("classic"));
 document.getElementById("krysa").addEventListener("click",ratSays);
 setupIdle();
 render();
 (async()=>{
   const claude:any=RUNTIME;
-  const[db,user,assets]=await Promise.all([claude?.use?.("db")??null,claude?.use?.("user")??null,claude?.use?.("assets")??null]);
-  S.assets=assets||null;S.user=user||null;
+  const[db,user,assets,push]=await Promise.all([claude?.use?.("db")??null,claude?.use?.("user")??null,claude?.use?.("assets")??null,claude?.use?.("push")??null]);
+  S.assets=assets||null;S.user=user||null;S.push=push||null;
+  void syncPush();
   Promise.resolve(claude?.use?.("downloads")).then(d=>{S.downloads=d||null;if(S.loaded)render()}).catch(()=>{});
   if(!db){S.db=false;render();return}
   S.db=db;

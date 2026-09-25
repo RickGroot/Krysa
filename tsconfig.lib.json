@@ -13,6 +13,7 @@
     ],
     "strict": true,
     "noUnusedLocals": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "isolatedModules": true,
@@ -21,6 +22,7 @@
   "include": [
     "src/lib",
     "src/data",
+    "supabase/functions",
     "tests"
   ],
   "exclude": [

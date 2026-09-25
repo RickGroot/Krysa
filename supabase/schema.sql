@@ -52,9 +52,14 @@ create table if not exists krysa.docs (
   collection text not null,
   doc_id text not null,
   data jsonb not null default '{}'::jsonb check (pg_column_size(data) < 262144),
+  created_at timestamptz default now(),
   updated_at timestamptz not null default now(),
   updated_by uuid default auth.uid()
 );
+-- When a document was first saved, by the server's clock: the notify function
+-- uses it to spot new Rat Wall posts. Rows from before this column stay empty.
+alter table krysa.docs add column if not exists created_at timestamptz;
+alter table krysa.docs alter column created_at set default now();
 create index if not exists docs_collection_idx on krysa.docs (collection);
 -- Realtime DELETE events need the old row.
 alter table krysa.docs replica identity full;
@@ -161,18 +166,133 @@ begin
 end;
 $$;
 
+-- Push notifications (optional, see README). Nothing is sent until the
+-- krysa-notify function is deployed and scheduled.
+
+-- Devices that switched notifications on, and what they want.
+create table if not exists krysa.push_subscriptions (
+  endpoint text primary key,
+  user_id uuid not null references krysa.members (user_id) on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  reminders boolean not null default true,
+  posts boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+-- Every reminder and post that went out, so each goes out once.
+create table if not exists krysa.push_sent (
+  key text primary key,
+  sent_at timestamptz not null default now()
+);
+
+-- The key pair pushes are signed with (VAPID). The function creates it on its
+-- first run; only the function and the SQL editor can read the private half.
+create table if not exists krysa.push_keys (
+  id boolean primary key default true check (id),
+  public_key text not null,
+  private_jwk jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+-- The public half, for the app to subscribe with. Null until the function has run.
+create or replace function krysa.push_public_key()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select k.public_key from krysa.push_keys k where krysa.is_member();
+$$;
+
+-- Switch notifications on for this device, or change what it wants.
+create or replace function krysa.push_subscribe(p_endpoint text, p_p256dh text, p_auth text, p_reminders boolean, p_posts boolean)
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+begin
+  if not krysa.is_member() then
+    raise exception 'not a member' using errcode = '42501';
+  end if;
+  if coalesce(p_endpoint, '') !~ '^https://' or length(p_endpoint) > 2000
+     or coalesce(length(p_p256dh), 0) not between 80 and 100
+     or coalesce(length(p_auth), 0) not between 16 and 30 then
+    raise exception 'invalid push subscription' using errcode = '22023';
+  end if;
+  -- A browser's endpoint is unguessable, so whoever holds it owns it (also after rejoining).
+  insert into krysa.push_subscriptions (endpoint, user_id, p256dh, auth, reminders, posts)
+  values (p_endpoint, auth.uid(), p_p256dh, p_auth, coalesce(p_reminders, true), coalesce(p_posts, true))
+  on conflict (endpoint) do update
+    set user_id = excluded.user_id, p256dh = excluded.p256dh, auth = excluded.auth,
+        reminders = excluded.reminders, posts = excluded.posts, updated_at = now();
+end;
+$$;
+
+create or replace function krysa.push_unsubscribe(p_endpoint text)
+returns void
+language sql
+volatile
+security definer
+set search_path = ''
+as $$
+  delete from krysa.push_subscriptions where endpoint = p_endpoint;
+$$;
+
+-- The function checks the token pg_cron sends. Only the service role may ask.
+create or replace function krysa.push_token_ok(p_token text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  return exists (select 1 from vault.decrypted_secrets s where s.name = 'krysa_notify_token' and s.decrypted_secret = p_token);
+end;
+$$;
+
+-- What pg_cron runs every minute: ask the function to send whatever is due.
+-- Does nothing until the function's URL and the token are in Vault (see README).
+create or replace function krysa.run_notify()
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_url text := (select s.decrypted_secret from vault.decrypted_secrets s where s.name = 'krysa_notify_url');
+  v_token text := (select s.decrypted_secret from vault.decrypted_secrets s where s.name = 'krysa_notify_token');
+begin
+  if v_url is null or v_token is null then
+    return;
+  end if;
+  perform net.http_post(
+    url := v_url,
+    body := '{}'::jsonb,
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-krysa-token', v_token),
+    timeout_milliseconds := 20000
+  );
+end;
+$$;
+
 -- Access: signed-in users only (never anon), and row level security below
 -- narrows that to members. The service role is for `pnpm seed`.
 revoke all on schema krysa from public, anon;
 grant usage on schema krysa to authenticated, service_role;
 revoke all on all tables in schema krysa from public, anon;
 revoke all on all functions in schema krysa from public, anon;
--- `codes` and `join_failures` get no grants: only the SQL editor and
--- `join_trip` (security definer) can touch them.
+-- `codes`, `join_failures` and the push tables get no grants: only the SQL
+-- editor, the service role and the security definer functions touch them.
 grant select on krysa.members to authenticated;
 grant select, insert, update on krysa.profiles to authenticated;
 grant select, insert, update, delete on krysa.docs to authenticated;
 grant execute on function krysa.is_member(), krysa.is_owner(), krysa.join_trip(text), krysa.jsonb_deep_merge(jsonb, jsonb), krysa.docs_merge(text, jsonb) to authenticated;
+grant execute on function krysa.push_public_key(), krysa.push_subscribe(text, text, text, boolean, boolean), krysa.push_unsubscribe(text) to authenticated;
 grant all on all tables in schema krysa to service_role;
 grant execute on all functions in schema krysa to service_role;
 
@@ -181,6 +301,9 @@ alter table krysa.codes enable row level security;
 alter table krysa.join_failures enable row level security;
 alter table krysa.profiles enable row level security;
 alter table krysa.docs enable row level security;
+alter table krysa.push_subscriptions enable row level security;
+alter table krysa.push_sent enable row level security;
+alter table krysa.push_keys enable row level security;
 
 -- Members can see the member list; only join_trip adds to it.
 drop policy if exists members_read on krysa.members;

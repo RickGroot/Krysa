@@ -1,6 +1,6 @@
 # Krysa · Prague Week
 
-A rat-themed team planner for a conference week in Prague: the Rat Wall with a Krysa meme maker, flights, a day-by-day plan with "Now & next", ideas with voting, to-dos, a koruna/euro expense splitter and trip info. It installs on phones as a PWA.
+A rat-themed team planner for a conference week in Prague: the Rat Wall with a Krysa meme maker, flights, a day-by-day plan with "Now & next", ideas with voting, to-dos, a koruna/euro expense splitter and trip info. It installs on phones as a PWA, with optional push notifications for reminders and new posts.
 
 Built for a real FrontKon trip. Everything in this repo is a made-up demo trip: the people, flights, costs and posts are invented, and the venues are public places.
 
@@ -54,6 +54,35 @@ There are no accounts or emails. Everyone gets in with a shared **trip code**: e
 
 **Changing the code:** `delete from krysa.codes;` and insert a new one. Devices that already joined stay in; `delete from krysa.members;` sends everyone back to the code screen.
 
+## Push notifications (optional)
+
+Phones get a ping for the reminders the app already shows (online check-in opening, leaving for the airport, the next plan item within the hour, to-dos due or overdue) and for new Rat Wall posts. A Supabase Edge Function, [`krysa-notify`](supabase/functions/krysa-notify/), does the sending. pg_cron calls it every minute, it works out what's due with the same code as the app ([`src/lib/notify.ts`](src/lib/notify.ts)), and it sends each reminder or post once. Check-in and to-do nudges wait out the night (22:00–08:00 Prague time), and new posts arrive silently at night.
+
+1. Run [`supabase/schema.sql`](supabase/schema.sql) again (it's safe to re-run). It adds the push tables and functions, and a `created_at` column on `krysa.docs` so the function can tell which posts are new.
+2. **Database → Extensions:** turn on `pg_cron` and `pg_net`.
+3. Deploy the function with the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (on Windows: `scoop install supabase`):
+   ```bash
+   supabase login
+   supabase functions deploy krysa-notify --project-ref <project-ref> --use-api --no-verify-jwt
+   ```
+   `--use-api` bundles on Supabase's side, so there's no Docker, and it lets the function import `src/lib`. JWT verification is off because the function checks its own token instead (next step).
+4. In the SQL editor, once. The first line stores where the function lives, the second creates the random token only pg_cron and the function know, and the third starts the schedule:
+   ```sql
+   select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/krysa-notify', 'krysa_notify_url');
+   select vault.create_secret(gen_random_uuid()::text || gen_random_uuid()::text, 'krysa_notify_token');
+   select cron.schedule('krysa-notify', '* * * * *', 'select krysa.run_notify()');
+   ```
+   The function creates the key pair pushes are signed with (VAPID) on its first run, so there are no keys to generate or copy.
+5. In the app: **More → Notifications → Turn on**, on each device. iPhones and iPads only support this from the Home Screen: add Krysa there first (Share → Add to Home Screen), open it from there, then switch on. Notifications need the built app, so use `pnpm build` and `pnpm preview` to try them locally.
+
+**Is it running?** Each run's answer lands in `net._http_response`:
+
+```sql
+select created, status_code, content from net._http_response order by created desc limit 5;
+```
+
+A healthy run returns 200 with `{"sent":0,"failed":0,"removed":0}`. A 401 usually means JWT verification is still on (deploy again with `--no-verify-jwt`), a 404 means the URL in Vault is wrong or the function isn't deployed, and a 500 includes the error. No rows at all means the schedule isn't running or a Vault secret is missing. **After the trip:** `select cron.unschedule('krysa-notify');`.
+
 ## Deploying to GitHub Pages
 
 1. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
@@ -73,6 +102,8 @@ src/
     schedule.ts      now & next, leave-by times, check-in rules, reminders
     geo.ts           walking-time estimates from where you stay
     demo.ts          keeps the demo trip "on" by moving its dates
+    notify.ts        which reminders and posts to push, and to whom
+    webpush.ts       Web Push on WebCrypto: VAPID signing and payload encryption (RFC 8291/8292)
   data/
     runtime.ts       the data interface the UI uses, plus the in-memory Store
     local.ts         demo backend (localStorage)
@@ -82,9 +113,10 @@ src/
     scenes.ts        the illustrated Prague scenes behind each tab
     meme.ts, model.ts  the meme maker's options and rendering
     export.ts        meme → PNG on a canvas
-  ui/                tabs, sheets, Rat Wall, idle rats, Rat Wrapped, reminders, accessibility
+  ui/                tabs, sheets, Rat Wall, idle rats, Rat Wrapped, reminders, notifications switch, accessibility
 supabase/            schema, demo seed
-public/              manifest, service worker, icons
+  functions/krysa-notify/  the Edge Function that sends push notifications (Deno; logic in handler.ts)
+public/              manifest, service worker (offline shell and notifications), icons
 ```
 
 The data layer mirrors the claude.ai artifact runtime the app started life on (`runtime.use("db")`, `doc().set()`, `collection().onSnapshot()`…), so the UI didn't have to change when the storage moved to Supabase. Another backend can be added by implementing `Runtime` in `src/data/`.
@@ -97,6 +129,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 - **Nothing personal ships with the app.** No codes, emails, names or booking details are built into the bundle; who's an owner lives in the database. A test fails if the demo seed ever contains booking codes.
 - **Booking codes:** a booking code plus a surname lets anyone change a booking, so add them in the app only if you're comfortable with every member seeing them. The app masks them until you tap "Show".
 - User-generated content is treated as untrusted: the UI builds DOM with `textContent`, and meme options are checked against allow-lists (`normMeme`).
+- **Push notifications:** the function only runs for pg_cron's random token, which lives in Vault and never leaves the database. The private key pushes are signed with is created by the function and stored in `krysa.push_keys`, which only the service role and the SQL editor can read. Messages are encrypted for each device, so Apple, Google and Mozilla's push services can't read them. A device's subscription is deleted with its membership.
 
 ## Shortcuts and known limits
 
@@ -109,4 +142,5 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 - **Offline is read-only.** The service worker caches the app shell and the last known data. Writes need a connection.
 - **Undo is client-side.** A delete can be undone for 8 seconds from the same device. There's no server-side history. An uploaded file is only removed from storage once those 8 seconds are up, so closing or reloading the app sooner leaves the file behind in the bucket (it no longer shows in the app).
 - **Uploads use signed URLs that expire after an hour.** The app refreshes them when it re-renders.
+- **Notifications are per device, and go to the whole group.** Each phone or browser switches them on by itself, iPhones only from the Home Screen, and every reminder goes to everyone (a flight's check-in too, not only to the people on it). A push that fails to deliver isn't retried, and the function runs every minute until you unschedule it. Delivery was tested against the RFC's example and a stand-in push service, not yet on real phones.
 - **One shared trip.** There's no concept of multiple trips or teams.
