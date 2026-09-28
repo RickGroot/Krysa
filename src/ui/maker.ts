@@ -85,7 +85,7 @@ export function postRat(prefill?){
     body.append(h("div",{class:"field"},h("label",{for:"rat-cap",text:"Caption"}),cap));
     if(formEl)formEl.scrollTop=sc;
   };
-  const form=h("form",{class:"sheet",onsubmit:async e=>{e.preventDefault();err.textContent="";
+  const form=h("form",{class:"sheet","aria-labelledby":"mk-title",onsubmit:async e=>{e.preventDefault();err.textContent="";
       const base={caption:st.caption.trim(),by:S.uid,createdAt:new Date().toISOString(),squeaks:{}};
       if(st.mode==="upload"){
         if(!st.file){err.textContent="Pick a file first";return}
@@ -100,7 +100,7 @@ export function postRat(prefill?){
         const ok=await write(()=>S.db.collection("rats").add({...base,type:"meme",...m}),"Rat posted");
         if(ok){close();scurry({cheese:true})}
       }}},
-    h("h3",{text:remix?"Remix this rat":"Post a rat"}),body,err,
+    h("h3",{id:"mk-title",text:remix?"Remix this rat":"Post a rat"}),body,err,
     h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel"),submit)));
   formEl=form;draw();scrim.append(form);document.body.append(scrim);
 }

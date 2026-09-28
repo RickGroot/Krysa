@@ -1,5 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { SCENES } from "../art/scenes";
+import { setBackgroundInert } from "./a11y";
 import { h, svg } from "./dom";
 
 /** Full-screen illustrated card used for sign-in and account states. */
@@ -10,7 +11,14 @@ function screen(...content: HTMLElement[]): HTMLElement {
   sc.classList.add("gate-scene");
   const root = h("div", { class: "gate", id: "gate" }, sc, h("div", { class: "gate-card" }, ...content));
   document.body.append(root);
+  // The app behind the gate is out of reach: no tabbing into it, no second h1 for screen readers.
+  setBackgroundInert(true);
   return root;
+}
+
+function closeGate(): void {
+  document.getElementById("gate")?.remove();
+  setBackgroundInert(false);
 }
 
 /** Pulls a code from an invite link (`…/#trip=the-code`) and removes it from the address bar. */
@@ -59,7 +67,7 @@ export function joinWithTripCode(sb: SupabaseClient, fromLink: string | null): P
           input.focus();
           return;
         }
-        document.getElementById("gate")?.remove();
+        closeGate();
         resolve();
       } catch {
         msg.textContent = "Couldn't reach the server. Check your connection and try again.";
@@ -115,7 +123,7 @@ export async function ensureProfile(sb: SupabaseClient, user: User): Promise<voi
               msg.textContent = error.message;
               return;
             }
-            document.getElementById("gate")?.remove();
+            closeGate();
             resolve();
           },
         },

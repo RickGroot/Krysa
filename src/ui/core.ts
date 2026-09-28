@@ -22,6 +22,8 @@ export function placeLine(it){
     h("a",{href:map,target:"_blank",rel:"noopener",onclick:stop},"Map"));
 }
 
+let sheetN=0;
+
 export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: any){
   const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
   const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};
@@ -38,8 +40,9 @@ export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: 
   const body=[];for(const f of fields){if(Array.isArray(f))body.push(h("div",{class:"grid2"},f.map(mk)));else body.push(mk(f))}
   let armed=false;
   const del=onDelete?h("button",{class:"btn danger ghost",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again to delete";return}if(await onDelete())close()}},"Delete"):null;
-  const form=h("form",{class:"sheet",onsubmit:async e=>{e.preventDefault();const v={};for(const k in get)v[k]=get[k]();const r=await onSave(v);if(typeof r==="string"){err.textContent=r}else if(r!==false)close()}},
-    h("h3",{text:title}),...body,err,
+  const tid="sheet-t"+(++sheetN);
+  const form=h("form",{class:"sheet","aria-labelledby":tid,onsubmit:async e=>{e.preventDefault();const v={};for(const k in get)v[k]=get[k]();const r=await onSave(v);if(typeof r==="string"){err.textContent=r}else if(r!==false)close()}},
+    h("h3",{id:tid,text:title}),...body,err,
     h("div",{class:"sheetacts"},del,h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel"),h("button",{class:"btn primary",type:"submit"},saveLabel))));
   scrim.append(form);document.body.append(scrim);
   const first=form.querySelector("input,select,textarea");if(first&&matchMedia("(pointer:fine)").matches)first.focus();

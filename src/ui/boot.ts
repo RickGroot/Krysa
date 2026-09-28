@@ -1,4 +1,5 @@
 /* eslint-disable */
+import "./a11y";
 import { krysa } from "../art/rat";
 import { S, TABS } from "../state";
 import { editEvent, editExpense, editIdea, editPerson, editTodo } from "./editors";

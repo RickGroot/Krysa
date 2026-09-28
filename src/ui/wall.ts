@@ -39,18 +39,18 @@ export function mediaFor(r,opts: any = {}){
 export function postCard(r,o: any = {}){
   const who=r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
   const canDel=S.canWrite&&((r.by&&r.by===S.uid)||S.isOwner);
-  let armed=false;const del=canDel?h("button",{class:"btn small ghost danger extra",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again";return}await deleteRat(r)}},"Delete"):null;
+  let armed=false;const del=canDel?h("button",{class:"btn small ghost danger extra",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again";return}if(await deleteRat(r))o.close?.()}},"Delete"):null;
   const reacts=h("div",{class:"reacts"},REACTS.map(([k,label,icon])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
     const b=h("button",{class:"react",type:"button","aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
     b.append(icon(),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
   const media=mediaFor(r,{fresh:o.fresh});
   if(S.wall.view==="grid"){media.style.cursor="zoom-in";media.addEventListener("click",()=>openLightbox(r))}
   return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
-    h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>postRat(r)},"Remix"),del)));
+    h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
 }
 
-export function openLightbox(r){const lb=h("div",{class:"lightbox",onclick:e=>{if(e.target===lb)close()}});const close=()=>{lb.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const prevView=S.wall.view;S.wall.view="feed";const card=postCard(r,{fresh:true});S.wall.view=prevView;
+export function openLightbox(r){const lb=h("div",{class:"lightbox","aria-label":r.caption?`Rat post: ${r.caption}`:"Rat post",onclick:e=>{if(e.target===lb)close()}});const close=()=>{lb.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+  const prevView=S.wall.view;S.wall.view="feed";const card=postCard(r,{fresh:true,close});S.wall.view=prevView;
   lb.append(h("button",{class:"btn closex",type:"button",onclick:close},"Close"),card);document.body.append(lb)}
 
 export function wallList(){
