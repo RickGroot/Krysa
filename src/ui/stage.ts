@@ -41,14 +41,6 @@ export function paintStage(){
   const [he,t,hs]=ht.children;he.textContent=H.eyebrow();t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
 }
 
-export function heroEl(tab){
-  const H=HERO[tab]||HERO.rats;
-  const el=h("section",{class:"hero"+(H.light?" lightscene":"")+(H.arch?" arch":"")});
-  const sv=svg((SCENES[tab]||SCENES.rats)(),"0 0 400 250");sv.setAttribute("preserveAspectRatio","xMidYMid slice");sv.classList.add("scene");
-  el.append(sv,h("div",{class:"hx"},h("div",{class:"he",text:H.eyebrow()}),h("h2",{class:"ht",text:H.title}),h("div",{class:"hs",text:H.sub()})));
-  return el;
-}
-
 export const MORE_ICONS={
   todo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.5l2.8 2.8L16.5 9"/></svg>',
   money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>',
