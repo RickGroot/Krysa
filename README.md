@@ -20,7 +20,9 @@ Without Supabase keys the app runs in **demo mode**: a made-up trip stored in yo
 | Command | What it does |
 | --- | --- |
 | `pnpm dev` | Local dev server |
+| `pnpm dev:demo` | Local dev server in demo mode, even when `.env` has Supabase keys |
 | `pnpm build` | Production build into `dist/` |
+| `pnpm build:demo` | Production build of the demo, even when `.env` has Supabase keys |
 | `pnpm build:notify` | The push notification function as one file (`dist/notify/index.js`) for the Supabase dashboard |
 | `pnpm preview` | Serve the build locally (service worker active) |
 | `pnpm test` | Unit tests (Vitest) |

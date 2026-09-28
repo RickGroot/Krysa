@@ -6,7 +6,9 @@
   "description": "Krysa: the rat-themed team planner for the FrontKon week in Prague (PWA).",
   "scripts": {
     "dev": "vite",
+    "dev:demo": "vite --mode demo",
     "build": "vite build",
+    "build:demo": "vite build --mode demo",
     "build:notify": "vite build --config vite.notify.config.ts",
     "preview": "vite preview",
     "test": "vitest run",

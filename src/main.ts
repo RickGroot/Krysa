@@ -11,6 +11,8 @@ import { shiftTrip } from "./lib/demo";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 // The publishable key is public by design; a legacy anon key works too.
 const SUPABASE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
+// `pnpm dev:demo` / `build:demo` run the demo even when .env holds Supabase keys.
+const DEMO = import.meta.env.MODE === "demo" || !SUPABASE_URL || !SUPABASE_KEY;
 
 /**
  * Demo data is a made-up trip that is always "on": day 2 is today. Edits a
@@ -46,7 +48,7 @@ const remember = (): void => {
 };
 
 async function start(): Promise<void> {
-  if (!SUPABASE_URL || !SUPABASE_KEY) {
+  if (DEMO) {
     boot(localRuntime(demoData()));
     showDemoBanner();
     return;
