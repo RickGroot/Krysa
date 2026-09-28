@@ -50,6 +50,21 @@ export function fmtAmt(e: Expense): string {
 }
 
 /**
+ * Who "Paid by" starts on for a new expense: the payer last picked on this
+ * device while they're still on the trip, else the one traveller whose first
+ * name matches yours. Empty when neither is known, so nobody gets charged by
+ * accident.
+ */
+export function defaultPayer(people: Person[], meName: string | null | undefined, last: string | null | undefined): string {
+  if (last && people.some((p) => p.id === last)) return last;
+  const first = (name: string | null | undefined) => (name ?? "").trim().split(/\s+/)[0].toLowerCase();
+  const me = first(meName);
+  if (!me) return "";
+  const hits = people.filter((p) => first(p.name) === me);
+  return hits.length === 1 ? hits[0].id : "";
+}
+
+/**
  * Net position per person in koruna: positive means they should get money
  * back, negative means they owe. An expense with an empty split is shared by
  * everyone on the trip. People who were removed but still appear in an

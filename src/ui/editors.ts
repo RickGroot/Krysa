@@ -2,6 +2,7 @@
 // Ported from the single-file artifact; types are intentionally loose here (see README).
 import { fmtD, joinDT, splitDT, todayIso } from "../lib/dates";
 import { hasCoords } from "../lib/geo";
+import { defaultPayer } from "../lib/money";
 import { S, kindOpts } from "../state";
 import { rate, tripDays } from "./bound";
 import { openSheet, removeDocs, snapOf, write } from "./core";
@@ -81,16 +82,21 @@ export function editInfo(){
       return write(()=>S.db.doc("trip/info").set({...S.info,...v}),"Trip details saved")}});
 }
 
+const PAYER_KEY="pw-payer";
+const lastPayer=()=>{try{return localStorage.getItem(PAYER_KEY)}catch(e){return null}};
+
 export function editExpense(x: any = {}){
   if(!S.people.length){toast("Add travellers in Info first");return}
   const all=S.people.map(p=>[p.id,p.name||"Someone"]);
+  const payer=x.paidBy||defaultPayer(S.people,S.meName,lastPayer());
   openSheet({title:x.id?"Edit expense":"Log an expense",
     fields:[{id:"what",label:"What",value:x.what,placeholder:"Dinner at Lokál"},
       [{id:"amount",label:"Amount",value:x.amount!=null?String(x.amount):"",inputmode:"decimal",placeholder:"1250"},{id:"currency",label:"Currency",type:"select",options:[["CZK","CZK (Kč)"],["EUR","EUR (€)"]],value:x.currency||"CZK"}],
-      [{id:"paidBy",label:"Paid by",type:"select",options:all,value:x.paidBy||(S.people.find(p=>p.id===S.meId)||S.people[0]).id},{id:"date",label:"Day",type:"date",value:x.date||todayIso()}],
+      [{id:"paidBy",label:"Paid by",type:"select",options:payer?all:[["","Who paid?"],...all],value:payer},{id:"date",label:"Day",type:"date",value:x.date||todayIso()}],
       {id:"split",label:"Split between",type:"checks",options:all,value:x.split||S.people.map(p=>p.id)}],
     onSave:v=>{const amount=parseFloat(String(v.amount).replace(/\s/g,"").replace(",","."));
-      if(!v.what)return"Say what it was for";if(!(amount>0))return"Enter an amount above zero";if(!v.split.length)return"Pick at least one person to split with";
+      if(!v.what)return"Say what it was for";if(!(amount>0))return"Enter an amount above zero";if(!v.paidBy)return"Pick who paid";if(!v.split.length)return"Pick at least one person to split with";
+      try{localStorage.setItem(PAYER_KEY,v.paidBy)}catch(e){}
       const data: any={what:v.what,amount:Math.round(amount*100)/100,currency:v.currency,paidBy:v.paidBy,date:v.date,split:v.split};
       if(x.id)return write(()=>S.db.doc("expenses/"+x.id).update(data),"Saved");
       return write(()=>S.db.collection("expenses").add({...data,createdBy:S.uid,createdAt:new Date().toISOString()}),"Logged").then(ok=>{if(ok)scurry();return ok})},

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { balances, fmtCzk, fmtEur, rateOf, settle, toCzk, type Expense, type Person } from "../src/lib/money";
+import { balances, defaultPayer, fmtCzk, fmtEur, rateOf, settle, toCzk, type Expense, type Person } from "../src/lib/money";
 
 const people: Person[] = [{ id: "sam" }, { id: "jules" }, { id: "alex" }];
 const sum = (b: Record<string, number>) => Object.values(b).reduce((a, x) => a + x, 0);
@@ -120,5 +120,23 @@ describe("formatting", () => {
   });
   it("formats euro with two decimals", () => {
     expect(fmtEur(11.728)).toBe("€11.73");
+  });
+});
+
+describe("defaultPayer", () => {
+  const trip: Person[] = [{ id: "a", name: "Alex" }, { id: "j", name: "Jules Verne" }, { id: "s", name: "Sam" }];
+  it("prefers the payer last picked on this device", () => {
+    expect(defaultPayer(trip, "Jules", "s")).toBe("s");
+  });
+  it("forgets a last payer who left the trip", () => {
+    expect(defaultPayer(trip, "Jules", "gone")).toBe("j");
+  });
+  it("matches your first name, ignoring case and spaces", () => {
+    expect(defaultPayer(trip, "  jules  v.", null)).toBe("j");
+  });
+  it("leaves it empty rather than guessing", () => {
+    expect(defaultPayer(trip, "You", null)).toBe("");
+    expect(defaultPayer(trip, "", null)).toBe("");
+    expect(defaultPayer([...trip, { id: "a2", name: "alex b" }], "Alex", null)).toBe("");
   });
 });
