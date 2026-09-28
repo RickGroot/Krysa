@@ -1,10 +1,10 @@
 /* eslint-disable */
 // Ported from the single-file artifact; types are intentionally loose here (see README).
 import { SCENES, groundEl } from "../art/scenes";
-import { anchor, dtUTC, fmtD, nowLocalUTC, parseD, todayIso } from "../lib/dates";
+import { daysUntil, dtUTC, fmtD, nowLocalUTC, parseD, todayIso } from "../lib/dates";
 import { fmtCzk } from "../lib/money";
 import { S } from "../state";
-import { toCzk, tripLive } from "./bound";
+import { toCzk, todayOn } from "./bound";
 import { h, svg } from "./dom";
 import { openNotifications, pushOn } from "./push";
 import { render } from "./tabs";
@@ -13,7 +13,9 @@ import { loveOf } from "./wall";
 export const HERO={
   rats:{title:"Rat Wall",eyebrow:()=>"Praha by night",sub:()=>{const n=S.rats.length,r=S.rats.reduce((a,x)=>a+loveOf(x),0);return `${n} rat${n===1?"":"s"} posted · ${r} reaction${r===1?"":"s"}`},arch:true},
   flights:{title:"Flights",eyebrow:()=>"AMS ✈ PRG",sub:()=>{const now=nowLocalUTC();const nx=S.flights.map(f=>({f,t:dtUTC(f.date,f.dep)})).filter(x=>x.t&&x.t>now).sort((a,b)=>a.t-b.t)[0];return nx?`Next up: ${nx.f.flight} · ${fmtD(nx.f.date)} ${nx.f.dep}`:"Everyone's home"},light:true},
-  plan:{title:"The Plan",eyebrow:()=>S.info.startDate&&S.info.endDate?`${fmtD(S.info.startDate)} → ${fmtD(S.info.endDate)}`:"Set the dates",sub:()=>{if(!S.info.startDate)return"";const d=Math.round((+parseD(S.info.startDate)-+parseD(todayIso()))/864e5),e=Math.round((+parseD(S.info.endDate)-+parseD(todayIso()))/864e5);return d>1?`${d} days to go`:d===1?"Tomorrow!":e>=0?"Happening now":"That was a week"},light:true},
+  plan:{title:()=>todayOn()?"Today":"The Plan",eyebrow:()=>todayOn()?fmtD(todayIso()):S.info.startDate&&S.info.endDate?`${fmtD(S.info.startDate)} → ${fmtD(S.info.endDate)}`:"Set the dates",sub:()=>{if(!S.info.startDate)return"";
+    if(todayOn()){const n=daysUntil(todayIso(),S.info.startDate),of=daysUntil(S.info.endDate,S.info.startDate);if(n!=null&&of!=null&&n>=0&&n<=of)return`Day ${n+1} of ${of+1}`}
+    const d=Math.round((+parseD(S.info.startDate)-+parseD(todayIso()))/864e5),e=Math.round((+parseD(S.info.endDate)-+parseD(todayIso()))/864e5);return d>1?`${d} days to go`:d===1?"Tomorrow!":e>=0?"Happening now":"That was a week"},light:true},
   ideas:{title:"Ideas",eyebrow:()=>"Where to next",sub:()=>`${S.ideas.length} ideas · vote for your favourites`},
   todo:{title:"To-do",eyebrow:()=>"Seznam úkolů",sub:()=>{const o=S.todos.filter(t=>!t.done).length;return `${o} open · ${S.todos.length-o} done`},light:true},
   money:{title:"Money",eyebrow:()=>"Koruna & euro",sub:()=>`${fmtCzk(S.expenses.reduce((a,e)=>a+toCzk(e),0))} spent together`},
@@ -28,7 +30,7 @@ export function paintStage(){
     slot.replaceChildren(sv,groundEl());slot.classList.remove("fadein");void slot.offsetWidth;slot.classList.add("fadein")}
   document.body.dataset.scene=H.light?"light":"dark";
   const ht=document.getElementById("hero-text");
-  ht.replaceChildren(h("div",{class:"he",text:H.eyebrow()}),h("h2",{class:"ht",text:H.title}),h("div",{class:"hs",text:S.loaded?H.sub():""}));
+  ht.replaceChildren(h("div",{class:"he",text:H.eyebrow()}),h("h2",{class:"ht",text:typeof H.title==="function"?H.title():H.title}),h("div",{class:"hs",text:S.loaded?H.sub():""}));
 }
 
 export function heroEl(tab){
@@ -46,7 +48,7 @@ export const MORE_ICONS={
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
 };
 
-export function goTab(tab){S.tab=tab;try{sessionStorage.setItem("pw-tab",tab)}catch(e){}render();window.scrollTo(0,0);if(tab==="plan"&&S.loaded&&tripLive())requestAnimationFrame(()=>{const el=document.getElementById(anchor(todayIso()));if(el)el.scrollIntoView({block:"start"})})}
+export function goTab(tab){S.tab=tab;S.tabReady=true;try{sessionStorage.setItem("pw-tab",tab)}catch(e){}render();window.scrollTo(0,0)}
 
 export function openMore(){
   const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});

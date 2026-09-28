@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { dtUTC, fmtD, inDur, tripDays, daysUntil } from "../src/lib/dates";
 import { walkMinutes, DEFAULT_BASE } from "../src/lib/geo";
-import { checkInRule, eventWindow, leaveBy, nowNext, reminders, tripLive, type Flight, type PlanEvent } from "../src/lib/schedule";
+import { checkInRule, eventWindow, leaveBy, nowNext, reminders, startTab, tripLive, type Flight, type PlanEvent } from "../src/lib/schedule";
 
 const at = (d: string, t: string) => dtUTC(d, t)!;
 const names: Record<string, string> = { alex: "Alex", sam: "Sam", jules: "Jules" };
@@ -146,5 +146,22 @@ describe("reminders", () => {
     const r = reminders({ ...base, today: "2026-10-04", now: at("2026-10-04", "18:58") });
     const ev = r.find((x) => x.id.startsWith("ev-dinner"));
     expect(ev?.text).toMatch(/Dinner at Mlejnice starts at 19:30\. Leave by \d\d:\d\d/);
+  });
+});
+
+describe("startTab", () => {
+  const TABS = ["rats", "flights", "plan", "ideas", "todo", "money", "info"];
+  it("opens on Plan while the trip is on, the Rat Wall otherwise", () => {
+    expect(startTab({ live: true }, TABS)).toBe("plan");
+    expect(startTab({ live: false }, TABS)).toBe("rats");
+  });
+  it("follows a #link or notification first", () => {
+    expect(startTab({ hash: "money", saved: "ideas", live: true }, TABS)).toBe("money");
+  });
+  it("keeps the tab picked earlier this session", () => {
+    expect(startTab({ hash: "", saved: "ideas", live: true }, TABS)).toBe("ideas");
+  });
+  it("ignores anything that isn't a tab", () => {
+    expect(startTab({ hash: "main", saved: "nope", live: true }, TABS)).toBe("plan");
   });
 });

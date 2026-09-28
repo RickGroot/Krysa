@@ -112,6 +112,15 @@ export function tripLive(info: { startDate?: string; endDate?: string }, now: nu
   return a != null && b != null && now >= a - 24 * HOUR && now <= b;
 }
 
+/**
+ * The tab to open on: a #link (or a tapped notification), then the tab picked
+ * earlier this session; otherwise Plan while the trip is on, so the day's
+ * plan comes first, and the Rat Wall before and after it.
+ */
+export function startTab(o: { hash?: string | null; saved?: string | null; live: boolean }, tabs: readonly string[]): string {
+  return [o.hash, o.saved].find((t): t is string => !!t && tabs.includes(t)) ?? (o.live ? "plan" : "rats");
+}
+
 export interface ReminderInput {
   flights: Flight[];
   todos: Todo[];

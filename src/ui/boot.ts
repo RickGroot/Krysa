@@ -1,7 +1,9 @@
 /* eslint-disable */
 import "./a11y";
 import { krysa } from "../art/rat";
+import { startTab } from "../lib/schedule";
 import { S, TABS } from "../state";
+import { tripLive } from "./bound";
 import { editEvent, editExpense, editIdea, editPerson, editTodo } from "./editors";
 import { editFlight } from "./flights";
 import { ratSays, setupIdle } from "./idle";
@@ -15,7 +17,10 @@ export function boot(RUNTIME: Runtime){
 document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.tab)));
 document.getElementById("more-btn").addEventListener("click",openMore);
 document.getElementById("fab").addEventListener("click",()=>({plan:()=>editEvent(),ideas:()=>editIdea(),todo:()=>editTodo(),money:()=>editExpense(),info:()=>editPerson(),rats:()=>postRat(),flights:()=>editFlight()})[S.tab]());
-if(TABS.includes(location.hash.slice(1)))S.tab=location.hash.slice(1);
+// The start tab: a #link, else this session's pick. Otherwise it waits for the trip dates (Plan while the trip is on),
+// and the hero stays empty until then so the Rat Wall's scene doesn't flash first.
+const hashTab=location.hash.slice(1),pickTab=()=>startTab({hash:hashTab,saved:S.savedTab,live:tripLive()},TABS);
+S.tabReady=[hashTab,S.savedTab].some(t=>TABS.includes(t));S.tab=pickTab();
 // A tapped notification (public/sw.js) asks the open app to show its tab.
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{const t=e.data&&e.data.krysaTab;if(TABS.includes(t))goTab(t)});
 document.getElementById("krysa").append(krysa("classic"));
@@ -30,13 +35,14 @@ render();
   Promise.resolve(claude?.use?.("downloads")).then(d=>{S.downloads=d||null;if(S.loaded)render()}).catch(()=>{});
   if(!db){S.db=false;render();return}
   S.db=db;
-  if(user){S.uid=await user.id();S.isOwner=await user.isOwner();try{const me=await user.me();S.meName=(me.name||"").trim().split(/\s+/)[0]||""}catch(e){}const cw=await user.can("data.write");if(cw===false)S.canWrite=false;else if(cw===true)S._validated=true}
+  // Only the id is needed to start listening; the rest of the profile arrives in the background.
+  if(user){S.uid=await user.id();Promise.all([user.isOwner(),user.me().catch(()=>null),user.can("data.write")]).then(([own,me,cw])=>{S.isOwner=own;if(me)S.meName=(me.name||"").trim().split(/\s+/)[0]||"";if(cw===false)S.canWrite=false;else if(cw===true)S._validated=true;render()}).catch(()=>{})}
   db.doc("ratgame/scores").onSnapshot(s=>{const d=s.exists?s.data():{};S.scores={...(d.scores||{})};if(S.tab==="rats"&&S.loaded)render()},()=>{});
   const cols=["events","ideas","todos","people","expenses","rats","flights"];
   let pending=cols.length+1;const ready=()=>{if(--pending===0)S.loaded=true;render()};
   const onErr=()=>{};
   let firstInfo=true;
-  db.doc("trip/info").onSnapshot(s=>{S.info=s.exists?s.data():{};if(firstInfo){firstInfo=false;ready()}else render()},onErr);
+  db.doc("trip/info").onSnapshot(s=>{S.info=s.exists?s.data():{};if(firstInfo){firstInfo=false;if(!S.tabReady){S.tab=pickTab();S.tabReady=true}ready()}else render()},onErr);
   for(const col of cols){let first=true;
     db.collection(col).onSnapshot(s=>{S[col]=s.docs.map(d=>({id:d.id,...d.data()}));if(first){first=false;ready()}else render()},onErr);
   }

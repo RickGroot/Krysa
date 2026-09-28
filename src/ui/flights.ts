@@ -12,7 +12,7 @@ export const AIRPORTS={AMS:"Amsterdam",PRG:"Prague"};
 export function copyBtn(text,key?){const b=h("button",{class:"btn small ghost",type:"button","data-k":key,"aria-label":"Copy booking code",onclick:async()=>{try{await navigator.clipboard.writeText(text);toast("Booking code copied")}catch(e){toast("Couldn't copy. Show the code and select it instead.")}}},"Copy");return b}
 
 export function renderFlights(main){
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"Everyone's flights. Check-in and leave-for-the-airport reminders show up on the Rats page when it's time."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:flight",onclick:()=>editFlight()},"+ Flight")));
+  main.append(h("div",{class:"sectionhead"},h("p",{text:"Everyone's flights. Check-in and leave-for-the-airport reminders show up at the top of Plan when it's time."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:flight",onclick:()=>editFlight()},"+ Flight")));
   const groups: any={};for(const f of S.flights){const k=`${f.flight}|${f.date}`;(groups[k]=groups[k]||[]).push(f)}
   const list: any[]=Object.values(groups).sort((a,b)=>((a[0].date||"")+(a[0].dep||"")).localeCompare((b[0].date||"")+(b[0].dep||"")));
   if(!list.length){main.append(h("p",{class:"empty",text:"No flights yet. Add the first booking."}));return}

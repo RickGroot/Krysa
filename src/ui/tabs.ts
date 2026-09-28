@@ -1,9 +1,10 @@
 /* eslint-disable */
 // Ported from the single-file artifact; types are intentionally loose here (see README).
-import { CZ, EN, MON, anchor, fmtD, parseD, splitDT, todayIso } from "../lib/dates";
+import { CZ, EN, MON, anchor, fmtD, nowLocalUTC, parseD, splitDT, todayIso } from "../lib/dates";
+import { eventWindow } from "../lib/schedule";
 import { fmtAmt, fmtCzk, fmtEur } from "../lib/money";
 import { KINDS, S, pname } from "../state";
-import { balances, rate, settle, toCzk, tripDays, walkMin } from "./bound";
+import { balances, rate, settle, toCzk, todayOn, tripDays, walkMin } from "./bound";
 import { placeLine, removeDocs, snapOf, write } from "./core";
 import { h, keepFocus, toast } from "./dom";
 import { editEvent, editExpense, editIdea, editInfo, editPerson, editRate, editTodo } from "./editors";
@@ -11,7 +12,7 @@ import { renderFlights } from "./flights";
 import { scurry } from "./idle";
 import { watchAnims } from "./perf";
 import { paintStage } from "./stage";
-import { nowNextCard, remindersEl } from "./timely";
+import { nowNextCard, planBadge, remindersEl } from "./timely";
 import { renderRats } from "./wall";
 
 export function render(){
@@ -29,14 +30,16 @@ export function render(){
   document.getElementById("c-ideas").textContent=S.ideas.length?S.ideas.length:"";
   document.getElementById("c-todo").textContent=open?open:"";document.getElementById("c-todo-sr").textContent=open?`, ${open} open to-do${open===1?"":"s"}`:"";
   document.getElementById("c-rats").textContent=S.rats.length?S.rats.length:"";
-  document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
-  const fab=document.getElementById("fab");fab.hidden=!S.canWrite||!S.loaded;
-  paintStage();
+  const fab=document.getElementById("fab");fab.hidden=!S.canWrite||!S.loaded||!S.tabReady;
+  // Nothing tab-specific until the start tab is decided (boot.ts).
+  if(S.tabReady){document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
+    paintStage();planBadge()}
   // Rebuilt on every change; keepFocus puts focus back on the same control (by its data-k).
   const main=document.getElementById("main");
   keepFocus(main,()=>{main.replaceChildren();
     if(!S.loaded){main.append(h("p",{class:"empty",text:S.db===false?"The rats couldn't load the plan. Check your connection and reload.":"The rats are fetching the plan…"}));return}
-    main.append(remindersEl());
+    // Reminders live on Plan; the Plan button carries a badge elsewhere.
+    if(S.tab==="plan")main.append(remindersEl());
     ({plan:renderPlan,ideas:renderIdeas,todo:renderTodo,money:renderMoney,info:renderInfo,rats:renderRats,flights:renderFlights})[S.tab](main);
     if(!S.canWrite)main.append(h("p",{class:"readonly",text:"View only. Reload and enter the trip code to make changes."}));
   });
@@ -63,22 +66,28 @@ export async function bulkDrafts(keep){
 }
 
 export function renderPlan(main){
-  const days=tripDays();
+  const days=tripDays(),live=todayOn(),today=todayIso();
   if(!S.info.startDate){main.append(h("div",{class:"banner"},h("span",{text:"Set the trip dates to lay out each day."}),S.canWrite&&h("button",{class:"btn primary","data-k":"edit:info",onclick:editInfo},"Set dates")))}
   {const nn=nowNextCard(false);if(nn)main.append(nn)}
+  // While the trip is on, today comes first; the day strip and the other days follow.
+  if(live)main.append(daySection(today,true));
   const drafts=S.events.filter(e=>e.draft).length;
   if(drafts&&S.canWrite){let armed=false;const rm=h("button",{class:"btn small ghost danger","data-k":"drafts:remove",onclick:()=>{if(!armed){armed=true;rm.textContent="Tap again to remove";return}bulkDrafts(false)}},"Remove all");
     main.append(h("div",{class:"banner"},h("span",{text:`${drafts} suggested items (dashed). Tap one to keep, change or delete it.`}),h("span",{style:"display:flex;gap:6px"},h("button",{class:"btn small","data-k":"drafts:keep",onclick:()=>bulkDrafts(true)},"Keep all"),rm)))}
   if(!days.length)return;
-  const today=todayIso();
   main.append(h("div",{class:"daystrip"},days.map(d=>{const dt=parseD(d);return h("a",{href:"#"+anchor(d),class:d===today?"today":null,"data-k":"day:"+d,onclick:e=>{e.preventDefault();document.getElementById(anchor(d))?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}},h("span",{class:"cz",text:`${CZ[dt.getUTCDay()]} · ${EN[dt.getUTCDay()]}`}),h("span",{class:"n",text:dt.getUTCDate()}))})));
-  for(const d of days){
-    const dt=parseD(d);
-    const evs=S.events.filter(e=>e.date===d).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
-    main.append(h("section",{class:"day",id:anchor(d)},
-      h("div",{class:"dayhead"},h("h2",null,`${EN[dt.getUTCDay()]} ${dt.getUTCDate()} ${MON[dt.getUTCMonth()]}`,h("span",{class:"cz",text:CZ[dt.getUTCDay()]})),S.canWrite&&h("button",{class:"btn small ghost","data-k":"add:day:"+d,onclick:()=>editEvent({},{date:d})},"+ Add")),
-      evs.length?h("div",{class:"events"},evs.map(evCard)):h("p",{class:"empty",text:"Nothing planned yet."})));
-  }
+  for(const d of days)if(!(live&&d===today))main.append(daySection(d,false));
+}
+
+/** One day of the plan. Today's version is headed "Today" and dims what's already over. */
+function daySection(d,isToday){
+  const dt=parseD(d),label=`${EN[dt.getUTCDay()]} ${dt.getUTCDate()} ${MON[dt.getUTCMonth()]}`,now=nowLocalUTC();
+  const evs=S.events.filter(e=>e.date===d).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
+  return h("section",{class:"day"+(isToday?" is-today":""),id:anchor(d)},
+    h("div",{class:"dayhead"},h("h2",null,isToday?"Today":label," ",isToday?h("span",{class:"cz",text:label}):h("span",{class:"cz",lang:"cs",text:CZ[dt.getUTCDay()]})),
+      S.canWrite&&h("button",{class:"btn small ghost","data-k":"add:day:"+d,"aria-label":`Add to ${isToday?"today":label}`,onclick:()=>editEvent({},{date:d})},"+ Add")),
+    evs.length?h("div",{class:"events"},evs.map(e=>{const c=evCard(e),w=isToday&&eventWindow(e);if(w&&w.en<=now)c.classList.add("past");return c}))
+      :h("p",{class:"empty",text:isToday?"Nothing planned today.":"Nothing planned yet."}));
 }
 
 export function voteCount(it){return Object.values(it.votes||{}).filter(Boolean).length}

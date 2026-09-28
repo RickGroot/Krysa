@@ -27,12 +27,16 @@ export function dismissReminder(id){DISMISSED.add(id);try{localStorage.setItem("
 
 export function remindersEl(){
   const list=reminders();if(!list.length)return h("div",{id:"rem",hidden:true});
-  return h("section",{class:"rem",id:"rem","aria-label":"Reminders"},list.slice(0,4).map(r=>h("div",{class:"rm",role:"status"},
+  return h("section",{class:"rem",id:"rem","aria-label":"Reminders"},list.map(r=>h("div",{class:"rm"},
     h("span",{class:"rm-bell","aria-hidden":"true"}),h("div",{class:"rm-x"},h("span",{text:r.text}),r.link&&h("a",{href:r.link[1],target:"_blank",rel:"noopener","data-k":"rm-link:"+r.id,text:r.link[0]}),r.tab&&r.tab!==S.tab&&h("button",{class:"linkish",type:"button","data-k":"rm-open:"+r.id,onclick:()=>goTab(r.tab)},"Open")),
     h("button",{class:"rm-close",type:"button","data-k":"rm:"+r.id,"aria-label":"Dismiss reminder",onclick:()=>dismissReminder(r.id)},"×"))));
 }
 
-export function refreshTimely(){keepFocus(document.getElementById("main"),()=>{
+/** How many reminders wait on Plan, as a badge on its button while you're elsewhere. */
+export function planBadge(){const n=S.loaded&&S.tab!=="plan"?reminders().length:0;
+  document.getElementById("c-plan").textContent=n?String(n):"";document.getElementById("c-plan-sr").textContent=n?`, ${n} reminder${n===1?"":"s"}`:""}
+
+export function refreshTimely(){planBadge();keepFocus(document.getElementById("main"),()=>{
   const r=document.getElementById("rem");if(r)r.replaceWith(remindersEl());
   const n=document.getElementById("nn");if(n){const c=nowNextCard(n.classList.contains("compact"));if(c)n.replaceWith(c);else n.remove()}
 })}

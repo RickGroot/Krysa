@@ -6,13 +6,11 @@ import { krysa, ratSvg } from "../art/rat";
 import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
-import { tripLive } from "./bound";
 import { removeDocs, snapOf, write } from "./core";
 import { h, reduced, svg, toast } from "./dom";
 import { IDLE, RAT_FACTS, scheduleCameo } from "./idle";
 import { postRat, saveMemeImage } from "./maker";
 import { render } from "./tabs";
-import { nowNextCard } from "./timely";
 import { openWrapped } from "./wrapped";
 
 export async function deleteRat(r){
@@ -81,7 +79,6 @@ export function ratTV(list){
 }
 
 export function renderRats(main){
-  if(tripLive()){const nn=nowNextCard(true);if(nn)main.append(nn)}
   const day=Math.floor(Date.now()/864e5);
   const fact=h("div",{class:"ratfact alive"});fact.append(krysa("classic"),h("div",null,h("div",{class:"lbl",text:"Rat fact of the day"}),h("p",{text:RAT_FACTS[day%RAT_FACTS.length]})));
   main.append(fact);

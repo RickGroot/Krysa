@@ -19,6 +19,8 @@ export const tripDays = (): string[] => dates.tripDays(S.info, S.events);
 export const nowNext = (now = dates.nowLocalUTC()) => schedule.nowNext(S.events, now);
 export const leaveBy = (e: schedule.PlanEvent, start: number) => schedule.leaveBy(e, start, geo.baseOf(S.info));
 export const tripLive = (now = dates.nowLocalUTC()): boolean => schedule.tripLive(S.info, now);
+/** Today is one of the trip days while the trip is on: the Plan tab opens with it. */
+export const todayOn = (): boolean => tripLive() && tripDays().includes(dates.todayIso());
 export const reminders = (now = dates.nowLocalUTC()): schedule.Reminder[] =>
   schedule
     .reminders({ flights: S.flights, todos: S.todos, events: S.events, now, today: dates.todayIso(), base: geo.baseOf(S.info), nameOf: pname })
