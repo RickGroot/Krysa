@@ -27,64 +27,71 @@ export async function prepFile(file){
 
 export function postRat(prefill?){
   const remix=!!(prefill&&prefill.type==="meme");
-  const st={mode:remix||!S.assets?"meme":"upload",file:null,url:null,caption:"",m:remix?normMeme(prefill):normMeme({bg:"slate"})};
+  const st={mode:remix||!S.assets?"meme":"upload",file:null,url:null,caption:"",dirty:false,m:remix?normMeme(prefill):normMeme({bg:"slate"})};
   if(!st.m.bg)st.m.bg="slate";
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
+  // A fresh meme starts with a caption, so the preview is never a blank rat. That doesn't count as a change.
+  if(!remix&&!st.m.top&&!st.m.bottom){const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b}
+  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)ask()}});
   const close=()=>{if(st.url)URL.revokeObjectURL(st.url);scrim.remove();document.removeEventListener("keydown",esc)};
-  const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const err=h("div",{class:"err",role:"alert"});const body=h("div",{class:"mk",style:"display:grid;gap:12px"});
+  const esc=e=>{if(e.key==="Escape")ask()};document.addEventListener("keydown",esc);
+  const err=h("div",{class:"err",role:"alert"});
   const submit=h("button",{class:"btn primary",type:"submit"},"Post rat");
-  let formEl=null;
+  const cancel=h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel");
+  const acts=h("div",{class:"sheetacts"},h("div",{class:"r"},cancel,submit));
+  // Tapping outside or Escape with work in progress asks first; Cancel is an explicit no.
+  const ask=()=>{if(!(st.dirty||st.file||st.caption.trim()))return close();if(acts.querySelector(".discard"))return;
+    const keep=h("button",{class:"btn",type:"button",onclick:()=>{acts.replaceChildren(h("div",{class:"r"},cancel,submit));submit.focus()}},"Keep editing");
+    acts.replaceChildren(h("span",{class:"discard",role:"alert",text:"Discard this rat?"}),h("div",{class:"r"},keep,h("button",{class:"btn danger ghost",type:"button",onclick:close},"Discard")));keep.focus()};
+  const changed=()=>{st.dirty=true;err.textContent=""};
+  // Meme mode. Every option row is built once; a change updates the pressed states and the preview in place,
+  // so the tapped option keeps focus and the sheet keeps its scroll.
   const prev=h("div",{class:"mk-prev"});
-  const paint=()=>prev.replaceChildren(memeEl(st.m,"preview"));
-  const set=(k,v)=>{st.m[k]=v;draw()};
+  let raf=0;const paint=()=>{raf=0;prev.replaceChildren(memeEl(st.m,"preview"))};const paintSoon=()=>{raf||=requestAnimationFrame(paint)};
+  const rows=[];
+  const sync=()=>{for(const r of rows)for(const b of r.el.children)b.setAttribute("aria-pressed",String(r.multi?st.m[r.key].includes(b.dataset.v):String(st.m[r.key])===b.dataset.v))};
   const chips=(label,list,key,opt: any = {})=>{
     const row=h("div",{class:"chips"+(opt.thumbs?" thumbs":"")});
-    for(const[k,l]of list){const on=opt.multi?st.m[key].includes(k):String(st.m[key])===k;
-      const b=h("button",{type:"button","aria-pressed":on,title:l,onclick:()=>{if(opt.multi){const a=st.m[key];set(key,on?a.filter(x=>x!==k):[...a,k].slice(-6))}else set(key,k)}});
+    for(const[k,l]of list){
+      const b=h("button",{type:"button","data-v":k,title:l,onclick:()=>{if(opt.multi){const a=st.m[key];st.m[key]=a.includes(k)?a.filter(x=>x!==k):[...a,k].slice(-6)}else st.m[key]=k;changed();update(key)}});
       if(opt.thumbs){b.setAttribute("aria-label",l);const sv=ratSvg({[opt.thumbs]:k});sv.setAttribute("viewBox",opt.thumbs==="item"||opt.thumbs==="fur"?"0 0 120 120":opt.thumbs==="gear"?"22 14 76 92":opt.thumbs==="ears"?"14 8 92 70":"24 -2 72 78");b.append(sv)}
       else if(opt.swatch){b.setAttribute("aria-label",l);b.classList.add("sw");b.append(h("span",{class:"swc bg-"+k}))}
       else b.textContent=l;
       row.append(b)}
+    rows.push({key,multi:!!opt.multi,el:row});
     return h("div",{class:"field"},h("span",{class:"lbl",text:label}),row)};
-  const group=(title,open,...kids)=>{const d=h("details",open?{open:true}:null,h("summary",{text:title}),h("div",{class:"mk-g"},...kids));return d};
-  const draw=()=>{
-    const openState=[...body.querySelectorAll("details")].map(d=>d.open);const sc=formEl?formEl.scrollTop:0;
-    body.replaceChildren();err.textContent="";
-    if(S.assets)body.append(h("div",{class:"seg"},[["upload","Upload a meme"],["meme","Make a Krysa meme"]].map(([k,l])=>h("button",{type:"button","aria-pressed":st.mode===k,onclick:()=>{st.mode=k;draw()}},l))));
-    else body.append(h("p",{class:"muted",text:"Uploads aren't available here. You can still make a Krysa meme."}));
-    if(st.mode==="upload"){
-      const inp=h("input",{type:"file",id:"rat-file",accept:"image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm"});
-      inp.addEventListener("change",()=>{const f=inp.files&&inp.files[0];if(!f)return;if(st.url)URL.revokeObjectURL(st.url);st.file=f;st.url=URL.createObjectURL(f);draw()});
-      body.append(h("label",{class:"drop",for:"rat-file"},h("span",{text:st.file?st.file.name:"Pick a rat image, GIF or video"}),h("span",{class:"muted",text:"JPG, PNG, GIF, WebP, MP4 or WebM, up to 20 MB"}),inp));
-      if(st.url)body.append(h("div",{class:"preview"},/^video\//.test(st.file.type)?h("video",{src:st.url,muted:true,loop:true,autoplay:true,playsinline:true}):h("img",{src:st.url,alt:"Preview"})));
-    }else{
-      paint();body.append(prev);
-      body.append(h("div",{class:"mk-actions"},
-        h("button",{class:"btn",type:"button",onclick:()=>{st.m=surpriseMeme();draw()}},"Surprise me"),
-        h("button",{class:"btn",type:"button",onclick:()=>{const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b;draw()}},"New caption"),
-        S.downloads&&h("button",{class:"btn",type:"button",onclick:()=>saveMemeImage(st.m,"preview")},"Save image"),
-        h("button",{class:"btn ghost",type:"button",onclick:()=>{st.m=normMeme({bg:"slate",top:st.m.top,bottom:st.m.bottom});draw()}},"Reset")));
-      const [l1,l2]=TEXT_LABELS[st.m.layout]||TEXT_LABELS.classic;
-      const top=h("input",{id:"rat-top",maxlength:"120",placeholder:"WHEN THE LOKÁL BOOKING",autocomplete:"off",oninput:e=>{st.m.top=e.target.value;paint()}});top.value=st.m.top;
-      const bot=h("input",{id:"rat-bot",maxlength:"160",placeholder:"GOES THROUGH",autocomplete:"off",oninput:e=>{st.m.bottom=e.target.value;paint()}});bot.value=st.m.bottom;
-      const two=st.m.layout==="duo"||st.m.layout==="stack";
-      const groups=[
-        group("Template & text",true,chips("Template",MM.layouts,"layout"),
-          h("div",{class:"field"},h("label",{for:"rat-top",text:l1}),top),h("div",{class:"field"},h("label",{for:"rat-bot",text:l2}),bot),
-          chips("Font",MM.fonts,"font"),chips("Text colour",MM.colors,"color")),
-        group("The rat",true,chips("Fur",MM.furs,"fur",{thumbs:"fur"}),chips("Ears",MM.ears,"ears",{thumbs:"ears"}),chips(two?"First rat's face":"Face",MM.faces,"face",{thumbs:"face"}),
-          two&&chips("Second rat's face",MM.faces,"face2",{thumbs:"face"}),
-          chips("Hat",MM.hats,"hat",{thumbs:"hat"}),chips("Face & outfit",MM.gear,"gear",{thumbs:"gear"}),chips("Holding",MM.items,"item",{thumbs:"item"})),
-        group("Scene & chaos",false,chips("Background",MM.bgs,"bg",{swatch:true}),chips("How many rats",MM.counts,"count"),chips("Size",MM.sizes,"size"),
-          chips("Movement",MM.moves,"move"),chips("Stickers (pick up to 6)",MM.stickers,"stickers",{multi:true}),chips("Filter",MM.filters,"filter")),
-      ];
-      groups.forEach((g,i)=>{if(openState.length>i+0&&openState[i]!==undefined)g.open=openState[i];body.append(g)});
-    }
-    const cap=h("input",{id:"rat-cap",maxlength:"140",placeholder:"Optional caption",autocomplete:"off",oninput:e=>{st.caption=e.target.value}});cap.value=st.caption;
-    body.append(h("div",{class:"field"},h("label",{for:"rat-cap",text:"Caption"}),cap));
-    if(formEl)formEl.scrollTop=sc;
-  };
+  const group=(title,open,...kids)=>h("details",open?{open:true}:null,h("summary",{text:title}),h("div",{class:"mk-g"},...kids));
+  const top=h("input",{id:"rat-top",maxlength:"120",placeholder:"WHEN THE LOKÁL BOOKING",autocomplete:"off",oninput:e=>{st.m.top=e.target.value;changed();paintSoon()}});
+  const bot=h("input",{id:"rat-bot",maxlength:"160",placeholder:"GOES THROUGH",autocomplete:"off",oninput:e=>{st.m.bottom=e.target.value;changed();paintSoon()}});
+  const topL=h("label",{for:"rat-top"}),botL=h("label",{for:"rat-bot"});
+  const face=chips("Face",MM.faces,"face",{thumbs:"face"}),face2=chips("Second rat's face",MM.faces,"face2",{thumbs:"face"});
+  // Only these depend on the template: the two text labels and whether there's a second rat.
+  const relabel=()=>{const[l1,l2]=TEXT_LABELS[st.m.layout]||TEXT_LABELS.classic;topL.textContent=l1;botL.textContent=l2;const two=st.m.layout==="duo"||st.m.layout==="stack";face.querySelector(".lbl").textContent=two?"First rat's face":"Face";face2.hidden=!two};
+  const update=(key?)=>{sync();paint();if(!key||key==="layout")relabel()};
+  const setText=()=>{top.value=st.m.top;bot.value=st.m.bottom};
+  const memeSec=h("div",{class:"mk-sec"},prev,
+    h("div",{class:"mk-actions"},
+      h("button",{class:"btn",type:"button",onclick:()=>{st.m=surpriseMeme();setText();changed();update()}},"Surprise me"),
+      h("button",{class:"btn",type:"button",onclick:()=>{const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b;setText();changed();paint()}},"New caption"),
+      S.downloads&&h("button",{class:"btn",type:"button",onclick:()=>saveMemeImage(st.m,"preview")},"Save image"),
+      h("button",{class:"btn ghost",type:"button",onclick:()=>{st.m=normMeme({bg:"slate",top:st.m.top,bottom:st.m.bottom});changed();update()}},"Reset")),
+    group("Template & text",true,chips("Template",MM.layouts,"layout"),h("div",{class:"field"},topL,top),h("div",{class:"field"},botL,bot),chips("Font",MM.fonts,"font"),chips("Text colour",MM.colors,"color")),
+    group("The rat",true,chips("Fur",MM.furs,"fur",{thumbs:"fur"}),chips("Ears",MM.ears,"ears",{thumbs:"ears"}),face,face2,
+      chips("Hat",MM.hats,"hat",{thumbs:"hat"}),chips("Face & outfit",MM.gear,"gear",{thumbs:"gear"}),chips("Holding",MM.items,"item",{thumbs:"item"})),
+    group("Scene & chaos",false,chips("Background",MM.bgs,"bg",{swatch:true}),chips("How many rats",MM.counts,"count"),chips("Size",MM.sizes,"size"),
+      chips("Movement",MM.moves,"move"),chips("Stickers (pick up to 6)",MM.stickers,"stickers",{multi:true}),chips("Filter",MM.filters,"filter")));
+  setText();update();
+  // Upload mode.
+  const inp=h("input",{type:"file",id:"rat-file",accept:"image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm"});
+  const dropName=h("span",{text:"Pick a rat image, GIF or video"}),filePrev=h("div",{class:"preview",hidden:true});
+  inp.addEventListener("change",()=>{const f=inp.files&&inp.files[0];if(!f)return;if(st.url)URL.revokeObjectURL(st.url);st.file=f;st.url=URL.createObjectURL(f);changed();
+    dropName.textContent=f.name;filePrev.replaceChildren(/^video\//.test(f.type)?h("video",{src:st.url,muted:true,loop:true,autoplay:true,playsinline:true}):h("img",{src:st.url,alt:"Preview"}));filePrev.hidden=false});
+  const uploadSec=h("div",{class:"mk-sec"},h("label",{class:"drop",for:"rat-file"},dropName,h("span",{class:"muted",text:"JPG, PNG, GIF, WebP, MP4 or WebM, up to 20 MB"}),inp),filePrev);
+  const seg=S.assets?h("div",{class:"seg"},[["upload","Upload a meme"],["meme","Make a Krysa meme"]].map(([k,l])=>h("button",{type:"button","data-v":k,onclick:()=>{st.mode=k;showMode()}},l)))
+    :h("p",{class:"muted",text:"Uploads aren't available here. You can still make a Krysa meme."});
+  const showMode=()=>{memeSec.hidden=st.mode!=="meme";uploadSec.hidden=st.mode!=="upload";if(S.assets)for(const b of seg.children)b.setAttribute("aria-pressed",String(b.dataset.v===st.mode));err.textContent=""};
+  showMode();
+  const cap=h("input",{id:"rat-cap",maxlength:"140",placeholder:"Optional caption",autocomplete:"off",oninput:e=>{st.caption=e.target.value}});
+  const body=h("div",{class:"mk"},seg,memeSec,uploadSec,h("div",{class:"field"},h("label",{for:"rat-cap",text:"Caption"}),cap));
   const form=h("form",{class:"sheet","aria-labelledby":"mk-title",onsubmit:async e=>{e.preventDefault();err.textContent="";
       const base={caption:st.caption.trim(),by:S.uid,createdAt:new Date().toISOString(),squeaks:{}};
       if(st.mode==="upload"){
@@ -100,9 +107,8 @@ export function postRat(prefill?){
         const ok=await write(()=>S.db.collection("rats").add({...base,type:"meme",...m}),"Rat posted");
         if(ok){close();scurry({cheese:true})}
       }}},
-    h("h3",{id:"mk-title",text:remix?"Remix this rat":"Post a rat"}),body,err,
-    h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel"),submit)));
-  formEl=form;draw();scrim.append(form);document.body.append(scrim);
+    h("h3",{id:"mk-title",text:remix?"Remix this rat":"Post a rat"}),body,err,acts);
+  scrim.append(form);document.body.append(scrim);
 }
 
 export async function saveMemeImage(m,id){
