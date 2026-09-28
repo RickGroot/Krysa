@@ -11,7 +11,13 @@ export const flatKids=(kids: any[]): any[]=>kids.flat(Infinity).filter(c=>c!=nul
 // `true` also sets the matching property: a script-made <video muted> is only really muted that way.
 export const h=(tag: string, attrs?: any, ...kids: any[]): any=>{const el=document.createElement(tag);for(const[k,v]of (Object.entries(attrs||{}) as [string, any][])){if(k==="class"||k==="text"||k.startsWith("on")){if(v==null||v===false)continue;if(k==="class")el.className=v;else if(k==="text")el.textContent=v;else el.addEventListener(k.slice(2),v);continue}const s=attrValue(k,v);if(s==null)continue;el.setAttribute(k,s);if(v===true&&typeof el[k]==="boolean")el[k]=true}for(const c of flatKids(kids))el.append(c.nodeType?c:document.createTextNode(String(c)));return el};
 
-export function toast(msg){const t=h("div",{class:"toast",role:"status",text:msg});document.body.append(t);setTimeout(()=>t.remove(),2200)}
+// Toasts go into the dialog on top when one is open: everything below it is inert and hidden behind it.
+const toastHost=()=>[...document.querySelectorAll("dialog.ov[open]")].pop()||document.body;
+
+export function toast(msg){const t=h("div",{class:"toast",role:"status",text:msg});toastHost().append(t);setTimeout(()=>t.remove(),2200)}
+
+/** The app behind the trip-code screen: out of reach for taps, Tab and screen readers. */
+export function shellInert(on){for(const el of document.querySelectorAll(".skip,.stage,.wrap,nav.tabs,#fab"))el.inert=on}
 
 export const SVGNS="http://www.w3.org/2000/svg";
 
@@ -39,5 +45,5 @@ export const reduced=()=>{try{return matchMedia("(prefers-reduced-motion:reduce)
 export function toastAction(msg,label,fn,ms=8000){
   document.querySelectorAll(".toast.act").forEach(t=>{clearTimeout(t._t);t.dispatchEvent(new Event("expire"));t.remove()});
   const t=h("div",{class:"toast act",role:"status"},h("span",{text:msg}),h("button",{class:"tbtn",type:"button",onclick:()=>{clearTimeout(t._t);t._undone=true;t.remove();fn()}},label));
-  document.body.append(t);t._t=setTimeout(()=>{t.dispatchEvent(new Event("expire"));t.remove()},ms);return t;
+  toastHost().append(t);t._t=setTimeout(()=>{t.dispatchEvent(new Event("expire"));t.remove()},ms);return t;
 }

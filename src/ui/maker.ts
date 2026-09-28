@@ -7,6 +7,7 @@ import { ratSvg } from "../art/rat";
 import { S } from "../state";
 import { write } from "./core";
 import { h, toast } from "./dom";
+import { openOverlay } from "./overlay";
 import { scurry } from "./idle";
 
 export function uploadErr(e){const c=e&&e.code;return c==="too_large"?"That file is over 20 MB. Try a smaller image or a shorter clip.":c==="unsupported_type"?"That format isn't supported. Use JPG, PNG, GIF, WebP, MP4 or WebM.":"Upload failed. Check your connection and try again."}
@@ -31,9 +32,7 @@ export function postRat(prefill?){
   if(!st.m.bg)st.m.bg="slate";
   // A fresh meme starts with a caption, so the preview is never a blank rat. That doesn't count as a change.
   if(!remix&&!st.m.top&&!st.m.bottom){const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b}
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)ask()}});
-  const close=()=>{if(st.url)URL.revokeObjectURL(st.url);scrim.remove();document.removeEventListener("keydown",esc)};
-  const esc=e=>{if(e.key==="Escape")ask()};document.addEventListener("keydown",esc);
+  let ov;const close=()=>ov.close();
   const err=h("div",{class:"err",role:"alert"});
   const submit=h("button",{class:"btn primary",type:"submit"},"Post rat");
   const cancel=h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel");
@@ -92,7 +91,7 @@ export function postRat(prefill?){
   showMode();
   const cap=h("input",{id:"rat-cap",maxlength:"140",placeholder:"Optional caption",autocomplete:"off",oninput:e=>{st.caption=e.target.value}});
   const body=h("div",{class:"mk"},seg,memeSec,uploadSec,h("div",{class:"field"},h("label",{for:"rat-cap",text:"Caption"}),cap));
-  const form=h("form",{class:"sheet","aria-labelledby":"mk-title",onsubmit:async e=>{e.preventDefault();err.textContent="";
+  const form=h("form",{class:"sheet",onsubmit:async e=>{e.preventDefault();err.textContent="";
       const base={caption:st.caption.trim(),by:S.uid,createdAt:new Date().toISOString(),squeaks:{}};
       if(st.mode==="upload"){
         if(!st.file){err.textContent="Pick a file first";document.getElementById("rat-file")?.focus();return}
@@ -107,8 +106,8 @@ export function postRat(prefill?){
         const ok=await write(()=>S.db.collection("rats").add({...base,type:"meme",...m}),"Rat posted");
         if(ok){close();scurry({cheese:true})}
       }}},
-    h("h3",{id:"mk-title",text:remix?"Remix this rat":"Post a rat"}),body,err,acts);
-  scrim.append(form);document.body.append(scrim);
+    h("h3",{id:"mk-title",tabindex:"-1",autofocus:true,text:remix?"Remix this rat":"Post a rat"}),body,err,acts);
+  ov=openOverlay({labelledby:"mk-title",content:form,onCancel:ask,onClose:()=>{if(st.url)URL.revokeObjectURL(st.url)}});
 }
 
 export async function saveMemeImage(m,id){

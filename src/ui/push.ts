@@ -4,6 +4,7 @@
 import { b64uDecode } from "../lib/webpush";
 import { S } from "../state";
 import { h, toast } from "./dom";
+import { openOverlay } from "./overlay";
 
 const PREFS_KEY = "krysa-push-prefs";
 
@@ -62,11 +63,8 @@ export async function syncPush(){
 }
 
 export function openNotifications(){
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
-  const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};
-  const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const sheet=h("div",{class:"sheet",role:"dialog","aria-label":"Notifications"});
-  scrim.append(sheet);document.body.append(scrim);
+  const sheet=h("div",{class:"sheet"});
+  const {close}=openOverlay({labelledby:"push-t",content:sheet});
   const draw=async()=>{
     const blocker=pushBlocker(),on=await pushOn(),prefs=pushPrefs();
     const err=h("p",{class:"err",role:"status"});
@@ -79,7 +77,7 @@ export function openNotifications(){
       try{if(on){await disable();toast("Notifications off on this device")}else{await enable(prefs);toast("Notifications on")}await draw()}
       catch(x){err.textContent=(x&&x.message)||"Couldn't change notifications. Try again.";btn.disabled=false}}},on?"Turn off":"Turn on");
     sheet.replaceChildren(
-      h("h3",{text:"Notifications"}),
+      h("h3",{id:"push-t",tabindex:"-1",text:"Notifications"}),
       h("p",{class:"muted",text:"A ping on this device, even when Krysa is closed. Each phone or browser switches on by itself."}),
       h("div",{class:"checks",style:"flex-direction:column;align-items:flex-start;gap:10px"},
         box("reminders","Reminders: check-in, leaving for the airport, what's next and to-dos that are due"),

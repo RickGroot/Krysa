@@ -1,5 +1,4 @@
 /* eslint-disable */
-import "./a11y";
 import { krysa } from "../art/rat";
 import { startTab } from "../lib/schedule";
 import { S, TABS } from "../state";

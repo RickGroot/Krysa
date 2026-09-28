@@ -9,6 +9,7 @@ import { S } from "../state";
 import { removeDocs, snapOf, write } from "./core";
 import { armBtn, h, keepFocus, reduced, svg, toast } from "./dom";
 import { IDLE, scheduleCameo } from "./idle";
+import { openOverlay } from "./overlay";
 import { postRat, saveMemeImage } from "./maker";
 import { render } from "./tabs";
 
@@ -46,9 +47,9 @@ export function postCard(r,o: any = {}){
     h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
 }
 
-export function openLightbox(r){const lb=h("div",{class:"lightbox","aria-label":r.caption?`Rat post: ${r.caption}`:"Rat post",onclick:e=>{if(e.target===lb)close()}});const close=()=>{lb.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+export function openLightbox(r){let ov;const close=()=>ov.close();
   const prevView=S.wall.view;S.wall.view="feed";const card=postCard(r,{fresh:true,close});S.wall.view=prevView;
-  lb.append(h("button",{class:"btn closex",type:"button",onclick:close},"Close"),card);document.body.append(lb)}
+  ov=openOverlay({cls:"lightbox",label:r.caption?`Rat post: ${r.caption}`:"Rat post",content:[h("button",{class:"btn closex",type:"button",onclick:close},"Close"),card]})}
 
 export function wallList(){
   let rs=[...S.rats];
@@ -63,18 +64,16 @@ export function ratTV(list){
   if(!list.length){toast("No rats to broadcast yet");return}
   // The progress bar is a CSS animation; the next rat comes on its animationend, so pausing it pauses the show.
   let i=0,paused=false;const bar=h("i");const slot=h("div",{class:"slot"});
-  const root=h("div",{class:"ratv",role:"dialog","aria-label":"Rat TV"});
-  const close=()=>{root.remove();document.removeEventListener("keydown",key)};
+  let ov,root;const close=()=>ov.close();
   const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(...[mediaFor(r,{bare:true,autoplay:!paused}),r.caption&&h("div",{class:"cap",text:r.caption})].filter(Boolean));
     bar.classList.remove("run");void bar.offsetWidth;bar.style.setProperty("--dur",(r.type==="video"?12:6)+"s");if(!reduced())bar.classList.add("run")};
   bar.addEventListener("animationend",()=>show(i+1));
   const pause=h("button",{class:"btn small",type:"button",onclick:()=>setPaused(!paused)},"Pause");
   const setPaused=v=>{paused=v;root.classList.toggle("paused",v);pause.textContent=v?"Play":"Pause";slot.querySelectorAll("video").forEach(x=>{if(v)x.pause();else x.play().catch(()=>{})})};
-  const key=e=>{if(e.key==="Escape")close();else if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};document.addEventListener("keydown",key);
-  root.append(h("div",{class:"ratv-top"},h("span",{class:"onair"},h("i"),"RAT TV · LIVE FROM PRAHA"),h("span",{class:"ratv-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Exit"))),
+  const key=e=>{if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};
+  ov=openOverlay({cls:"ratv",label:"Rat TV",backdrop:false,content:[h("div",{class:"ratv-top"},h("span",{class:"onair"},h("i"),"RAT TV · LIVE FROM PRAHA"),h("span",{class:"ratv-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Exit"))),
     h("div",{class:"ratv-stage"},slot,h("button",{class:"nav prev",type:"button","aria-label":"Previous rat",onclick:()=>show(i-1)}),h("button",{class:"nav next",type:"button","aria-label":"Next rat",onclick:()=>show(i+1)})),
-    h("div",{class:"ratv-bar"},bar));
-  document.body.append(root);show(0);
+    h("div",{class:"ratv-bar"},bar)]});root=ov.dlg;root.addEventListener("keydown",key);show(0);
 }
 
 export function renderRats(main){
@@ -102,18 +101,17 @@ export function ensureProfiles(ids){ids=[...new Set<any>(ids.filter(Boolean))].f
 
 /** More → Rat catchers: the scoreboard and the Sneaky rats switch. */
 export function openCatchers(){
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
-  const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const sheet=h("div",{class:"sheet",role:"dialog","aria-labelledby":"catch-t"});
+  let ov;const close=()=>ov.close();
+  const sheet=h("div",{class:"sheet"});
   const draw=()=>keepFocus(sheet,()=>{
     // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
     const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
     const toggle=h("button",{class:"btn small",type:"button","data-k":"sneaky","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
       if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}draw()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
-    sheet.replaceChildren(h("h3",{id:"catch-t",text:"Rat catchers"}),
+    sheet.replaceChildren(h("h3",{id:"catch-t",tabindex:"-1",autofocus:true,text:"Rat catchers"}),
       h("div",{class:"sectionhead"},h("p",{text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the app is open, rats sneak in from the edges now and then. Tap one to catch it."}),toggle),
       entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
         :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}),
       h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"))))});
-  draw();scrim.append(sheet);document.body.append(scrim);
+  draw();ov=openOverlay({labelledby:"catch-t",content:sheet});
 }

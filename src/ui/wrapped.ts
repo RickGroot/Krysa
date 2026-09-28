@@ -8,6 +8,7 @@ import { fmtAmt, fmtCzk, fmtEur } from "../lib/money";
 import { S, pname } from "../state";
 import { rate, toCzk } from "./bound";
 import { h, reduced, svg } from "./dom";
+import { openOverlay } from "./overlay";
 import { HERO } from "./stage";
 import { voteCount } from "./tabs";
 import { ensureProfiles, loveOf, mediaFor } from "./wall";
@@ -37,10 +38,10 @@ export function wrappedSlides(){
 
 export function openWrapped(){
   const slides=wrappedSlides();let i=0,paused=false;
-  const root=h("div",{class:"wrapped",role:"dialog","aria-label":"Rat Wrapped"});
+  let ov,root;
   const bars=h("div",{class:"wr-bars"},slides.map(()=>h("span",null,h("i"))));
   const stage=h("div",{class:"wr-stage"});
-  const close=()=>{root.remove();document.removeEventListener("keydown",key)};
+  const close=()=>ov.close();
   const show=n=>{i=Math.max(0,Math.min(slides.length-1,n));const s=slides[i];
     const sv=svg(SCENES[s.scene](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMid slice");sv.classList.add("wr-scene");
     const light=HERO[s.scene]&&HERO[s.scene].light;
@@ -52,8 +53,7 @@ export function openWrapped(){
   bars.addEventListener("animationend",e=>{if(e.target===bars.children[i].firstChild&&i<slides.length-1)show(i+1)});
   const pause=h("button",{class:"btn small",type:"button",onclick:()=>setPaused(!paused)},"Pause");
   const setPaused=v=>{paused=v;root.classList.toggle("paused",v);pause.textContent=v?"Play":"Pause";stage.querySelectorAll("video").forEach(x=>{if(v)x.pause();else x.play().catch(()=>{})})};
-  const key=e=>{if(e.key==="Escape")close();else if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};document.addEventListener("keydown",key);
-  root.append(bars,h("div",{class:"wr-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Close")),stage,
-    h("button",{class:"nav prev",type:"button","aria-label":"Previous",onclick:()=>show(i-1)}),h("button",{class:"nav next",type:"button","aria-label":"Next",onclick:()=>show(i+1)}));
-  document.body.append(root);show(0);
+  const key=e=>{if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};
+  ov=openOverlay({cls:"wrapped",label:"Rat Wrapped",backdrop:false,content:[bars,h("div",{class:"wr-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Close")),stage,
+    h("button",{class:"nav prev",type:"button","aria-label":"Previous",onclick:()=>show(i-1)}),h("button",{class:"nav next",type:"button","aria-label":"Next",onclick:()=>show(i+1)})]});root=ov.dlg;root.addEventListener("keydown",key);show(0);
 }

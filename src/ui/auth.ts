@@ -1,7 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { SCENES } from "../art/scenes";
-import { setBackgroundInert } from "./a11y";
-import { armBtn, h, svg } from "./dom";
+import { armBtn, h, shellInert, svg } from "./dom";
 
 /** Full-screen illustrated card used for sign-in and account states. */
 function screen(...content: HTMLElement[]): HTMLElement {
@@ -12,13 +11,13 @@ function screen(...content: HTMLElement[]): HTMLElement {
   const root = h("div", { class: "gate", id: "gate" }, sc, h("div", { class: "gate-card" }, ...content));
   document.body.append(root);
   // The app behind the gate is out of reach: no tabbing into it, no second h1 for screen readers.
-  setBackgroundInert(true);
+  shellInert(true);
   return root;
 }
 
 function closeGate(): void {
   document.getElementById("gate")?.remove();
-  setBackgroundInert(false);
+  shellInert(false);
 }
 
 /** Pulls a code from an invite link (`…/#trip=the-code`) and removes it from the address bar. */

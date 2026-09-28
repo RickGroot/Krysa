@@ -6,6 +6,7 @@ import { fmtCzk } from "../lib/money";
 import { S } from "../state";
 import { toCzk, todayOn } from "./bound";
 import { h, svg } from "./dom";
+import { openOverlay } from "./overlay";
 import { openNotifications, pushOn } from "./push";
 import { render } from "./tabs";
 import { IDLE } from "./idle";
@@ -52,18 +53,16 @@ export const MORE_ICONS={
 export function goTab(tab){S.tab=tab;S.tabReady=true;try{sessionStorage.setItem("pw-tab",tab)}catch(e){}render();window.scrollTo(0,0)}
 
 export function openMore(){
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
   const more=document.getElementById("more-btn");more.setAttribute("aria-expanded","true");
-  const close=()=>{scrim.remove();more.setAttribute("aria-expanded","false");document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+  let ov;const close=()=>ov.close();
   const open=S.todos.filter(t=>!t.done).length,total=S.expenses.reduce((a,e)=>a+toCzk(e),0);
   const item=(tab,label,sub)=>{const ico=h("span",{class:"ico","aria-hidden":"true"});ico.innerHTML=MORE_ICONS[tab];return h("button",{class:"more-item"+(S.tab===tab?" on":""),type:"button",onclick:()=>{close();goTab(tab)}},ico,h("span",null,h("b",{text:label}),h("small",{text:sub})))};
   const bell=h("span",{class:"ico","aria-hidden":"true"});bell.innerHTML=MORE_ICONS.bell;
   const cup=h("span",{class:"ico","aria-hidden":"true"});cup.innerHTML=MORE_ICONS.catch;
   const pushSub=h("small",{text:"Reminders and new rats on this device"});
   pushOn().then(on=>{if(on)pushSub.textContent="On for this device"});
-  scrim.append(h("div",{class:"sheet more-sheet",role:"dialog","aria-label":"More sections"},h("h3",{text:"More"}),
+  ov=openOverlay({labelledby:"more-t",onClose:()=>more.setAttribute("aria-expanded","false"),content:h("div",{class:"sheet more-sheet"},h("h3",{id:"more-t",tabindex:"-1",autofocus:true,text:"More"}),
     item("todo","To-do",open?`${open} open`:"All done"),item("money","Money",`${fmtCzk(total)} spent together`),item("info","Info","Stay, people and Prague basics"),
     h("button",{class:"more-item",type:"button",onclick:()=>{close();openCatchers()}},cup,h("span",null,h("b",{text:"Rat catchers"}),h("small",{text:IDLE.on?"Scores, and sneaky rats are on":"Scores, and sneaky rats are off"}))),
-    h("button",{class:"more-item",type:"button",onclick:()=>{close();openNotifications()}},bell,h("span",null,h("b",{text:"Notifications"}),pushSub))));
-  document.body.append(scrim);
+    h("button",{class:"more-item",type:"button",onclick:()=>{close();openNotifications()}},bell,h("span",null,h("b",{text:"Notifications"}),pushSub)))});
 }

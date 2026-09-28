@@ -82,7 +82,7 @@ export function tailDangle(){
 }
 
 // Not while something is open or someone is typing.
-export function canCameo(){return IDLE.on&&!reduced()&&document.visibilityState==="visible"&&!document.querySelector(".scrim,.lightbox,.ratv,.wrapped,#gate,.peek,.tail-dangle,.scurry")&&!document.activeElement?.matches?.("input,select,textarea")&&Date.now()-IDLE.last>4000}
+export function canCameo(){return IDLE.on&&!reduced()&&document.visibilityState==="visible"&&!document.querySelector("dialog[open],#gate,.peek,.tail-dangle,.scurry")&&!document.activeElement?.matches?.("input,select,textarea")&&Date.now()-IDLE.last>4000}
 
 export function scheduleCameo(first?){clearTimeout((scheduleCameo as any).t);if(!IDLE.on)return;
   (scheduleCameo as any).t=setTimeout(()=>{if(canCameo()){const acts=[()=>peek("b"),()=>peek("b"),()=>peek("r"),()=>peek("l"),tailDangle,()=>scurry({dir:Math.random()<.5?1:-1,cheese:Math.random()<.6})];acts[Math.floor(Math.random()*acts.length)]()}scheduleCameo()},(first?15+Math.random()*10:25+Math.random()*35)*1000)}

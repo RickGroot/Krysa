@@ -4,6 +4,7 @@ import { hasCoords } from "../lib/geo";
 import { S } from "../state";
 import { walkMin } from "./bound";
 import { armBtn, h, toast, toastAction } from "./dom";
+import { openOverlay } from "./overlay";
 import { render } from "./tabs";
 
 export async function write(fn,okMsg?){if(!S.db){toast("Saving isn't available here");return false}try{await fn();if(okMsg)toast(okMsg);return true}catch(e){if(e&&e.code==="invalid_argument"&&!S._validated){S.canWrite=false;render();toast("View only. Reload and enter the trip code to make changes.")}else if(e&&e.code==="quota_exceeded"){toast("The planner is full, delete a few old items")}else{toast(navigator.onLine===false?"You're offline, so that didn't save.":"Couldn't save, try again")}return false}}
@@ -25,9 +26,7 @@ export function placeLine(it){
 let sheetN=0;
 
 export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: any){
-  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
-  const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};
-  const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+  let ov;const close=()=>ov.close();
   const tid="sheet-t"+(++sheetN);
   // role=alert from the start, so a message set later is announced.
   const err=h("div",{class:"err",id:tid+"-err",role:"alert"});
@@ -43,11 +42,11 @@ export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: 
   const del=onDelete?armBtn(h("button",{class:"btn danger ghost",type:"button"},"Delete"),"Tap again to delete",async()=>{if(await onDelete())close()}):null;
   // onSave returns a message, or {msg, field} to point at the field that needs fixing.
   const fail=(msg,field)=>{err.textContent=msg;const el=els[field];const t=el&&(el.matches("input,select,textarea")?el:el.querySelector("input"));if(t){t.setAttribute("aria-invalid","true");t.setAttribute("aria-describedby",err.id);t.focus()}};
-  const form=h("form",{class:"sheet","aria-labelledby":tid,novalidate:true,onsubmit:async e=>{e.preventDefault();form.querySelectorAll("[aria-invalid]").forEach(x=>{x.removeAttribute("aria-invalid");x.removeAttribute("aria-describedby")});
+  const form=h("form",{class:"sheet",novalidate:true,onsubmit:async e=>{e.preventDefault();form.querySelectorAll("[aria-invalid]").forEach(x=>{x.removeAttribute("aria-invalid");x.removeAttribute("aria-describedby")});
     const v={};for(const k in get)v[k]=get[k]();const r=await onSave(v);if(typeof r==="string")fail(r,null);else if(r&&typeof r==="object")fail(r.msg,r.field);else if(r!==false)close()}},
-    h("h3",{id:tid,text:title}),...body,err,
+    h("h3",{id:tid,tabindex:"-1",autofocus:true,text:title}),...body,err,
     h("div",{class:"sheetacts"},del,h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel"),h("button",{class:"btn primary",type:"submit"},saveLabel))));
-  scrim.append(form);document.body.append(scrim);
+  ov=openOverlay({labelledby:tid,content:form});
   const first=form.querySelector("input,select,textarea");if(first&&matchMedia("(pointer:fine)").matches)first.focus();
 }
 
