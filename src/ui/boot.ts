@@ -4,6 +4,7 @@ import { krysa } from "../art/rat";
 import { startTab } from "../lib/schedule";
 import { S, TABS } from "../state";
 import { tripLive } from "./bound";
+import { h } from "./dom";
 import { ratSays, setupIdle } from "./idle";
 import { syncPush } from "./push";
 import { goTab, openMore } from "./stage";
@@ -23,6 +24,11 @@ if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("messag
 document.getElementById("krysa").append(krysa("classic"));
 document.getElementById("krysa").addEventListener("click",ratSays);
 setupIdle();
+// Offline the plan still shows (the last saved copy) but changes need a connection: say so.
+const offline=()=>{let el=document.getElementById("offline");if(navigator.onLine){el?.remove();return}if(el)return;
+  const k=h("span",{class:"kr","aria-hidden":"true"});k.append(krysa("sleep"));
+  el=h("div",{class:"offline",id:"offline",role:"status"},k,h("span",{text:"Offline. Showing the saved plan; changes need a connection."}));document.querySelector(".stage-in").prepend(el)};
+addEventListener("online",offline);addEventListener("offline",offline);offline();
 render();
 (async()=>{
   const claude:any=RUNTIME;

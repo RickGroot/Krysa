@@ -6,7 +6,7 @@ import { walkMin } from "./bound";
 import { armBtn, h, toast, toastAction } from "./dom";
 import { render } from "./tabs";
 
-export async function write(fn,okMsg?){if(!S.db){toast("Saving isn't available here");return false}try{await fn();if(okMsg)toast(okMsg);return true}catch(e){if(e&&e.code==="invalid_argument"&&!S._validated){S.canWrite=false;render();toast("View only. Reload and enter the trip code to make changes.")}else if(e&&e.code==="quota_exceeded"){toast("The planner is full, delete a few old items")}else{toast("Couldn't save, try again")}return false}}
+export async function write(fn,okMsg?){if(!S.db){toast("Saving isn't available here");return false}try{await fn();if(okMsg)toast(okMsg);return true}catch(e){if(e&&e.code==="invalid_argument"&&!S._validated){S.canWrite=false;render();toast("View only. Reload and enter the trip code to make changes.")}else if(e&&e.code==="quota_exceeded"){toast("The planner is full, delete a few old items")}else{toast(navigator.onLine===false?"You're offline, so that didn't save.":"Couldn't save, try again")}return false}}
 
 export function placeLine(it){
   if(!it.location&&!hasCoords(it))return null;
