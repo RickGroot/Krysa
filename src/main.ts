@@ -1,3 +1,4 @@
+import "./fonts/fonts.css";
 import "./styles.css";
 import seed from "../supabase/seed/demo.json";
 import { LOCAL_DB_KEY, localRuntime } from "./data/local";

@@ -1,6 +1,7 @@
 // Krysa service worker: the app shell works offline, data comes from Supabase
 // (and the app's own localStorage cache) and is never cached here.
-const CACHE = "krysa-v1";
+// v2: the fonts are the app's own files now, so v1 and its copies of Google's go.
+const CACHE = "krysa-v2";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -18,7 +19,7 @@ async function staleWhileRevalidate(req) {
   const hit = await cache.match(req);
   const net = fetch(req)
     .then((res) => {
-      if (res.ok || res.type === "opaque") cache.put(req, res.clone());
+      if (res.ok) cache.put(req, res.clone());
       return res;
     })
     .catch(() => hit);
@@ -29,10 +30,7 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.origin !== location.origin) {
-    if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") e.respondWith(staleWhileRevalidate(req));
-    return; // Supabase and everything else: straight to the network
-  }
+  if (url.origin !== location.origin) return; // Supabase and everything else: straight to the network
   if (req.mode === "navigate") {
     e.respondWith(
       fetch(req)

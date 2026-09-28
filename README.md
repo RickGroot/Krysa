@@ -113,6 +113,7 @@ src/
     scenes.ts        the illustrated Prague scenes behind each tab
     meme.ts, model.ts  the meme maker's options and rendering
     export.ts        meme → PNG on a canvas
+  fonts/             the five typefaces, served with the app (Latin + Czech subsets, OFL.txt)
   ui/                tabs, Rat Wall, idle rats, Rat Wrapped, reminders, notifications switch
     overlay.ts       every sheet and full-screen view is a modal <dialog>: stacking, Escape, focus
     dom.ts           h() to build elements, keepFocus() so a re-render keeps keyboard focus, toasts
@@ -130,6 +131,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 - **The publishable key is public by design.** RLS protects the data. The secret key is only for `pnpm seed` on your own machine.
 - **Nothing personal ships with the app.** No codes, emails, names or booking details are built into the bundle; who's an owner lives in the database. A test fails if the demo seed ever contains booking codes.
 - **Booking codes:** a booking code plus a surname lets anyone change a booking, so add them in the app only if you're comfortable with every member seeing them. The app masks them until you tap "Show".
+- **No third parties on load.** The fonts are served with the app, so opening Krysa doesn't tell Google (or anyone else) who's visiting. The only other host it talks to is your Supabase project.
 - User-generated content is treated as untrusted: the UI builds DOM with `textContent`, and meme options are checked against allow-lists (`normMeme`).
 - **Push notifications:** the function only runs for pg_cron's random token, which lives in Vault and never leaves the database. The private key pushes are signed with is created by the function and stored in `krysa.push_keys`, which only the service role and the SQL editor can read. Messages are encrypted for each device, so Apple, Google and Mozilla's push services can't read them. A device's subscription is deleted with its membership.
 
@@ -140,7 +142,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 - **The rat-catcher scoreboard matches people by name.** Devices with the same display name (ignoring case and spaces) add up, so a phone and a laptop count as one catcher. Two people with the same name share a score too, and names can't be changed in the app: fix a mismatch in the SQL editor with `update krysa.profiles set name = 'Rick' where name = 'Rick G';`. Posts, reactions and votes are still per device.
 - **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
-- **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests, and a test checks the colour contrast of both themes. The UI was checked by hand in a browser (demo mode, phone and desktop sizes, light and dark), not with a screen reader or on a real iPhone.
+- **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests, a test checks the colour contrast of both themes, and one checks that every font the app asks for is there. The UI was checked by hand in a browser (demo mode, phone and desktop sizes, light and dark), not with a screen reader or on a real iPhone.
 - **Check-in timings are only known for KLM.** Other airlines get a cautious default (reminder from 24 hours before, bag drop closing 45 minutes before). Add airlines in `checkInRule`.
 - **Offline is read-only.** The service worker caches the app shell and the last known data. Writes need a connection.
 - **Undo is client-side.** A delete can be undone for 10 seconds from the same device (longer while your finger or keyboard is on the Undo). There's no server-side history. An uploaded file is only removed from storage once the Undo is gone, so closing or reloading the app sooner leaves the file behind in the bucket (it no longer shows in the app).
