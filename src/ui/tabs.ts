@@ -35,10 +35,10 @@ export function render(){
   // Rebuilt on every change; keepFocus puts focus back on the same control (by its data-k).
   const main=document.getElementById("main");
   keepFocus(main,()=>{main.replaceChildren();
-    if(!S.loaded){main.append(h("p",{class:"empty",text:S.db===false?"This planner couldn't connect. Open it on claude.ai while signed in to your organization.":"The rats are fetching the plan…"}));return}
+    if(!S.loaded){main.append(h("p",{class:"empty",text:S.db===false?"The rats couldn't load the plan. Check your connection and reload.":"The rats are fetching the plan…"}));return}
     main.append(remindersEl());
     ({plan:renderPlan,ideas:renderIdeas,todo:renderTodo,money:renderMoney,info:renderInfo,rats:renderRats,flights:renderFlights})[S.tab](main);
-    if(!S.canWrite)main.append(h("p",{class:"readonly",text:"You have view-only access. Ask the trip owner for edit rights to make changes."}));
+    if(!S.canWrite)main.append(h("p",{class:"readonly",text:"View only. Reload and enter the trip code to make changes."}));
   });
   if(S.loaded)requestAnimationFrame(watchAnims);
 }

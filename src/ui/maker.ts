@@ -9,7 +9,7 @@ import { write } from "./core";
 import { h, toast } from "./dom";
 import { scurry } from "./idle";
 
-export function uploadErr(e){const c=e&&e.code;return c==="too_large"?"That file is over 20 MB. Try a smaller image or a shorter clip.":c==="unsupported_type"?"That format isn't supported. Use JPG, PNG, GIF, WebP, MP4 or WebM.":c==="quota_or_state"?"The Rat Wall is out of storage. Delete a few old posts first.":c==="rate_limited"?"Slow down, rat. Try again in a moment.":c==="upstream_auth"?"Your session expired. Reload the page and try again.":(c==="not_granted"||c==="capability_disabled"||c==="capability_removed")?"Uploads need edit access to this planner.":"Upload failed. Try again."}
+export function uploadErr(e){const c=e&&e.code;return c==="too_large"?"That file is over 20 MB. Try a smaller image or a shorter clip.":c==="unsupported_type"?"That format isn't supported. Use JPG, PNG, GIF, WebP, MP4 or WebM.":"Upload failed. Check your connection and try again."}
 
 export async function prepFile(file){
   const t=(file.type||"").toLowerCase();
@@ -52,7 +52,7 @@ export function postRat(prefill?){
     const openState=[...body.querySelectorAll("details")].map(d=>d.open);const sc=formEl?formEl.scrollTop:0;
     body.replaceChildren();err.textContent="";
     if(S.assets)body.append(h("div",{class:"seg"},[["upload","Upload a meme"],["meme","Make a Krysa meme"]].map(([k,l])=>h("button",{type:"button","aria-pressed":st.mode===k,onclick:()=>{st.mode=k;draw()}},l))));
-    else body.append(h("p",{class:"muted",text:"Image uploads need edit access. You can still make a Krysa meme."}));
+    else body.append(h("p",{class:"muted",text:"Uploads aren't available here. You can still make a Krysa meme."}));
     if(st.mode==="upload"){
       const inp=h("input",{type:"file",id:"rat-file",accept:"image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm"});
       inp.addEventListener("change",()=>{const f=inp.files&&inp.files[0];if(!f)return;if(st.url)URL.revokeObjectURL(st.url);st.file=f;st.url=URL.createObjectURL(f);draw()});
