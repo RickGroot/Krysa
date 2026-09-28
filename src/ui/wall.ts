@@ -7,11 +7,10 @@ import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
 import { removeDocs, snapOf, write } from "./core";
-import { h, reduced, svg, toast } from "./dom";
-import { IDLE, RAT_FACTS, scheduleCameo } from "./idle";
+import { h, keepFocus, reduced, svg, toast } from "./dom";
+import { IDLE, scheduleCameo } from "./idle";
 import { postRat, saveMemeImage } from "./maker";
 import { render } from "./tabs";
-import { openWrapped } from "./wrapped";
 
 export async function deleteRat(r){
   return removeDocs([snapOf("rats",r)],"Rat removed",{onExpire:()=>{if(r.assetId&&S.assets)S.assets.delete(r.assetId).catch(()=>{})}});
@@ -79,32 +78,42 @@ export function ratTV(list){
 }
 
 export function renderRats(main){
-  const day=Math.floor(Date.now()/864e5);
-  const fact=h("div",{class:"ratfact alive"});fact.append(krysa("classic"),h("div",null,h("div",{class:"lbl",text:"Rat fact of the day"}),h("p",{text:RAT_FACTS[day%RAT_FACTS.length]})));
-  main.append(fact);
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"The official Rat Wall. Post memes, react to the good ones."}),h("span",{style:"display:flex;gap:6px;flex-wrap:wrap"},S.rats.length>0&&h("button",{class:"btn small",type:"button","data-k":"ratv",onclick:()=>ratTV(wallList())},"Rat TV"),h("button",{class:"btn small",type:"button","data-k":"wrapped",onclick:openWrapped},"Rat Wrapped"),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:rat",onclick:()=>postRat()},"+ Rat"))));
+  // The wall is a feed: one toolbar row, then the posts, with the hall of fame after the third.
+  const grid=S.wall.view==="grid";
+  const sel=(label,key,list)=>h("label",{class:"wsel"},h("span",{class:"sr",text:label}),h("select",{"data-k":"wall:"+key,onchange:e=>{S.wall[key]=e.target.value;if(key==="sort"&&S.wall.sort==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},list.map(([k,l])=>h("option",{value:k,selected:S.wall[key]===k},l))));
+  main.append(h("div",{class:"wallbar"},
+    sel("Sort","sort",[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]]),
+    sel("Show","filter",[["all","All rats"],["memes","Krysa memes"],["uploads","Uploads"],["mine","Mine"]]),
+    S.wall.sort==="shuffle"&&h("button",{class:"btn small",type:"button","data-k":"wall:reshuffle",onclick:()=>{S.wall.seed=Math.random()*1e9|0;saveWall();render()}},"Reshuffle"),
+    h("button",{class:"btn small",type:"button","data-k":"wall:view","aria-pressed":grid,onclick:()=>{S.wall.view=grid?"feed":"grid";saveWall();render()}},"Grid")));
   const top=[...S.rats].filter(r=>loveOf(r)>0).sort((a,b)=>loveOf(b)-loveOf(a)).slice(0,3);
-  if(top.length){main.append(h("section",{class:"fame"},h("h3",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>{const b=h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}));return b}))))}
-  requestAnimationFrame(()=>document.querySelectorAll(".fame-item .media").forEach(m=>{const mm=m.querySelector(".meme");if(mm)mm.style.transform=`scale(${m.clientWidth/360})`}));
-  const opt=(label,key,list)=>h("span",{style:"display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"},h("span",{class:"lblx",text:label}),h("span",{class:"chips"},list.map(([k,l])=>h("button",{type:"button","data-k":`wall:${key}:${k}`,"aria-pressed":S.wall[key]===k,onclick:()=>{S.wall[key]=k;if(k==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},l))));
-  main.append(h("div",{class:"wallbar"},h("div",{class:"row2"},opt("View","view",[["feed","Feed"],["grid","Grid"]]),opt("Sort","sort",[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]])),h("div",{class:"row2"},opt("Show","filter",[["all","All"],["memes","Krysa memes"],["uploads","Uploads"],["mine","Mine"]]))));
+  const fame=top.length?h("section",{class:"fame"},h("h3",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}))))):null;
+  // Hall-of-fame memes are drawn 360px wide and scaled to the tile, keeping their own shape.
+  if(fame)requestAnimationFrame(()=>fame.querySelectorAll(".fame-item .media").forEach(m=>{const mm=m.querySelector(".meme");if(!mm)return;const s=m.clientWidth/360;mm.style.transform=`scale(${s})`;m.style.aspectRatio="auto";m.style.height=`${mm.offsetHeight*s}px`}));
   const rs=wallList();
-  if(!rs.length){main.append(h("p",{class:"empty",text:S.rats.length?"No rats match this filter.":"No rats yet. Unacceptable."}))}
-  else main.append(h("div",{class:"feed"+(S.wall.view==="grid"?" grid":"")},rs.map(postCard)));
-  main.append(catchersCard());
+  if(!rs.length)main.append(...[h("p",{class:"empty",text:S.rats.length?"No rats match this filter.":"No rats yet. Unacceptable."}),fame].filter(Boolean));
+  else if(grid)main.append(...[h("div",{class:"feed grid"},rs.map(postCard)),fame].filter(Boolean));
+  else main.append(h("div",{class:"feed"},rs.map((r,i)=>fame&&i===Math.min(2,rs.length-1)?[postCard(r),fame]:postCard(r))));
   ensureProfiles(S.rats.map(r=>r.by));
 }
 
 export function ensureProfiles(ids){ids=[...new Set<any>(ids.filter(Boolean))].filter(id=>!(id in S.profiles));
   if(ids.length&&S.user&&!(ensureProfiles as any).busy){(ensureProfiles as any).busy=true;S.user.profiles(ids).then(ps=>{Object.assign(S.profiles,ps);(ensureProfiles as any).busy=false;if(S.tab==="rats")render()}).catch(()=>{(ensureProfiles as any).busy=false})}}
 
-export function catchersCard(){
-  // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
-  const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
-  const toggle=h("button",{class:"btn small",type:"button","data-k":"sneaky","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
-    if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}render()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
-  return h("div",{class:"card"},h("h3",null,"Rat catchers",toggle),
-    h("p",{class:"muted",text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the page is open, rats sneak in from the edges now and then. Tap one to catch it."}),
-    entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
-      :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}));
+/** More → Rat catchers: the scoreboard and the Sneaky rats switch. */
+export function openCatchers(){
+  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
+  const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+  const sheet=h("div",{class:"sheet",role:"dialog","aria-labelledby":"catch-t"});
+  const draw=()=>keepFocus(sheet,()=>{
+    // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
+    const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
+    const toggle=h("button",{class:"btn small",type:"button","data-k":"sneaky","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
+      if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}draw()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
+    sheet.replaceChildren(h("h3",{id:"catch-t",text:"Rat catchers"}),
+      h("div",{class:"sectionhead"},h("p",{text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the app is open, rats sneak in from the edges now and then. Tap one to catch it."}),toggle),
+      entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
+        :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}),
+      h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"))))});
+  draw();scrim.append(sheet);document.body.append(scrim);
 }

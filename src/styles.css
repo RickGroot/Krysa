@@ -306,10 +306,11 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 @keyframes mv-vibe{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
 @keyframes st-fly{from{transform:translateX(-30px)}to{transform:translateX(130px)}}
 /* wall controls */
-.wallbar{display:grid;gap:8px}
-.wallbar .chips button{font-size:13px;padding:4px 10px}
-.wallbar .row2{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-.wallbar .lblx{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-right:2px}
+.wallbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wsel select{min-height:40px;border:1px solid var(--field-border);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700}
+.hero-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hero-acts .btn{background:color-mix(in srgb,var(--surface) 82%,transparent);border-color:transparent;color:var(--ink);text-shadow:none}
+.krysa-btn.has-fact::after{content:"";position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--tram);box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 70%,transparent)}
 .fame{border-top:2px solid var(--rule);padding-top:10px;display:grid;gap:10px}
 .fame h3{margin:0;font-family:var(--display);font-stretch:80%;font-weight:800;font-size:22px}
 .fame-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}
@@ -572,7 +573,6 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 .peek-b{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
 .nest{padding-block:28px 0}
 .lightbox .post{background:var(--surface)}
-.wallbar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
 /* illustration motion */
 .hz-tw,.hz-ff,.hz-bob,.hz-pulse,.hz-glow{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion:no-preference){
@@ -614,7 +614,7 @@ body[data-scene="light"] .stage-in{color:#252a47;text-shadow:none}
 .wrap{position:relative;z-index:1}
 main{margin-top:-10px;gap:22px}
 /* softer sections: no outlines, gentle tint */
-.card,.list,section.day,.post,.fame,.flight,.ratfact,.wallbar{border-color:transparent;background:color-mix(in srgb,var(--surface) 78%,transparent);box-shadow:none}
+.card,.list,section.day,.post,.fame,.flight{border-color:transparent;background:color-mix(in srgb,var(--surface) 78%,transparent);box-shadow:none}
 .lightbox .post{background:var(--surface)}
 .daystrip a{border-color:transparent;background:color-mix(in srgb,var(--surface) 78%,transparent)}
 .daystrip a.today{border-color:var(--tram)}

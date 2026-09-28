@@ -28,8 +28,15 @@ export const RAT_LINES=[
 
 export let ratIdx=Math.floor(Math.random()*RAT_LINES.length);
 
+// The first tap each day tells the rat fact of the day; a dot on Krysa says one is waiting.
+const FACT_KEY="pw-fact",factDay=()=>String(Math.floor(Date.now()/864e5));
+const factWaiting=()=>{try{return localStorage.getItem(FACT_KEY)!==factDay()}catch(e){return false}};
+export function markFact(){const k=document.getElementById("krysa"),on=factWaiting();k.classList.toggle("has-fact",on);k.setAttribute("aria-label",on?"Krysa the house rat. Tap for today's rat fact.":"Krysa the house rat. Tap for a rat fact.")}
+
 export function ratSays(){const btn=document.getElementById("krysa");btn.querySelector(".bubble")?.remove();clearTimeout((ratSays as any).t);
-  ratIdx=(ratIdx+1)%RAT_LINES.length;const b=h("div",{class:"bubble",role:"status",text:RAT_LINES[ratIdx]});btn.append(b);
+  let text;if(factWaiting()){text="Rat fact of the day: "+RAT_FACTS[+factDay()%RAT_FACTS.length];try{localStorage.setItem(FACT_KEY,factDay())}catch(e){}markFact()}
+  else{ratIdx=(ratIdx+1)%RAT_LINES.length;text=RAT_LINES[ratIdx]}
+  const b=h("div",{class:"bubble",role:"status",text});btn.append(b);
   btn.classList.remove("hop");void btn.offsetWidth;btn.classList.add("hop");(ratSays as any).t=setTimeout(()=>b.remove(),6000)}
 
 export const RAT_FACTS=RAT_LINES.slice(0,8);
@@ -83,7 +90,7 @@ export function scheduleCameo(first?){clearTimeout((scheduleCameo as any).t);if(
 export function wakeKrysa(){const k=document.getElementById("krysa");if(!k.classList.contains("sleep"))return;k.classList.remove("sleep","hop");void k.offsetWidth;k.classList.add("hop")}
 
 export function setupIdle(){
-  const k=document.getElementById("krysa");k.classList.add("alive");
+  const k=document.getElementById("krysa");k.classList.add("alive");markFact();
   k.append(h("span",{class:"zzz","aria-hidden":"true"},h("i",null,"z"),h("i",null,"z"),h("i",null,"Z")));
   const nest=h("footer",{class:"nest"});const kr=h("div",{class:"kr alive sleep"});kr.append(krysa("sleep"),h("span",{class:"zzz","aria-hidden":"true"},h("i",null,"z"),h("i",null,"z"),h("i",null,"Z")));
   nest.append(kr,h("span",{text:"End of the page. Krysa is guarding the plan."}));document.querySelector(".wrap").append(nest);
