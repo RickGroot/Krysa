@@ -72,7 +72,8 @@ main{padding-top:4px;display:grid;margin-top:-10px;gap:22px}
 .row .amt{font-weight:600}
 .readonly{font-size:.875rem;color:var(--ink-2);text-align:center}
 /* plan */
-.daystrip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+/* The side-scrolling strips keep a thin scrollbar as a hint that there is more, and room for the focus ring. */
+.daystrip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .daystrip a{flex:0 0 auto;text-decoration:none;color:var(--ink);border:1px solid transparent;border-radius:var(--r-lg);padding:8px 12px;text-align:center;min-width:58px;background:var(--card-bg)}
 .daystrip a .cz{font-size:.6875rem;font-weight:700;color:var(--ink-2);display:block;white-space:nowrap}
 .daystrip a .n{font-family:var(--display);font-weight:700;font-size:1.5rem;line-height:1.1}
@@ -154,6 +155,7 @@ dl.kv dd{margin:0;overflow-wrap:anywhere}
 .person:first-of-type{border-top:0;padding-top:0}
 .person .ti{font-weight:700;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .person .meta{font-size:.84375rem;color:var(--ink-2)}
+.person .meta a,.tips a{color:var(--vltava);font-weight:700}
 .tips{margin:0;padding-left:0;list-style:none;font-size:.90625rem;display:grid;gap:8px;color:var(--ink-2);max-width:62ch}
 .tips b{color:var(--ink);font-weight:700}
 .sectionhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -189,14 +191,15 @@ html:has(dialog.ov[open]) :is(.stage,.wrap) *{animation-play-state:paused!import
 .err{color:var(--danger);font-size:.875rem;min-height:1em}
 /* Centred, as wide as its text (left:50% capped it at half the screen), above the add button. */
 .toast{position:fixed;inset-inline:16px;margin-inline:auto;width:fit-content;max-width:calc(100% - 32px);bottom:calc(var(--above-nav) + var(--fab-h) + 24px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r-pill);font-size:.90625rem;font-weight:700;z-index:var(--z-toast);box-shadow:var(--shadow)}
-@media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.7}}}
+/* Sheets slide up already opaque (from 70% the page showed through), easing out fast. */
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s cubic-bezier(.2,.8,.2,1)}@keyframes up{from{transform:translateY(28px)}}}
 /* places */
 .place{font-size:.84375rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:2px 12px;align-items:center}
 .place a{color:var(--vltava);font-weight:700;text-decoration:none;position:relative;z-index:1}
 .place a:hover{text-decoration:underline}
 .walk{font-size:.78125rem;font-weight:700}
 .pill{display:inline-block;font-size:.6875rem;font-weight:800;padding:1px 8px;border-radius:var(--r-pill);background:var(--gold);color:var(--tram-ink);margin-left:8px;vertical-align:2px;letter-spacing:.04em}
-.filters{display:flex;gap:6px;overflow-x:auto;padding:4px 2px;scrollbar-width:none}
+.filters{display:flex;gap:6px;overflow-x:auto;padding:4px 2px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .filters button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-pill);padding:6px 13px;font-size:.84375rem;font-weight:700;cursor:pointer;color:var(--ink-2)}
 .filters button[aria-pressed="true"]{border-color:var(--tram);background:var(--tram);color:var(--tram-ink)}
 .checks{display:flex;flex-wrap:wrap;gap:6px 14px}

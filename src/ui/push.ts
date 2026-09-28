@@ -76,15 +76,16 @@ export function openNotifications(){
       btn.disabled=true;err.textContent="";
       try{if(on){await disable();toast("Notifications off on this device")}else{await enable(prefs);toast("Notifications on")}await draw()}
       catch(x){err.textContent=(x&&x.message)||"Couldn't change notifications. Try again.";btn.disabled=false}}},on?"Turn off":"Turn on");
-    sheet.replaceChildren(
+    // Where notifications can't be switched on, the choices would only be greyed-out boxes: leave them out.
+    sheet.replaceChildren(...[
       h("h3",{id:"push-t",tabindex:"-1",text:"Notifications"}),
       h("p",{class:"muted",text:"A ping on this device, even when Krysa is closed. Each phone or browser switches on by itself."}),
-      h("div",{class:"checks stack"},
+      !blocker&&h("div",{class:"checks stack"},
         box("reminders","Reminders: check-in, leaving for the airport, what's next and to-dos that are due"),
         box("posts","New rats on the wall")),
       h("p",{class:"muted",text:blocker||(on?"On for this device.":"Off for this device.")}),
       err,
-      h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"),btn)));
+      h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"),btn))].filter(Boolean));
   };
   void draw();
 }

@@ -42,8 +42,14 @@ export function armBtn(btn,label,fn,ms=4000){let armed=false,t,idle="";
 
 export const reduced=()=>{try{return matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){return false}};
 
-export function toastAction(msg,label,fn,ms=8000){
+// An action toast (Undo) stays 10 s, and waits while a pointer or keyboard focus is on it (WCAG 2.2.1).
+export function toastAction(msg,label,fn,ms=10000){
   document.querySelectorAll(".toast.act").forEach(t=>{clearTimeout(t._t);t.dispatchEvent(new Event("expire"));t.remove()});
   const t=h("div",{class:"toast act",role:"status"},h("span",{text:msg}),h("button",{class:"tbtn",type:"button",onclick:()=>{clearTimeout(t._t);t._undone=true;t.remove();fn()}},label));
-  toastHost().append(t);t._t=setTimeout(()=>{t.dispatchEvent(new Event("expire"));t.remove()},ms);return t;
+  let left=ms,since=0,paused=false,over=false,focus=false;
+  const run=()=>{since=Date.now();t._t=setTimeout(()=>{t.dispatchEvent(new Event("expire"));t.remove()},left)};
+  const sync=()=>{const hold=over||focus;if(hold&&!paused){paused=true;clearTimeout(t._t);left=Math.max(1500,left-(Date.now()-since))}else if(!hold&&paused){paused=false;run()}};
+  t.addEventListener("pointerenter",()=>{over=true;sync()});t.addEventListener("pointerleave",()=>{over=false;sync()});
+  t.addEventListener("focusin",()=>{focus=true;sync()});t.addEventListener("focusout",()=>{focus=false;sync()});
+  toastHost().append(t);run();return t;
 }

@@ -146,7 +146,7 @@ export function renderMoney(main){
     S.people.length&&S.expenses.length&&h("div",{class:"bal"},S.people.flatMap(p=>{const v=bal[p.id]||0;return[h("span",{text:p.name||"Someone"}),h("span",{class:"money "+(v>0.5?"pos":v<-0.5?"neg":""),text:(v>0.5?"gets back ":v<-0.5?"owes ":"")+fmtCzk(Math.abs(v))})]}))));
   const xs=[...S.expenses].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||"").localeCompare(a.createdAt||""));
   if(xs.length)main.append(h("div",{class:"list"},xs.map(x=>{const d=parseD(x.date);const n=Array.isArray(x.split)?x.split.length:S.people.length;
-    return h("div",{class:"row"},h("span",{class:"walk",text:d?`${CZ[d.getUTCDay()]} ${d.getUTCDate()}`:""}),
+    return h("div",{class:"row"},h("span",{class:"walk",text:d?`${EN[d.getUTCDay()]} ${d.getUTCDate()}`:""}),
       h("div",{class:"main"},h("div",{class:"ti",text:x.what}),h("div",{class:"meta",text:`${pname(x.paidBy)} paid · split ${n} way${n===1?"":"s"}${x.currency==="EUR"?` · ≈ ${fmtCzk(toCzk(x))}`:""}`})),
       h("div",{class:"acts"},h("span",{class:"money amt",text:fmtAmt(x)}),S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:expenses:"+x.id,onclick:()=>editExpense(x)},"Edit")))})));
 }
@@ -163,13 +163,13 @@ export function renderInfo(main){
     ppl.length?ppl.map(p=>h("div",{class:"person"},h("div",{class:"ti"},h("span",{text:p.name}),S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:people:"+p.id,onclick:()=>editPerson(p)},"Edit")),
       (p.arrive||p.arriveBy)&&h("div",{class:"meta",text:"In: "+[fmtDT(p.arrive),p.arriveBy].filter(Boolean).join(" · ")}),
       (p.depart||p.departBy)&&h("div",{class:"meta",text:"Out: "+[fmtDT(p.depart),p.departBy].filter(Boolean).join(" · ")}),
-      p.phone&&h("div",{class:"meta",text:p.phone}),p.notes&&h("div",{class:"meta",text:p.notes})))
+      p.phone&&h("div",{class:"meta"},h("a",{href:"tel:"+p.phone.replace(/[^\d+]/g,""),text:p.phone})),p.notes&&h("div",{class:"meta",text:p.notes})))
     :h("p",{class:"empty",text:"Add everyone with their flight times so pickups line up."})));
   main.append(h("div",{class:"card"},h("h2",{text:"Prague basics"}),h("ul",{class:"tips"},
     h("li",null,h("b",{text:"Money: "}),"Czech koruna (CZK, Kč). Cards work almost everywhere; pay in CZK when a terminal offers a currency choice."),
     h("li",null,h("b",{text:"Transport: "}),"Trams, metro and buses share one PID ticket. Buy it in the PID Lítačka app and activate it before boarding."),
     h("li",null,h("b",{text:"To FrontKon: "}),"Walk to Můstek (about 5 min), metro B towards Černý Most, get off at Českomoravská (6 stops). O2 Universum is next to the station."),
     h("li",null,h("b",{text:"From the airport: "}),"Buses link the airport to the metro on a regular PID ticket, or take a taxi or ride-hailing car to Old Town."),
-    h("li",null,h("b",{text:"Emergency: "}),"112"),
+    h("li",null,h("b",{text:"Emergency: "}),h("a",{href:"tel:112",text:"112"})),
     h("li",null,h("b",{text:"Useful words: "}),h("span",{lang:"cs",text:"Dobrý den"})," (hello) · ",h("span",{lang:"cs",text:"Děkuji"})," (thanks) · ",h("span",{lang:"cs",text:"Pivo"})," (beer) · ",h("span",{lang:"cs",text:"Účet, prosím"})," (the bill, please)"))));
 }
