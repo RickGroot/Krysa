@@ -38,6 +38,8 @@ export function mediaFor(r,opts: any = {}){
   if(r.type==="meme")media.append(opts.bare||opts.fresh?memeEl(r,r.id):memeCached(r));
   else if(r.assetId&&/^[A-Za-z0-9_-]{8,64}$/.test(r.assetId)){const src=null;
     const m=r.type==="video"?h("video",{src,"aria-label":r.caption?`Rat video: ${r.caption}`:"Rat video",controls:!opts.bare,loop:true,muted:true,playsinline:true,autoplay:!!opts.autoplay,preload:"metadata"}):h("img",{src,alt:r.caption||"Rat meme",loading:"lazy"});
+    // Newer uploads know their shape, so the feed keeps their space and doesn't jump when they load.
+    if(typeof r.ar==="number"&&r.ar>.1&&r.ar<10)m.style.aspectRatio=String(r.ar);
     m.addEventListener("error",()=>m.replaceWith(h("p",{class:"empty escaped",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
   return media;
 }

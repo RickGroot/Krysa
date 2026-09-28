@@ -1,6 +1,7 @@
 /* eslint-disable */
 // Ported from the single-file artifact; types are intentionally loose here (see README).
 import { CZ, EN, MON, anchor, fmtD, nowLocalUTC, parseD, splitDT, todayIso } from "../lib/dates";
+import { krysa } from "../art/rat";
 import { eventWindow } from "../lib/schedule";
 import { fmtAmt, fmtCzk, fmtEur } from "../lib/money";
 import { KINDS, S, pname } from "../state";
@@ -49,6 +50,9 @@ export function render(only?){
   if(S.loaded)requestAnimationFrame(watchAnims);
 }
 
+/** Krysa beside an empty or finished list: sus, cheers or sleep. */
+const ratNote=(pose,text)=>{const k=h("span",{class:"kr","aria-hidden":"true"});k.append(krysa(pose));return h("div",{class:"empty-rat"},k,h("p",{class:"empty",text}))};
+
 export function evCard(e){
   const k=KINDS[e.kind]?e.kind:"work";
   // The title is the card's one button; its ::after covers the card, and Route/Map sit above it.
@@ -90,7 +94,8 @@ function daySection(d,isToday){
     h("div",{class:"dayhead"},h("h2",null,isToday?"Today":label," ",isToday?h("span",{class:"cz",text:label}):h("span",{class:"cz",lang:"cs",text:CZ[dt.getUTCDay()]})),
       S.canWrite&&h("button",{class:"btn small ghost","data-k":"add:day:"+d,"aria-label":`Add to ${isToday?"today":label}`,onclick:()=>editEvent({},{date:d})},"+ Add")),
     evs.length?h("div",{class:"events"},evs.map(e=>{const c=evCard(e),w=isToday&&eventWindow(e);if(w&&w.en<=now)c.classList.add("past");return c}))
-      :h("p",{class:"empty",text:isToday?"Nothing planned today.":"Nothing planned yet."}));
+      :h("p",{class:"empty",text:isToday?"Nothing planned today.":"Nothing planned yet."}),
+    isToday&&evs.length&&evs.every(e=>{const w=eventWindow(e);return w&&w.en<=now})&&ratNote("sleep","That's today done. Krysa is off to bed."));
 }
 
 export function voteCount(it){return Object.values(it.votes||{}).filter(Boolean).length}
@@ -114,9 +119,9 @@ export function renderIdeas(main){
 export function renderTodo(main){
   main.append(h("div",{class:"sectionhead"},h("p",{text:"Bookings and prep. Tick them off as you go."})));
   const ts=[...S.todos].sort((a,b)=>(a.done-b.done)||(a.due||"9").localeCompare(b.due||"9"));
-  if(!ts.length){main.append(h("p",{class:"empty",text:"Nothing to do. The rats are suspicious."}));return}
+  if(!ts.length){main.append(ratNote("sus","Nothing to do. The rats are suspicious."));return}
   main.append(h("div",{class:"list"},ts.map(t=>h("div",{class:"row"+(t.done?" done":"")},
-    h("input",{type:"checkbox",class:"check",id:"todo-"+t.id,"data-k":"todo:"+t.id,checked:!!t.done,disabled:!S.canWrite,onchange:e=>{const d=e.target.checked;write(()=>S.db.doc("todos/"+t.id).update({done:d})).then(ok=>{if(ok&&d)scurry()})}}),
+    h("input",{type:"checkbox",class:"check",id:"todo-"+t.id,"data-k":"todo:"+t.id,checked:!!t.done,disabled:!S.canWrite,onchange:e=>{const d=e.target.checked;write(()=>S.db.doc("todos/"+t.id).update({done:d})).then(ok=>{if(!ok||!d)return;const left=S.todos.some(x=>!x.done&&x.id!==t.id);scurry(left?{}:{cheese:true});if(!left)toast("All done. Krysa is impressed.")})}}),
     h("label",{class:"main",for:"todo-"+t.id},h("div",{class:"ti",text:t.text}),(t.owner||t.due)&&h("div",{class:"meta",text:[t.owner,t.due&&"by "+fmtD(t.due)].filter(Boolean).join(" · ")})),
     S.canWrite&&h("div",{class:"acts"},h("button",{class:"btn small ghost","data-k":"edit:todos:"+t.id,onclick:()=>editTodo(t)},"Edit"))))));
 }
@@ -142,7 +147,7 @@ export function renderMoney(main){
     h("div",{class:"card-head"},h("h2",{text:"Settle up"}),h("span",{class:"muted"},`1 € = ${rate().toLocaleString("en-GB")} Kč `,S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:rate",onclick:editRate},"Edit"))),
     h("div",null,h("div",{class:"big money",text:fmtCzk(total)}),h("div",{class:"muted",text:`≈ ${fmtEur(total/rate())} spent together · ${S.expenses.length} expenses`})),
     moves.length?h("div",{class:"settle"},moves.map(m=>h("div",null,h("b",{text:pname(m.from)}),h("span",{class:"arrow",text:"pays →"}),h("b",{text:pname(m.to)}),h("span",{class:"money",text:fmtCzk(m.amt)}),h("span",{class:"muted money",text:`(${fmtEur(m.amt/rate())})`}))))
-      :h("p",{class:"empty",text:S.expenses.length?"All square.":"Nothing logged yet. Add the first shared cost."}),
+      :S.expenses.length?ratNote("cheers","All square. Krysa raises a Pilsner."):h("p",{class:"empty",text:"Nothing logged yet. Add the first shared cost."}),
     S.people.length&&S.expenses.length&&h("div",{class:"bal"},S.people.flatMap(p=>{const v=bal[p.id]||0;return[h("span",{text:p.name||"Someone"}),h("span",{class:"money "+(v>0.5?"pos":v<-0.5?"neg":""),text:(v>0.5?"gets back ":v<-0.5?"owes ":"")+fmtCzk(Math.abs(v))})]}))));
   const xs=[...S.expenses].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||"").localeCompare(a.createdAt||""));
   if(xs.length)main.append(h("div",{class:"list"},xs.map(x=>{const d=parseD(x.date);const n=Array.isArray(x.split)?x.split.length:S.people.length;

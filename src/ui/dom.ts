@@ -40,6 +40,9 @@ export function armBtn(btn,label,fn,ms=4000){let armed=false,t,idle="";
   btn.addEventListener("blur",()=>{if(armed)disarm()});
   return btn}
 
+/** The close icon, drawn like the rest of the app's icons (it was a "×" character). */
+export const closeIcon=()=>svg('<path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',"0 0 24 24");
+
 export const reduced=()=>{try{return matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){return false}};
 
 // An action toast (Undo) stays 10 s, and waits while a pointer or keyboard focus is on it (WCAG 2.2.1).

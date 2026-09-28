@@ -4,7 +4,7 @@ import { fmtClock, fmtD, inDur, nowLocalUTC } from "../lib/dates";
 import { KINDS, S } from "../state";
 import { leaveBy, nowNext, reminders } from "./bound";
 import { placeLine } from "./core";
-import { h, keepFocus } from "./dom";
+import { closeIcon, h, keepFocus } from "./dom";
 import { goTab } from "./stage";
 
 export function nowNextCard(compact?){
@@ -29,7 +29,7 @@ export function remindersEl(){
   const list=reminders();if(!list.length)return h("div",{id:"rem",hidden:true});
   return h("section",{class:"rem",id:"rem","aria-label":"Reminders"},list.map(r=>h("div",{class:"rm"},
     h("span",{class:"rm-bell","aria-hidden":"true"}),h("div",{class:"rm-x"},h("span",{text:r.text}),r.link&&h("a",{href:r.link[1],target:"_blank",rel:"noopener","data-k":"rm-link:"+r.id,text:r.link[0]}),r.tab&&r.tab!==S.tab&&h("button",{class:"linkish",type:"button","data-k":"rm-open:"+r.id,onclick:()=>goTab(r.tab)},"Open")),
-    h("button",{class:"rm-close",type:"button","data-k":"rm:"+r.id,"aria-label":"Dismiss reminder",onclick:()=>dismissReminder(r.id)},"×"))));
+    h("button",{class:"rm-close",type:"button","data-k":"rm:"+r.id,"aria-label":"Dismiss reminder",onclick:()=>dismissReminder(r.id)},closeIcon()))));
 }
 
 /** How many reminders wait on Plan, as a badge on its button while you're elsewhere. */

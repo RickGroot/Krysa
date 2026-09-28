@@ -26,6 +26,13 @@ export async function prepFile(file){
   return null;
 }
 
+/** Width ÷ height of an upload, kept with the post so the feed can hold its space before the file loads. */
+async function mediaRatio(blob,kind){
+  try{if(kind==="image"){const b=await createImageBitmap(blob);const r=b.width/b.height;b.close?.();return r}
+    const v=document.createElement("video"),u=URL.createObjectURL(blob);v.muted=true;v.preload="metadata";v.src=u;
+    await new Promise((res,rej)=>{v.onloadedmetadata=res;v.onerror=rej;setTimeout(rej,4000)});URL.revokeObjectURL(u);return v.videoWidth&&v.videoHeight?v.videoWidth/v.videoHeight:null}
+  catch(e){return null}}
+
 export function postRat(prefill?){
   const remix=!!(prefill&&prefill.type==="meme");
   const st={mode:remix||!S.assets?"meme":"upload",file:null,url:null,caption:"",dirty:false,m:remix?normMeme(prefill):normMeme({bg:"slate"})};
@@ -97,8 +104,9 @@ export function postRat(prefill?){
         if(!st.file){err.textContent="Pick a file first";document.getElementById("rat-file")?.focus();return}
         submit.disabled=true;submit.textContent="Uploading…";
         try{const prep=await prepFile(st.file);if(!prep){throw{code:"unsupported_type"}}
+          const ar=await mediaRatio(prep.blob,prep.kind);
           const up=await S.assets.upload(prep.blob);
-          const ok=await write(()=>S.db.collection("rats").add({...base,type:prep.kind,assetId:up.id}),"Rat posted");
+          const ok=await write(()=>S.db.collection("rats").add({...base,type:prep.kind,assetId:up.id,...(ar?{ar:Math.round(ar*1000)/1000}:{})}),"Rat posted");
           if(ok){close();scurry()}else{try{await S.assets.delete(up.id)}catch(x){}}
         }catch(x){err.textContent=uploadErr(x)}finally{submit.disabled=false;submit.textContent="Post rat"}
       }else{

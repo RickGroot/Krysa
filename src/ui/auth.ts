@@ -1,6 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { SCENES } from "../art/scenes";
-import { armBtn, h, shellInert, svg } from "./dom";
+import { armBtn, closeIcon, h, shellInert, svg } from "./dom";
 
 /** Full-screen illustrated card used for sign-in and account states. */
 function screen(...content: HTMLElement[]): HTMLElement {
@@ -148,7 +148,7 @@ export function showDemoBanner(): void {
       }
       location.reload();
     }),
-    h("button", { class: "rm-close", type: "button", "aria-label": "Dismiss the demo note", onclick: () => b.remove() }, "×"),
+    h("button", { class: "rm-close", type: "button", "aria-label": "Dismiss the demo note", onclick: () => b.remove() }, closeIcon()),
   );
   // In the page, above the header: a fixed banner covered the mascot and the Rat TV and Wrapped close buttons.
   (document.querySelector(".stage-in") ?? document.body).prepend(b);

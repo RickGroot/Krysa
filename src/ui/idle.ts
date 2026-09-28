@@ -3,8 +3,9 @@
 import { RAT, krysa, sideRat } from "../art/rat";
 import { catchers } from "../lib/catchers";
 import { S } from "../state";
-import { h, reduced, svg, toast } from "./dom";
+import { h, reduced, svg, toast, toastAction } from "./dom";
 import { render } from "./tabs";
+import { openCatchers } from "./wall";
 
 export function scurry(opts: any = {}){if(reduced())return;const el=h("div",{class:"scurry"+(opts.dir===-1?" rev":""),"aria-hidden":"true"});el.append(sideRat(!!opts.cheese));
   el.addEventListener("animationend",e=>{if(e.target===el)el.remove()});
@@ -54,7 +55,8 @@ export function caughtRat(){
   if(S.db&&S.uid&&S.canWrite){const n=((S.scores||{})[S.uid]||0)+1;S.scores={...(S.scores||{}),[S.uid]:n};
     // Same total as the scoreboard, where your devices with the same name add up.
     const mine=catchers(S.scores,S.profiles).find(c=>c.ids.includes(S.uid));
-    S.db.doc("ratgame/scores").update({scores:{[S.uid]:n}}).catch(()=>{});toast(`Rat caught! That's ${mine?mine.n:n}.`)}
+    S.db.doc("ratgame/scores").update({scores:{[S.uid]:n}}).catch(()=>{});// A "Scores" shortcut, unless an Undo is showing: that one mustn't be pushed away.
+    const msg=`Rat caught! That's ${mine?mine.n:n}.`;if(document.querySelector(".toast.act"))toast(msg);else toastAction(msg,"Scores",openCatchers,4000)}
   else toast(`Rat caught! That's ${S.myCatches}.`);
   if(S.tab==="rats")render();
 }
