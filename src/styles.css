@@ -13,6 +13,7 @@ img{max-width:100%}
   --card-bg:color-mix(in srgb,var(--surface) 78%,transparent);
   --display:"Cinzel",Georgia,"Times New Roman",serif;
   --body:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --condensed:"Archivo","Arial Narrow",sans-serif;
   /* Corners: small, medium, large, cards (--radius), sheets, pills. */
   --r-sm:8px; --r-md:14px; --r-lg:18px; --radius:22px; --r-sheet:28px; --r-pill:999px;
   /* Stacking, bottom to top. */
@@ -377,12 +378,13 @@ html:has(dialog.ov[open]){overflow:hidden}
 /* flights */
 .flight{display:grid;gap:12px;border:1px solid transparent;border-radius:var(--radius);padding:16px 18px;position:relative;background:var(--card-bg)}
 .fl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.fl-no{font-stretch:80%;font-size:26px;line-height:1;font-family:var(--display);font-weight:700;letter-spacing:.04em}
+/* Flight numbers and airport codes in condensed Archivo, like a boarding pass (it is already loaded for memes). */
+.fl-no{font-family:var(--condensed);font-stretch:80%;font-size:26px;line-height:1;font-weight:800;letter-spacing:.02em}
 .fl-no small{font-family:var(--body);font-weight:600;font-size:14px;color:var(--ink-2);margin-left:8px;font-stretch:100%;letter-spacing:0}
 .fl-state{font-size:13px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);background:var(--surface-2)}
 .fl-state.open{background:var(--vltava);color:var(--tram-ink)}
 .fl-route{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
-.fl-end .code{font-stretch:72%;font-size:clamp(40px,12vw,60px);line-height:.9;font-family:var(--display);font-weight:700;letter-spacing:.04em}
+.fl-end .code{font-family:var(--condensed);font-stretch:72%;font-size:clamp(40px,12vw,60px);line-height:.9;font-weight:800;letter-spacing:.02em}
 .fl-end .time{font-stretch:85%;font-size:20px;font-family:var(--body);font-weight:800}
 .fl-end .city{font-size:14px;color:var(--ink-2)}
 .fl-end.to{text-align:right}
@@ -415,7 +417,7 @@ details.landed>summary{cursor:pointer;font-weight:700;color:var(--ink-2);min-hei
 .post .foot{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:0 4px 4px}
 .post .cap{font-weight:700;overflow-wrap:anywhere;font-size:16px}
 .post .by{font-size:14px;color:var(--ink-2)}
-.meme{width:100%;display:grid;container-type:inline-size;background:#000;--display:"Archivo","Arial Narrow",sans-serif}
+.meme{width:100%;display:grid;container-type:inline-size;background:#000;--display:var(--condensed)}
 .art{position:relative;aspect-ratio:1/1;overflow:hidden;container-type:inline-size;width:100%}
 .stl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
 .rats{position:absolute;inset:0}
