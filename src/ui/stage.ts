@@ -36,7 +36,7 @@ export function paintStage(){
     const sv=svg(SCENES[tab](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMax slice");sv.classList.add("scene");
     slot.replaceChildren(sv,groundEl());slot.classList.remove("fadein");void slot.offsetWidth;slot.classList.add("fadein");
     // Built once per tab and updated in place below, so a focused hero button stays focused.
-    ht.replaceChildren(h("div",{class:"he"}),h("h2",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts()))}
+    ht.replaceChildren(...[h("div",{class:"he"}),h("h2",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts())].filter(Boolean))}
   document.body.dataset.scene=H.light?"light":"dark";document.body.dataset.hero=HERO_SIZE[tab]||"lg";
   const [he,t,hs]=ht.children;he.textContent=H.eyebrow();t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
 }

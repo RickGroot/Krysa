@@ -65,7 +65,7 @@ export function ratTV(list){
   let i=0,paused=false;const bar=h("i");const slot=h("div",{class:"slot"});
   const root=h("div",{class:"ratv",role:"dialog","aria-label":"Rat TV"});
   const close=()=>{root.remove();document.removeEventListener("keydown",key)};
-  const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(mediaFor(r,{bare:true,autoplay:!paused}),r.caption&&h("div",{class:"cap",text:r.caption}));
+  const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(...[mediaFor(r,{bare:true,autoplay:!paused}),r.caption&&h("div",{class:"cap",text:r.caption})].filter(Boolean));
     bar.classList.remove("run");void bar.offsetWidth;bar.style.setProperty("--dur",(r.type==="video"?12:6)+"s");if(!reduced())bar.classList.add("run")};
   bar.addEventListener("animationend",()=>show(i+1));
   const pause=h("button",{class:"btn small",type:"button",onclick:()=>setPaused(!paused)},"Pause");
@@ -83,7 +83,7 @@ export function renderRats(main){
   const sel=(label,key,list)=>h("label",{class:"wsel"},h("span",{class:"sr",text:label}),h("select",{"data-k":"wall:"+key,onchange:e=>{S.wall[key]=e.target.value;if(key==="sort"&&S.wall.sort==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},list.map(([k,l])=>h("option",{value:k,selected:S.wall[key]===k},l))));
   main.append(h("div",{class:"wallbar"},
     sel("Sort","sort",[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]]),
-    sel("Show","filter",[["all","All rats"],["memes","Krysa memes"],["uploads","Uploads"],["mine","Mine"]]),
+    sel("Show","filter",[["all","All"],["memes","Memes"],["uploads","Uploads"],["mine","Mine"]]),
     S.wall.sort==="shuffle"&&h("button",{class:"btn small",type:"button","data-k":"wall:reshuffle",onclick:()=>{S.wall.seed=Math.random()*1e9|0;saveWall();render()}},"Reshuffle"),
     h("button",{class:"btn small",type:"button","data-k":"wall:view","aria-pressed":grid,onclick:()=>{S.wall.view=grid?"feed":"grid";saveWall();render()}},"Grid")));
   const top=[...S.rats].filter(r=>loveOf(r)>0).sort((a,b)=>loveOf(b)-loveOf(a)).slice(0,3);
