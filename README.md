@@ -98,6 +98,7 @@ src/
     money.ts         balances and settle-up in haléře, CZK/EUR
     schedule.ts      now & next, leave-by times, check-in rules, reminders
     geo.ts           walking-time estimates from where you stay
+    catchers.ts      the rat-catcher scoreboard: devices with the same name add up
     demo.ts          keeps the demo trip "on" by moving its dates
     notify.ts        which reminders and posts to push, and to whom
     webpush.ts       Web Push on WebCrypto: VAPID signing and payload encryption (RFC 8291/8292)
@@ -132,6 +133,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 
 - **Supabase mode is only tested by hand.** It ran against a real project (a wrong code, joining with the right one, live updates between two browsers, uploading and deleting a Rat Wall post), and the SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (the guess limit, deep merge, strangers blocked, delete rules).
 - **A device is a member, not a person.** Clearing the browser's data means entering the code again, and posts from the old session can then only be removed by an owner. Anonymous users are never cleaned up automatically; delete old ones under Authentication → Users if you like.
+- **The rat-catcher scoreboard matches people by name.** Devices with the same display name (ignoring case and spaces) add up, so a phone and a laptop count as one catcher. Two people with the same name share a score too, and names can't be changed in the app: fix a mismatch in the SQL editor with `update krysa.profiles set name = 'Rick' where name = 'Rick G';`. Posts, reactions and votes are still per device.
 - **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
 - **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests. The UI was checked by hand in a browser.

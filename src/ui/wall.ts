@@ -3,6 +3,7 @@
 import { resolveAsset } from "./bound";
 import { memeCached, memeEl } from "../art/meme";
 import { krysa, ratSvg } from "../art/rat";
+import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
 import { tripLive } from "./bound";
@@ -98,11 +99,12 @@ export function ensureProfiles(ids){ids=[...new Set<any>(ids.filter(Boolean))].f
   if(ids.length&&S.user&&!(ensureProfiles as any).busy){(ensureProfiles as any).busy=true;S.user.profiles(ids).then(ps=>{Object.assign(S.profiles,ps);(ensureProfiles as any).busy=false;if(S.tab==="rats")render()}).catch(()=>{(ensureProfiles as any).busy=false})}}
 
 export function catchersCard(){
-  const entries=(Object.entries as any)(S.scores||{}).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]);ensureProfiles(entries.map(([id])=>id));
+  // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
+  const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
   const toggle=h("button",{class:"btn small",type:"button","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
     if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}render()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
   return h("div",{class:"card"},h("h3",null,"Rat catchers",toggle),
     h("p",{class:"muted",text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the page is open, rats sneak in from the edges now and then. Tap one to catch it."}),
-    entries.length?h("div",{class:"bal"},entries.flatMap(([id,n],i)=>[h("span",{text:`${i+1}. ${S.profiles[id]?.name||(id===S.uid?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
+    entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
       :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}));
 }

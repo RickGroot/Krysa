@@ -1,6 +1,7 @@
 /* eslint-disable */
 // Ported from the single-file artifact; types are intentionally loose here (see README).
 import { RAT, krysa, sideRat } from "../art/rat";
+import { catchers } from "../lib/catchers";
 import { S } from "../state";
 import { h, reduced, svg, toast } from "./dom";
 import { render } from "./tabs";
@@ -44,7 +45,9 @@ export function eek(x,y,msg?){const b=h("div",{class:"eek",role:"status",text:ms
 export function caughtRat(){
   S.myCatches=(S.myCatches||0)+1;
   if(S.db&&S.uid&&S.canWrite){const n=((S.scores||{})[S.uid]||0)+1;S.scores={...(S.scores||{}),[S.uid]:n};
-    S.db.doc("ratgame/scores").update({scores:{[S.uid]:n}}).catch(()=>{});toast(`Rat caught! That's ${n}.`)}
+    // Same total as the scoreboard, where your devices with the same name add up.
+    const mine=catchers(S.scores,S.profiles).find(c=>c.ids.includes(S.uid));
+    S.db.doc("ratgame/scores").update({scores:{[S.uid]:n}}).catch(()=>{});toast(`Rat caught! That's ${mine?mine.n:n}.`)}
   else toast(`Rat caught! That's ${S.myCatches}.`);
   if(S.tab==="rats")render();
 }
