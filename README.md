@@ -1,6 +1,6 @@
 # Krysa · Prague Week
 
-A rat-themed team planner for a conference week in Prague: the Rat Wall with a Krysa meme maker, flights, a day-by-day plan with "Now & next", ideas with voting, to-dos, a koruna/euro expense splitter and trip info. It installs on phones as a PWA, with optional push notifications for reminders and new posts.
+A rat-themed team planner for a conference week in Prague: the Rat Wall with a Krysa meme maker, flights, a day-by-day plan that opens on Today while the trip is on (with "Now & next" and when to leave), ideas with voting, to-dos, a koruna/euro expense splitter and trip info. It installs on phones as a PWA, with optional push notifications for reminders and new posts.
 
 Built for a real FrontKon trip. Everything in this repo is a made-up demo trip: the people, flights, costs and posts are invented, and the venues are public places.
 
@@ -13,7 +13,7 @@ pnpm install --ignore-scripts
 pnpm dev
 ```
 
-Without Supabase keys the app runs in **demo mode**: a made-up trip stored in your browser. The demo is always "on": day 2 of the trip is today, so Now & next, reminders and the Rat Wall look alive whenever you open it. "Reset demo" in the banner starts over.
+Without Supabase keys (or with `pnpm dev:demo`) the app runs in **demo mode**: a made-up trip stored in your browser. The demo is always "on": day 2 of the trip is today, so Today, reminders and the Rat Wall look alive whenever you open it. "Reset demo" in the note at the top starts over.
 
 ## Scripts
 
@@ -113,7 +113,9 @@ src/
     scenes.ts        the illustrated Prague scenes behind each tab
     meme.ts, model.ts  the meme maker's options and rendering
     export.ts        meme → PNG on a canvas
-  ui/                tabs, sheets, Rat Wall, idle rats, Rat Wrapped, reminders, notifications switch, accessibility
+  ui/                tabs, Rat Wall, idle rats, Rat Wrapped, reminders, notifications switch
+    overlay.ts       every sheet and full-screen view is a modal <dialog>: stacking, Escape, focus
+    dom.ts           h() to build elements, keepFocus() so a re-render keeps keyboard focus, toasts
 supabase/            schema, demo seed
   functions/krysa-notify/  the Edge Function that sends push notifications (Deno; logic in handler.ts)
 public/              manifest, service worker (offline shell and notifications), icons
@@ -138,7 +140,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 - **The rat-catcher scoreboard matches people by name.** Devices with the same display name (ignoring case and spaces) add up, so a phone and a laptop count as one catcher. Two people with the same name share a score too, and names can't be changed in the app: fix a mismatch in the SQL editor with `update krysa.profiles set name = 'Rick' where name = 'Rick G';`. Posts, reactions and votes are still per device.
 - **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
-- **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests. The UI was checked by hand in a browser.
+- **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests, and a test checks the colour contrast of both themes. The UI was checked by hand in a browser (demo mode, phone and desktop sizes, light and dark), not with a screen reader or on a real iPhone.
 - **Check-in timings are only known for KLM.** Other airlines get a cautious default (reminder from 24 hours before, bag drop closing 45 minutes before). Add airlines in `checkInRule`.
 - **Offline is read-only.** The service worker caches the app shell and the last known data. Writes need a connection.
 - **Undo is client-side.** A delete can be undone for 10 seconds from the same device (longer while your finger or keyboard is on the Undo). There's no server-side history. An uploaded file is only removed from storage once the Undo is gone, so closing or reloading the app sooner leaves the file behind in the bucket (it no longer shows in the app).
