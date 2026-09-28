@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { dtUTC, fmtD, inDur, tripDays, daysUntil } from "../src/lib/dates";
 import { walkMinutes, DEFAULT_BASE } from "../src/lib/geo";
-import { checkInRule, eventWindow, leaveBy, nowNext, reminders, startTab, tripLive, type Flight, type PlanEvent } from "../src/lib/schedule";
+import { checkInRule, eventWindow, leaveBy, nowNext, reminders, splitFlights, startTab, tripLive, type Flight, type PlanEvent } from "../src/lib/schedule";
 
 const at = (d: string, t: string) => dtUTC(d, t)!;
 const names: Record<string, string> = { alex: "Alex", sam: "Sam", jules: "Jules" };
@@ -163,5 +163,27 @@ describe("startTab", () => {
   });
   it("ignores anything that isn't a tab", () => {
     expect(startTab({ hash: "main", saved: "nope", live: true }, TABS)).toBe("plan");
+  });
+});
+
+describe("splitFlights", () => {
+  const out: Flight = { flight: "KL1351", date: "2026-10-04", dep: "12:20", arr: "13:45" };
+  const home: Flight = { flight: "KL1356", date: "2026-10-10", dep: "18:05", arr: "19:35" };
+  const late: Flight = { flight: "OK001", date: "2026-10-10", dep: "23:30", arr: "00:40" };
+  it("groups bookings on the same flight", () => {
+    const { upcoming } = splitFlights([out, { ...out, id: "b" }, home], dtUTC("2026-10-01", "09:00")!);
+    expect(upcoming.map((g) => g.length)).toEqual([2, 1]);
+  });
+  it("puts what's still to come first and folds away what has landed, latest first", () => {
+    const { upcoming, landed } = splitFlights([home, out], dtUTC("2026-10-06", "09:00")!);
+    expect(upcoming.map((g) => g[0].flight)).toEqual(["KL1356"]);
+    expect(landed.map((g) => g[0].flight)).toEqual(["KL1351"]);
+  });
+  it("counts a flight as landed once it lands, not when it leaves", () => {
+    expect(splitFlights([out], dtUTC("2026-10-04", "13:00")!).upcoming).toHaveLength(1);
+    expect(splitFlights([out], dtUTC("2026-10-04", "13:45")!).landed).toHaveLength(1);
+  });
+  it("uses the departure when the landing is after midnight", () => {
+    expect(splitFlights([late], dtUTC("2026-10-10", "23:31")!).landed).toHaveLength(1);
   });
 });

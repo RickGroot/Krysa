@@ -112,6 +112,32 @@ export function tripLive(info: { startDate?: string; endDate?: string }, now: nu
   return a != null && b != null && now >= a - 24 * HOUR && now <= b;
 }
 
+/** When a flight is over: when it lands, or when it leaves if the landing time is missing or after midnight. */
+export function flightEnd(f: Flight): number | null {
+  const dep = dtUTC(f.date, f.dep);
+  const arr = dtUTC(f.date, f.arr);
+  return dep != null && arr != null && arr > dep ? arr : dep;
+}
+
+/**
+ * Bookings grouped per flight and split in two: still to come, soonest
+ * first, and landed, most recent first.
+ */
+export function splitFlights<T extends Flight>(flights: T[], now: number): { upcoming: T[][]; landed: T[][] } {
+  const groups = new Map<string, T[]>();
+  for (const f of flights) {
+    const k = `${f.flight}|${f.date}`;
+    groups.set(k, [...(groups.get(k) ?? []), f]);
+  }
+  const at = (legs: T[]) => (legs[0].date ?? "") + (legs[0].dep ?? "");
+  const all = [...groups.values()].sort((a, b) => at(a).localeCompare(at(b)));
+  const isLanded = (legs: T[]) => {
+    const end = flightEnd(legs[0]);
+    return end != null && now >= end;
+  };
+  return { upcoming: all.filter((g) => !isLanded(g)), landed: all.filter(isLanded).reverse() };
+}
+
 /**
  * The tab to open on: a #link (or a tapped notification), then the tab picked
  * earlier this session; otherwise Plan while the trip is on, so the day's

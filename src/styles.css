@@ -387,6 +387,8 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 .fl-book{display:grid;gap:6px}
 .fl-book .bk{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:15px}
 .fl-book code{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:15px;background:var(--surface-2);padding:2px 6px;border-radius:3px;letter-spacing:.06em}
+details.landed>summary{cursor:pointer;font-weight:700;color:var(--ink-2);min-height:44px;display:flex;align-items:center;padding-inline:4px}
+.landed-list{display:grid;gap:22px;margin-top:10px}
 .fl-links{display:flex;gap:12px;flex-wrap:wrap;font-size:14px}
 .fl-links a{color:var(--vltava);font-weight:600}
 .pill-p{display:inline-block;font-size:13px;font-weight:700;padding:1px 8px;border-radius:3px;border:1px solid var(--line)}
