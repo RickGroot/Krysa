@@ -26,8 +26,9 @@ export const HERO={
   info:{title:"Info",eyebrow:()=>S.info.hotelAddress?S.info.hotelAddress.split(",")[0]:"The basics",sub:()=>`${S.people.length} travelling`},
 };
 
-// Utility tabs get a shorter hero (styles.css); the scenes survive that crop intact.
-const HERO_SIZE={plan:"md",flights:"md",ideas:"md",todo:"sm",money:"sm",info:"sm"};
+// Utility tabs get a shorter hero (styles.css). The scenes are bottom-aligned, so a shorter hero slides the art up
+// behind the text: each tab here was checked to keep its title on the sky. To-do keeps the full height, as its lake sits high.
+const HERO_SIZE={plan:"md",flights:"md",ideas:"md",money:"sm",info:"sm"};
 
 export function paintStage(){
   const tab=SCENES[S.tab]?S.tab:"rats",H=HERO[tab];
