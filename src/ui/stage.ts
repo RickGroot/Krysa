@@ -50,7 +50,8 @@ export function goTab(tab){S.tab=tab;try{sessionStorage.setItem("pw-tab",tab)}ca
 
 export function openMore(){
   const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
-  const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
+  const more=document.getElementById("more-btn");more.setAttribute("aria-expanded","true");
+  const close=()=>{scrim.remove();more.setAttribute("aria-expanded","false");document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
   const open=S.todos.filter(t=>!t.done).length,total=S.expenses.reduce((a,e)=>a+toCzk(e),0);
   const item=(tab,label,sub)=>{const ico=h("span",{class:"ico"});ico.innerHTML=MORE_ICONS[tab];return h("button",{class:"more-item"+(S.tab===tab?" on":""),type:"button",onclick:()=>{close();goTab(tab)}},ico,h("span",null,h("b",{text:label}),h("small",{text:sub})))};
   const bell=h("span",{class:"ico"});bell.innerHTML=MORE_ICONS.bell;

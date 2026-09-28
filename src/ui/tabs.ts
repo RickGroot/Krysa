@@ -27,9 +27,9 @@ export function render(){
   sub.append(h("span",{text:`${S.people.length} travelling`}));
   const open=S.todos.filter(t=>!t.done).length;
   document.getElementById("c-ideas").textContent=S.ideas.length?S.ideas.length:"";
-  document.getElementById("c-todo").textContent=open?open:"";
+  document.getElementById("c-todo").textContent=open?open:"";document.getElementById("c-todo-sr").textContent=open?`, ${open} open to-do${open===1?"":"s"}`:"";
   document.getElementById("c-rats").textContent=S.rats.length?S.rats.length:"";
-  document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===S.tab)));document.getElementById("more-btn").setAttribute("aria-selected",String(["todo","money","info"].includes(S.tab)));
+  document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
   const fab=document.getElementById("fab");fab.hidden=!S.canWrite||!S.loaded;
   paintStage();
   // Rebuilt on every change; keepFocus puts focus back on the same control (by its data-k).

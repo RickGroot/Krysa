@@ -30,6 +30,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .skip{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:800;text-decoration:none;transform:translateY(calc(-100% - 24px))}
 .skip:focus{transform:none}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 #main:focus{outline:none}
 
 /* top bar */
@@ -57,8 +58,8 @@ nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + e
 nav.tabs button{border:0;background:transparent;border-radius:20px;padding:7px 2px 9px;display:grid;justify-items:center;gap:2px;color:var(--ink-2);font:700 11px/1.1 var(--body);letter-spacing:.02em;cursor:pointer;position:relative}
 nav.tabs button svg{width:23px;height:23px;display:block}
 nav.tabs button:hover{color:var(--ink)}
-nav.tabs button[aria-selected="true"]{color:var(--tram-text);background:color-mix(in srgb,var(--tram) 12%,transparent)}
-nav.tabs button[aria-selected="true"]::after{content:"";position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--tram);box-shadow:0 0 10px var(--tram)}
+nav.tabs button:is([aria-current="page"],.here){color:var(--tram-text);background:color-mix(in srgb,var(--tram) 12%,transparent)}
+nav.tabs button:is([aria-current="page"],.here)::after{content:"";position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--tram);box-shadow:0 0 10px var(--tram)}
 nav.tabs .count{position:absolute;top:2px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--tram);color:var(--tram-ink);font:800 10px/17px var(--body)}
 nav.tabs .count:empty,#c-rats,#c-ideas{display:none}
 .more-sheet{gap:10px}
