@@ -73,7 +73,9 @@ export function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo
 
 export async function memeToPng(m,id){
   const o=normMeme(m);id=id||"x";
-  try{await Promise.all(["400 80px Anton","700 60px 'Comic Neue'","800 60px Manrope","700 60px Cinzel"].map(f=>document.fonts.load(f)))}catch(e){}
+  // Every face the canvas draws with, loaded for the caption's own letters: Czech ones (ě, ř) are in a separate file.
+  const letters=[o.top,o.bottom].filter(Boolean).join(" ")+" ";
+  try{await Promise.all(["400 80px Anton","700 60px 'Comic Neue'","800 60px Manrope","700 60px Cinzel","800 60px Archivo"].map(f=>document.fonts.load(f,letters)))}catch(e){}
   const W=1080;const A=await artImage(o,o.face,id);const B=(o.layout==="duo"||o.layout==="stack")?await artImage(o,o.face2,id+"b"):null;
   const c=document.createElement("canvas");const ctx=c.getContext("2d");let H=W;
   const setSize=hh=>{c.width=W;c.height=Math.round(hh);H=c.height};
