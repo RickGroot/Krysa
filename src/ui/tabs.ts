@@ -19,7 +19,14 @@ import { renderRats } from "./wall";
 // The one add button: what it adds follows the tab. Info has none; its cards have their own buttons.
 export const ADD={rats:["+ Rat",()=>postRat()],plan:["+ Plan item",()=>editEvent({},todayOn()?{date:todayIso()}:{})],flights:["+ Flight",()=>editFlight()],ideas:["+ Idea",()=>editIdea()],todo:["+ To-do",()=>editTodo()],money:["+ Expense",()=>editExpense()]};
 
-export function render(){
+// Data from other phones can arrive in bursts: render at most once a frame, and rebuild the page only when the
+// tab shows what changed. The header, badges and hero always update; a plain render() still rebuilds everything.
+const DEPS={rats:["rats"],plan:["events","info","flights","todos","people"],flights:["flights","people","info"],ideas:["ideas","info"],todo:["todos"],money:["expenses","people","info"],info:["info","people"]};
+let frame=0;const pending=new Set();
+export function scheduleRender(col){pending.add(col);frame||=requestAnimationFrame(()=>{frame=0;const cols=[...pending];pending.clear();render(cols)})}
+
+export function render(only?){
+  if(frame){cancelAnimationFrame(frame);frame=0;pending.clear()}
   const i=S.info;
   document.getElementById("title").textContent=i.title||"Prague week";
   {const hr=new Date().getHours();document.getElementById("greet").textContent=(hr<11?"Dobré ráno":hr<18?"Dobrý den":"Dobrý večer")+(S.meName?`, ${S.meName}`:"")}
@@ -29,6 +36,7 @@ export function render(){
   // Nothing tab-specific until the start tab is decided (boot.ts).
   if(S.tabReady){document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
     paintStage();planBadge()}
+  if(only&&S.loaded&&!only.some(c=>DEPS[S.tab]?.includes(c)))return;
   // Rebuilt on every change; keepFocus puts focus back on the same control (by its data-k).
   const main=document.getElementById("main");
   keepFocus(main,()=>{main.replaceChildren();

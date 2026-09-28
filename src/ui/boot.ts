@@ -7,7 +7,7 @@ import { h } from "./dom";
 import { ratSays, setupIdle } from "./idle";
 import { syncPush } from "./push";
 import { goTab, openMore } from "./stage";
-import { ADD, render } from "./tabs";
+import { ADD, render, scheduleRender } from "./tabs";
 import type { Runtime } from "../data/runtime";
 
 export function boot(RUNTIME: Runtime){
@@ -39,14 +39,14 @@ render();
   S.db=db;
   // Only the id is needed to start listening; the rest of the profile arrives in the background.
   if(user){S.uid=await user.id();Promise.all([user.isOwner(),user.me().catch(()=>null),user.can("data.write")]).then(([own,me,cw])=>{S.isOwner=own;if(me)S.meName=(me.name||"").trim().split(/\s+/)[0]||"";if(cw===false)S.canWrite=false;else if(cw===true)S._validated=true;render()}).catch(()=>{})}
-  db.doc("ratgame/scores").onSnapshot(s=>{const d=s.exists?s.data():{};S.scores={...(d.scores||{})};if(S.tab==="rats"&&S.loaded)render()},()=>{});
+  db.doc("ratgame/scores").onSnapshot(s=>{const d=s.exists?s.data():{};S.scores={...(d.scores||{})};if(S.loaded)scheduleRender("scores")},()=>{});
   const cols=["events","ideas","todos","people","expenses","rats","flights"];
   let pending=cols.length+1;const ready=()=>{if(--pending===0)S.loaded=true;render()};
   const onErr=()=>{};
   let firstInfo=true;
-  db.doc("trip/info").onSnapshot(s=>{S.info=s.exists?s.data():{};if(firstInfo){firstInfo=false;if(!S.tabReady){S.tab=pickTab();S.tabReady=true}ready()}else render()},onErr);
+  db.doc("trip/info").onSnapshot(s=>{S.info=s.exists?s.data():{};if(firstInfo){firstInfo=false;if(!S.tabReady){S.tab=pickTab();S.tabReady=true}ready()}else scheduleRender("info")},onErr);
   for(const col of cols){let first=true;
-    db.collection(col).onSnapshot(s=>{S[col]=s.docs.map(d=>({id:d.id,...d.data()}));if(first){first=false;ready()}else render()},onErr);
+    db.collection(col).onSnapshot(s=>{S[col]=s.docs.map(d=>({id:d.id,...d.data()}));if(first){first=false;ready()}else scheduleRender(col)},onErr);
   }
 })();
 }
