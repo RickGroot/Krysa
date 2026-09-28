@@ -25,6 +25,9 @@ export const HERO={
   info:{title:"Info",eyebrow:()=>S.info.hotelAddress?S.info.hotelAddress.split(",")[0]:"The basics",sub:()=>`${S.people.length} travelling`},
 };
 
+// Utility tabs get a shorter hero (styles.css); the scenes survive that crop intact.
+const HERO_SIZE={plan:"md",flights:"md",ideas:"md",todo:"sm",money:"sm",info:"sm"};
+
 export function paintStage(){
   const tab=SCENES[S.tab]?S.tab:"rats",H=HERO[tab];
   const slot=document.getElementById("hero-slot");
@@ -34,7 +37,7 @@ export function paintStage(){
     slot.replaceChildren(sv,groundEl());slot.classList.remove("fadein");void slot.offsetWidth;slot.classList.add("fadein");
     // Built once per tab and updated in place below, so a focused hero button stays focused.
     ht.replaceChildren(h("div",{class:"he"}),h("h2",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts()))}
-  document.body.dataset.scene=H.light?"light":"dark";
+  document.body.dataset.scene=H.light?"light":"dark";document.body.dataset.hero=HERO_SIZE[tab]||"lg";
   const [he,t,hs]=ht.children;he.textContent=H.eyebrow();t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
 }
 

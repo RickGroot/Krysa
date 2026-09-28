@@ -601,6 +601,9 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 /* v10: one continuous landscape */
 :root{--hero-h:380px}
 @media (min-width:700px){:root{--hero-h:440px}}
+body[data-hero="md"]{--hero-h:340px}
+body[data-hero="sm"]{--hero-h:300px}
+@media (min-width:700px){body[data-hero="md"]{--hero-h:400px}body[data-hero="sm"]{--hero-h:360px}}
 .stage{position:relative;margin-inline:-16px;min-height:var(--hero-h);display:grid;align-content:start;isolation:isolate}
 .hero-slot{position:absolute;top:calc(-1 * env(safe-area-inset-top,0px));bottom:0;left:50%;width:min(100%,820px);transform:translateX(-50%);z-index:-1;overflow:hidden}
 @media (min-width:700px){.hero-slot{-webkit-mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}}
