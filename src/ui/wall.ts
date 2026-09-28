@@ -64,14 +64,17 @@ export function wallList(){
 
 export function ratTV(list){
   if(!list.length){toast("No rats to broadcast yet");return}
-  let i=0,timer=null;const bar=h("i");const slot=h("div",{class:"slot"});
+  // The progress bar is a CSS animation; the next rat comes on its animationend, so pausing it pauses the show.
+  let i=0,paused=false;const bar=h("i");const slot=h("div",{class:"slot"});
   const root=h("div",{class:"ratv",role:"dialog","aria-label":"Rat TV"});
-  const close=()=>{clearTimeout(timer);root.remove();document.removeEventListener("keydown",key)};
-  const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(mediaFor(r,{bare:true,autoplay:true}),r.caption&&h("div",{class:"cap",text:r.caption}));
-    bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;const dur=r.type==="video"?12000:6000;
-    if(!reduced()){bar.style.transition=`width ${dur}ms linear`;bar.style.width="100%"}clearTimeout(timer);timer=setTimeout(()=>show(i+1),dur)};
-  const key=e=>{if(e.key==="Escape")close();else if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1)};document.addEventListener("keydown",key);
-  root.append(h("div",{class:"ratv-top"},h("span",{class:"onair"},h("i"),"RAT TV · LIVE FROM PRAHA"),h("button",{class:"btn small",type:"button",onclick:close},"Exit")),
+  const close=()=>{root.remove();document.removeEventListener("keydown",key)};
+  const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(mediaFor(r,{bare:true,autoplay:!paused}),r.caption&&h("div",{class:"cap",text:r.caption}));
+    bar.classList.remove("run");void bar.offsetWidth;bar.style.setProperty("--dur",(r.type==="video"?12:6)+"s");if(!reduced())bar.classList.add("run")};
+  bar.addEventListener("animationend",()=>show(i+1));
+  const pause=h("button",{class:"btn small",type:"button",onclick:()=>setPaused(!paused)},"Pause");
+  const setPaused=v=>{paused=v;root.classList.toggle("paused",v);pause.textContent=v?"Play":"Pause";slot.querySelectorAll("video").forEach(x=>{if(v)x.pause();else x.play().catch(()=>{})})};
+  const key=e=>{if(e.key==="Escape")close();else if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};document.addEventListener("keydown",key);
+  root.append(h("div",{class:"ratv-top"},h("span",{class:"onair"},h("i"),"RAT TV · LIVE FROM PRAHA"),h("span",{class:"ratv-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Exit"))),
     h("div",{class:"ratv-stage"},slot,h("button",{class:"nav prev",type:"button","aria-label":"Previous rat",onclick:()=>show(i-1)}),h("button",{class:"nav next",type:"button","aria-label":"Next rat",onclick:()=>show(i+1)})),
     h("div",{class:"ratv-bar"},bar));
   document.body.append(root);show(0);

@@ -335,7 +335,12 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 .ratv-stage .slot img,.ratv-stage .slot video{width:100%;max-height:calc(100vh - 240px);object-fit:contain}
 .ratv-stage .cap{font-size:18px;font-weight:700}
 .ratv-bar{height:4px;background:rgb(255 255 255 / .15);border-radius:2px;overflow:hidden}
-.ratv-bar i{display:block;height:100%;background:#ff3b30;width:0}
+.ratv-bar i{display:block;height:100%;background:#ff3b30;transform-origin:0 50%;transform:scaleX(0)}
+.ratv-bar i.run,.wr-bars i.run{animation:story-bar var(--dur,6s) linear forwards}
+.ratv.paused .ratv-bar i.run,.wrapped.paused .wr-bars i.run{animation-play-state:paused}
+@keyframes story-bar{to{transform:none}}
+.ratv-acts{display:flex;gap:8px}
+.ratv-top .btn,.wr-acts .btn{min-height:44px;padding-inline:16px}
 .ratv .nav{position:absolute;top:0;bottom:0;width:30%;border:0;background:transparent;cursor:pointer}
 .ratv .nav.prev{left:0}.ratv .nav.next{right:0}
 .ratv .btn{background:#fff;color:#111;border-color:#fff}
@@ -637,8 +642,10 @@ main>*{min-width:0}
 .wrapped{position:fixed;inset:0;z-index:30;background:#0c0f24;color:#fcf4e2;display:grid;overflow:hidden}
 .wr-bars{position:absolute;z-index:3;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:4px}
 .wr-bars span{flex:1;height:4px;border-radius:2px;background:rgb(255 255 255 / .3);overflow:hidden}
-.wr-bars i{display:block;height:100%;width:0;background:#fff}
-.wr-close{position:absolute;z-index:4;right:12px;top:calc(24px + env(safe-area-inset-top,0px));background:rgb(255 255 255 / .92);color:#111;border-color:transparent}
+.wr-bars i{display:block;height:100%;background:#fff;transform-origin:0 50%;transform:scaleX(0)}
+.wr-bars i.done{transform:none}
+.wr-acts{position:absolute;z-index:4;right:12px;top:calc(24px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.wr-acts .btn{background:rgb(255 255 255 / .92);color:#111;border-color:transparent}
 .wr-stage{position:relative;display:grid;align-content:end;min-height:100%}
 .wr-scene{position:absolute;inset:0;width:100%;height:100%}
 .wr-body{position:relative;z-index:1;display:grid;gap:12px;justify-items:start;padding:120px 26px calc(64px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgb(8 10 28 / .88) 40%);width:100%;text-shadow:0 1px 14px rgb(0 0 0 / .4)}
