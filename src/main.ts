@@ -2,7 +2,6 @@ import "./styles.css";
 import seed from "../supabase/seed/demo.json";
 import { LOCAL_DB_KEY, localRuntime } from "./data/local";
 import type { Json } from "./data/runtime";
-import { supabaseClient, supabaseRuntime } from "./data/supabase";
 import { ensureProfile, joinWithTripCode, showDemoBanner, takeTripCodeFromUrl } from "./ui/auth";
 import { boot } from "./ui/boot";
 import { todayIso } from "./lib/dates";
@@ -53,6 +52,8 @@ async function start(): Promise<void> {
     showDemoBanner();
     return;
   }
+  // Loaded only for the shared trip, so the demo never downloads supabase-js.
+  const { supabaseClient, supabaseRuntime } = await import("./data/supabase");
   const sb = supabaseClient(SUPABASE_URL, SUPABASE_KEY);
   const fromLink = takeTripCodeFromUrl();
   const { data } = await sb.auth.getSession();
