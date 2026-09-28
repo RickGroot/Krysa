@@ -7,7 +7,7 @@ import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
 import { removeDocs, snapOf, write } from "./core";
-import { armBtn, h, keepFocus, reduced, svg, toast } from "./dom";
+import { SVGNS, armBtn, h, keepFocus, reduced, svg, toast } from "./dom";
 import { IDLE, scheduleCameo } from "./idle";
 import { openOverlay } from "./overlay";
 import { postRat, saveMemeImage } from "./maker";
@@ -18,6 +18,14 @@ export async function deleteRat(r){
 }
 
 export const REACTS: any[]=[["squeaks","squeak",()=>krysa("classic")],["re_cheese","cheese",()=>svg(`<path d="M3 17L20 8L21 19Z" fill="#f2c14e" stroke="#c9962a" stroke-width="1" stroke-linejoin="round"/><circle cx="15" cy="14" r="1.6" fill="#c9962a"/><circle cx="18.5" cy="16.5" r="1" fill="#c9962a"/>`,"0 0 24 24")],["re_dead","dead",()=>{const e=ratSvg({face:"dead"});e.setAttribute("viewBox","24 -2 72 78");return e}],["re_sus","sus",()=>{const e=ratSvg({face:"sus"});e.setAttribute("viewBox","24 -2 72 78");return e}]];
+
+// Each post drew its reaction icons in full: three rat drawings per post. They're drawn once, as <symbol>s, and reused.
+let sprite=null;
+const reactIcon=k=>{
+  if(!sprite){sprite=document.createElementNS(SVGNS,"svg");sprite.setAttribute("class","sprite");sprite.setAttribute("aria-hidden","true");
+    for(const[key,,make]of REACTS){const src=make(),sym=document.createElementNS(SVGNS,"symbol");sym.id="react-"+key;sym.setAttribute("viewBox",src.getAttribute("viewBox"));sym.innerHTML=src.innerHTML;sprite.append(sym)}
+    document.body.append(sprite)}
+  return svg(`<use href="#react-${k}"/>`,sprite.querySelector("#react-"+k).getAttribute("viewBox"))};
 
 export const reactCount=(r,k)=>Object.values(r[k]||{}).filter(Boolean).length;
 
@@ -38,9 +46,9 @@ export function postCard(r,o: any = {}){
   const who=r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
   const canDel=S.canWrite&&((r.by&&r.by===S.uid)||S.isOwner);
   const del=canDel?armBtn(h("button",{class:"btn small ghost danger extra",type:"button","data-k":"del:"+r.id},"Delete"),"Tap again",async()=>{if(await deleteRat(r))o.close?.()}):null;
-  const reacts=h("div",{class:"reacts"},REACTS.map(([k,label,icon])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
+  const reacts=h("div",{class:"reacts"},REACTS.map(([k,label])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
     const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
-    b.append(icon(),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
+    b.append(reactIcon(k),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
   const media=mediaFor(r,{fresh:o.fresh});
   if(S.wall.view==="grid")media.append(h("button",{class:"media-hit",type:"button","data-k":"open:"+r.id,"aria-label":r.caption?`Open "${r.caption}"`:"Open this rat",onclick:()=>openLightbox(r)}));
   return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),

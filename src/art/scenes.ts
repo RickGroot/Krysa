@@ -19,7 +19,8 @@ export function hzRat(x,y,s,c,up,tail){return `<g transform="translate(${x} ${y}
 
 export function hzRand(seed){let r=seed;return()=>{r=(r*9301+49297)%233280;return r/233280}}
 
-export function hzStars(n,w,h,seed,col="#fff8e1"){const R=hzRand(seed);let s="";for(let i=0;i<n;i++){s+=`<circle class="hz-tw" style="animation-delay:${-(i%9)*.4}s" cx="${(R()*w).toFixed(1)}" cy="${(R()*h).toFixed(1)}" r="${i%4?0.9:1.6}" fill="${col}"/>`}return s}
+// Stars twinkle in three groups, in turn: three animations per sky instead of one per star.
+export function hzStars(n,w,h,seed,col="#fff8e1"){const R=hzRand(seed);const g=["","",""];for(let i=0;i<n;i++){g[i%3]+=`<circle cx="${(R()*w).toFixed(1)}" cy="${(R()*h).toFixed(1)}" r="${i%4?0.9:1.6}" fill="${col}"/>`}return g.map((c,k)=>`<g class="hz-stars" style="animation-delay:${-k*.87}s">${c}</g>`).join("")}
 
 export function hzWaves(x0,x1,y0,y1,c,op,seed){const R=hzRand(seed);let s="";for(let y=y0;y<=y1;y+=7){const n=1+Math.floor(R()*3);for(let k=0;k<n;k++){const x=x0+R()*(x1-x0-20),l=10+R()*30;s+=`<path d="M${x.toFixed(1)} ${y}h${l.toFixed(1)}" stroke="${c}" stroke-width="1.6" stroke-linecap="round" opacity="${op}"/>`}}return s}
 
