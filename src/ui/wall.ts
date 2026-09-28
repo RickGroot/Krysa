@@ -37,7 +37,7 @@ export function mediaFor(r,opts: any = {}){
   const media=h("div",{class:"media"});
   if(r.type==="meme")media.append(opts.bare||opts.fresh?memeEl(r,r.id):memeCached(r));
   else if(r.assetId&&/^[A-Za-z0-9_-]{8,64}$/.test(r.assetId)){const src=null;
-    const m=r.type==="video"?h("video",{src,controls:!opts.bare,loop:true,muted:true,playsinline:true,autoplay:!!opts.autoplay,preload:"metadata"}):h("img",{src,alt:r.caption||"Rat meme",loading:"lazy"});
+    const m=r.type==="video"?h("video",{src,"aria-label":r.caption?`Rat video: ${r.caption}`:"Rat video",controls:!opts.bare,loop:true,muted:true,playsinline:true,autoplay:!!opts.autoplay,preload:"metadata"}):h("img",{src,alt:r.caption||"Rat meme",loading:"lazy"});
     m.addEventListener("error",()=>m.replaceWith(h("p",{class:"empty escaped",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
   return media;
 }
@@ -94,7 +94,7 @@ export function renderRats(main){
     S.wall.sort==="shuffle"&&h("button",{class:"btn small",type:"button","data-k":"wall:reshuffle",onclick:()=>{S.wall.seed=Math.random()*1e9|0;saveWall();render()}},"Reshuffle"),
     h("button",{class:"btn small",type:"button","data-k":"wall:view","aria-pressed":grid,onclick:()=>{S.wall.view=grid?"feed":"grid";saveWall();render()}},"Grid")));
   const top=[...S.rats].filter(r=>loveOf(r)>0).sort((a,b)=>loveOf(b)-loveOf(a)).slice(0,3);
-  const fame=top.length?h("section",{class:"fame"},h("h3",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}))))):null;
+  const fame=top.length?h("section",{class:"fame"},h("h2",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}))))):null;
   // Hall-of-fame memes are drawn 360px wide and scaled to the tile, keeping their own shape.
   if(fame)requestAnimationFrame(()=>fame.querySelectorAll(".fame-item .media").forEach(m=>{const mm=m.querySelector(".meme");if(!mm)return;const s=m.clientWidth/360;mm.style.transform=`scale(${s})`;m.style.aspectRatio="auto";m.style.height=`${mm.offsetHeight*s}px`}));
   const rs=wallList();

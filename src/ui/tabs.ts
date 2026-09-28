@@ -78,7 +78,7 @@ export function renderPlan(main){
   if(drafts&&S.canWrite){const rm=armBtn(h("button",{class:"btn small ghost danger","data-k":"drafts:remove"},"Remove all"),"Tap again to remove",()=>bulkDrafts(false));
     main.append(h("div",{class:"banner"},h("span",{text:`${drafts} suggested items (dashed). Tap one to keep, change or delete it.`}),h("span",{class:"banner-acts"},h("button",{class:"btn small","data-k":"drafts:keep",onclick:()=>bulkDrafts(true)},"Keep all"),rm)))}
   if(!days.length)return;
-  main.append(h("div",{class:"daystrip"},days.map(d=>{const dt=parseD(d);return h("a",{href:"#"+anchor(d),class:d===today?"today":null,"data-k":"day:"+d,onclick:e=>{e.preventDefault();document.getElementById(anchor(d))?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}},h("span",{class:"cz",text:`${CZ[dt.getUTCDay()]} · ${EN[dt.getUTCDay()]}`}),h("span",{class:"n",text:dt.getUTCDate()}))})));
+  main.append(h("div",{class:"daystrip"},days.map(d=>{const dt=parseD(d);return h("a",{href:"#"+anchor(d),class:d===today?"today":null,"data-k":"day:"+d,onclick:e=>{e.preventDefault();document.getElementById(anchor(d))?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}},h("span",{class:"cz"},h("span",{lang:"cs",text:CZ[dt.getUTCDay()]}),` · ${EN[dt.getUTCDay()]}`),h("span",{class:"n",text:dt.getUTCDate()}))})));
   for(const d of days)if(!(live&&d===today))main.append(daySection(d,false));
 }
 
@@ -128,7 +128,7 @@ export function convCard(){
   const inp=h("input",{id:"conv-amt","data-k":"conv-amt",inputmode:"decimal",autocomplete:"off",placeholder:toEur?"285":"12",oninput:e=>{c.amt=e.target.value;upd()}});inp.value=c.amt;
   upd();
   return h("div",{class:"card"},
-    h("h3",null,"Quick convert",h("button",{class:"btn small",type:"button","data-k":"conv-swap",onclick:()=>{c.from=toEur?"EUR":"CZK";render();document.getElementById("conv-amt")?.focus()}},toEur?"Kč → €  ⇄":"€ → Kč  ⇄")),
+    h("div",{class:"card-head"},h("h2",{text:"Quick convert"}),h("button",{class:"btn small",type:"button","data-k":"conv-swap",onclick:()=>{c.from=toEur?"EUR":"CZK";render();document.getElementById("conv-amt")?.focus()}},toEur?"Kč → €  ⇄":"€ → Kč  ⇄")),
     h("div",{class:"conv"},h("div",{class:"field"},h("label",{for:"conv-amt",text:toEur?"Price in Kč":"Amount in €"}),inp),h("span",{class:"arrow",text:"≈"}),out),
     h("div",{class:"muted",text:[100,250,500,1000].map(k=>`${fmtCzk(k)} ≈ ${fmtEur(k/rate())}`).join(" · ")}));
 }
@@ -139,7 +139,7 @@ export function renderMoney(main){
   const total=S.expenses.reduce((s,e)=>s+toCzk(e),0);
   const bal=balances(),moves=settle(bal);
   main.append(h("div",{class:"card"},
-    h("h3",null,"Settle up",h("span",{class:"muted"},`1 € = ${rate().toLocaleString("en-GB")} Kč `,S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:rate",onclick:editRate},"Edit"))),
+    h("div",{class:"card-head"},h("h2",{text:"Settle up"}),h("span",{class:"muted"},`1 € = ${rate().toLocaleString("en-GB")} Kč `,S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:rate",onclick:editRate},"Edit"))),
     h("div",null,h("div",{class:"big money",text:fmtCzk(total)}),h("div",{class:"muted",text:`≈ ${fmtEur(total/rate())} spent together · ${S.expenses.length} expenses`})),
     moves.length?h("div",{class:"settle"},moves.map(m=>h("div",null,h("b",{text:pname(m.from)}),h("span",{class:"arrow",text:"pays →"}),h("b",{text:pname(m.to)}),h("span",{class:"money",text:fmtCzk(m.amt)}),h("span",{class:"muted money",text:`(${fmtEur(m.amt/rate())})`}))))
       :h("p",{class:"empty",text:S.expenses.length?"All square.":"Nothing logged yet. Add the first shared cost."}),
@@ -156,20 +156,20 @@ export function fmtDT(s){if(!s)return"";const[d,t]=splitDT(s);return fmtD(d)+(t?
 export function renderInfo(main){
   const i=S.info;
   const kv=[["Dates",i.startDate&&i.endDate?`${fmtD(i.startDate)} – ${fmtD(i.endDate)}`:"Not set"],["Stay",i.hotelName],["Address",i.hotelAddress],["Check-in / out",[i.checkIn,i.checkOut].filter(Boolean).join(" / ")],["Booking / key",i.booking],["Work location",i.workBase],["Notes",i.notes]].filter(([,v])=>v);
-  main.append(h("div",{class:"card"},h("h3",null,"Trip",S.canWrite&&h("button",{class:"btn small","data-k":"edit:info",onclick:editInfo},"Edit")),h("dl",{class:"kv"},kv.flatMap(([k,v])=>[h("dt",{text:k}),h("dd",{text:v})])),
+  main.append(h("div",{class:"card"},h("div",{class:"card-head"},h("h2",{text:"Trip"}),S.canWrite&&h("button",{class:"btn small","data-k":"edit:info",onclick:editInfo},"Edit")),h("dl",{class:"kv"},kv.flatMap(([k,v])=>[h("dt",{text:k}),h("dd",{text:v})])),
     i.hotelAddress&&placeLine({location:i.hotelAddress})));
   const ppl=[...S.people].sort((a,b)=>(a.arrive||"9").localeCompare(b.arrive||"9"));
-  main.append(h("div",{class:"card"},h("h3",null,"Who's coming",S.canWrite&&h("button",{class:"btn small","data-k":"add:person",onclick:()=>editPerson()},"+ Add")),
+  main.append(h("div",{class:"card"},h("div",{class:"card-head"},h("h2",{text:"Who's coming"}),S.canWrite&&h("button",{class:"btn small","data-k":"add:person",onclick:()=>editPerson()},"+ Add")),
     ppl.length?ppl.map(p=>h("div",{class:"person"},h("div",{class:"ti"},h("span",{text:p.name}),S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:people:"+p.id,onclick:()=>editPerson(p)},"Edit")),
       (p.arrive||p.arriveBy)&&h("div",{class:"meta",text:"In: "+[fmtDT(p.arrive),p.arriveBy].filter(Boolean).join(" · ")}),
       (p.depart||p.departBy)&&h("div",{class:"meta",text:"Out: "+[fmtDT(p.depart),p.departBy].filter(Boolean).join(" · ")}),
       p.phone&&h("div",{class:"meta",text:p.phone}),p.notes&&h("div",{class:"meta",text:p.notes})))
     :h("p",{class:"empty",text:"Add everyone with their flight times so pickups line up."})));
-  main.append(h("div",{class:"card"},h("h3",{text:"Prague basics"}),h("ul",{class:"tips"},
+  main.append(h("div",{class:"card"},h("h2",{text:"Prague basics"}),h("ul",{class:"tips"},
     h("li",null,h("b",{text:"Money: "}),"Czech koruna (CZK, Kč). Cards work almost everywhere; pay in CZK when a terminal offers a currency choice."),
     h("li",null,h("b",{text:"Transport: "}),"Trams, metro and buses share one PID ticket. Buy it in the PID Lítačka app and activate it before boarding."),
     h("li",null,h("b",{text:"To FrontKon: "}),"Walk to Můstek (about 5 min), metro B towards Černý Most, get off at Českomoravská (6 stops). O2 Universum is next to the station."),
     h("li",null,h("b",{text:"From the airport: "}),"Buses link the airport to the metro on a regular PID ticket, or take a taxi or ride-hailing car to Old Town."),
     h("li",null,h("b",{text:"Emergency: "}),"112"),
-    h("li",null,h("b",{text:"Useful words: "}),"Dobrý den (hello) · Děkuji (thanks) · Pivo (beer) · Účet, prosím (the bill, please)"))));
+    h("li",null,h("b",{text:"Useful words: "}),h("span",{lang:"cs",text:"Dobrý den"})," (hello) · ",h("span",{lang:"cs",text:"Děkuji"})," (thanks) · ",h("span",{lang:"cs",text:"Pivo"})," (beer) · ",h("span",{lang:"cs",text:"Účet, prosím"})," (the bill, please)"))));
 }

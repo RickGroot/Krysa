@@ -21,7 +21,7 @@ export const HERO={
     if(todayOn()){const n=daysUntil(todayIso(),S.info.startDate),of=daysUntil(S.info.endDate,S.info.startDate);if(n!=null&&of!=null&&n>=0&&n<=of)return`Day ${n+1} of ${of+1}`}
     const d=Math.round((+parseD(S.info.startDate)-+parseD(todayIso()))/864e5),e=Math.round((+parseD(S.info.endDate)-+parseD(todayIso()))/864e5);return d>1?`${d} days to go`:d===1?"Tomorrow!":e>=0?"Happening now":"That was a week"},light:true},
   ideas:{title:"Ideas",eyebrow:()=>"Where to next",sub:()=>`${S.ideas.length} ideas · vote for your favourites`},
-  todo:{title:"To-do",eyebrow:()=>"Seznam úkolů",sub:()=>{const o=S.todos.filter(t=>!t.done).length;return `${o} open · ${S.todos.length-o} done`},light:true},
+  todo:{title:"To-do",eyebrow:()=>"Seznam úkolů",lang:"cs",sub:()=>{const o=S.todos.filter(t=>!t.done).length;return `${o} open · ${S.todos.length-o} done`},light:true},
   money:{title:"Money",eyebrow:()=>"Koruna & euro",sub:()=>`${fmtCzk(S.expenses.reduce((a,e)=>a+toCzk(e),0))} spent together`},
   info:{title:"Info",eyebrow:()=>S.info.hotelAddress?S.info.hotelAddress.split(",")[0]:"The basics",sub:()=>`${S.people.length} travelling`},
 };
@@ -37,9 +37,9 @@ export function paintStage(){
     const sv=svg(SCENES[tab](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMax slice");sv.classList.add("scene");
     slot.replaceChildren(sv,groundEl());slot.classList.remove("fadein");void slot.offsetWidth;slot.classList.add("fadein");
     // Built once per tab and updated in place below, so a focused hero button stays focused.
-    ht.replaceChildren(...[h("div",{class:"he"}),h("h2",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts())].filter(Boolean))}
+    ht.replaceChildren(...[h("div",{class:"he"}),h("h1",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts())].filter(Boolean))}
   document.body.dataset.scene=H.light?"light":"dark";document.body.dataset.hero=HERO_SIZE[tab]||"lg";
-  const [he,t,hs]=ht.children;he.textContent=H.eyebrow();t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
+  const [he,t,hs]=ht.children as any;he.textContent=H.eyebrow();he.lang=H.lang||"";t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
 }
 
 export const MORE_ICONS={

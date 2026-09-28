@@ -144,8 +144,9 @@ input:disabled,select:disabled,textarea:disabled{opacity:.6;cursor:not-allowed}
 .check{width:22px;height:22px;accent-color:var(--tram)}
 .row.done .ti{text-decoration:line-through;color:var(--ink-2);font-weight:600}
 .card{border:1px solid transparent;border-radius:var(--radius);padding:16px;display:grid;gap:12px;background:var(--card-bg)}
-.card h3 :is(.btn,.muted){font-family:var(--body);letter-spacing:0;text-transform:none}
-.card h3{font-family:var(--display);font-weight:700;font-size:1.125rem;letter-spacing:.05em;line-height:1.2;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+/* A card starts with its title (h2) and, beside it, the card's own buttons. */
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2{font-family:var(--display);font-weight:700;font-size:1.125rem;letter-spacing:.05em;line-height:1.2;margin:0}
 dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:0;font-size:.90625rem}
 dl.kv dt{color:var(--ink-2)}
 dl.kv dd{margin:0;overflow-wrap:anywhere}
@@ -337,7 +338,7 @@ html:has(dialog.ov[open]) :is(.stage,.wrap) *{animation-play-state:paused!import
 .hero-acts .btn{background:color-mix(in srgb,var(--surface) 82%,transparent);border-color:transparent;color:var(--ink);text-shadow:none}
 .krysa-btn.has-fact::after{content:"";position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--tram);box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 70%,transparent)}
 .fame{display:grid;gap:10px;border:1px solid transparent;border-radius:var(--radius);padding:14px 16px;background:var(--card-bg)}
-.fame h3{margin:0;font-stretch:80%;font-family:var(--display);font-weight:700;font-size:1.125rem;letter-spacing:.05em}
+.fame h2{margin:0;font-stretch:80%;font-family:var(--display);font-weight:700;font-size:1.125rem;letter-spacing:.05em}
 .fame-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end}
 .fame-item{border:0;background:transparent;padding:0;cursor:pointer;display:grid;gap:4px;text-align:center;color:var(--ink)}
 .fame-item .media{overflow:hidden;background:var(--surface-2);aspect-ratio:1/1;position:relative;border-radius:var(--r-md)}
@@ -599,7 +600,7 @@ body[data-hero="sm"]{--hero-h:300px}
 @keyframes scene-in{from{opacity:0;transform:scale(1.025)}}
 .stage-in{position:relative;max-width:600px;margin:0 auto;width:100%;padding:0 16px;text-shadow:0 1px 14px rgb(0 0 0 / .35)}
 body[data-scene="light"] .greet{color:#7a2414}
-header.top h1{font-size:.9375rem;font-weight:700;opacity:.85}
+header.top .trip{font-size:.9375rem;font-weight:700;line-height:1.2;opacity:.85}
 .stage-in{color:#fcf4e2}
 body[data-scene="light"] .stage-in{color:#252a47;text-shadow:none}
 .hero-text{display:grid;gap:3px;padding-top:6px;max-width:72%}
