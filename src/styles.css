@@ -42,7 +42,7 @@ input,select,textarea{font-size:max(1rem,1em)}
 ::selection{background:color-mix(in srgb,var(--tram) 32%,transparent);color:inherit}
 input,textarea{caret-color:var(--tram-text)}
 html{scrollbar-color:var(--line) transparent}
-.skip{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:var(--z-skip);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r-pill);font-weight:800;text-decoration:none;transform:translateY(calc(-100% - 24px))}
+.skip{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:var(--z-skip);background:var(--ink);color:var(--bg);padding:10px 16px;min-height:44px;border-radius:var(--r-pill);font-weight:800;text-decoration:none;transform:translateY(calc(-100% - 24px))}
 .skip:focus{transform:none}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 /* top bar */
@@ -336,7 +336,7 @@ html:has(dialog.ov[open]) :is(.stage,.wrap) *{animation-play-state:paused!import
 @keyframes st-fly{from{transform:translateX(-30px)}to{transform:translateX(130px)}}
 /* wall controls */
 .wallbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.wsel select{min-height:40px;border:1px solid var(--field-border);background:var(--surface-2);color:var(--ink);border-radius:var(--r-pill);padding:6px 12px;font-weight:700}
+.wsel select{min-height:44px;border:1px solid var(--field-border);background:var(--surface-2);color:var(--ink);border-radius:var(--r-pill);padding:6px 12px;font-weight:700}
 .hero-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .hero-acts .btn{background:color-mix(in srgb,var(--surface) 82%,transparent);border-color:transparent;color:var(--ink);text-shadow:none}
 .krysa-btn.has-fact::after{content:"";position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--tram);box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 70%,transparent)}
@@ -677,8 +677,8 @@ main>*{min-width:0}
 .offline .kr svg{width:100%;height:100%;display:block}
 .armed{background:var(--danger);color:var(--tram-ink);border-color:var(--danger)}
 /* Tap targets: small controls keep their look but get a hit area of at least 44 × 44px. */
-.btn.small,.chips button,.filters button,.react,.linkish,.rm-close,.place a,.fl-links a,.row .meta a{position:relative}
-.btn.small::before,.chips button::before,.filters button::before,.react::before,.linkish::before,.rm-close::before,.place a::before,.fl-links a::before,.row .meta a::before{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+.btn.small,.chips button,.filters button,.react,.linkish,.rm-close,.place a,.fl-links a,.row .meta a,.person .meta a,.tips a{position:relative}
+.btn.small::before,.chips button::before,.filters button::before,.react::before,.linkish::before,.rm-close::before,.place a::before,.fl-links a::before,.row .meta a::before,.person .meta a::before,.tips a::before{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
 .btn.small,.chips button,.filters button,.react{min-height:36px}
 /* Below 320px (a phone at 200% zoom) the tab bar keeps its icons; the names stay for screen readers. */
 @media (max-width:319px){nav.tabs button>span:first-of-type{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
