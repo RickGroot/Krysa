@@ -55,8 +55,9 @@ export function caughtRat(){
 export function catchPeek(el){if(el.classList.contains("caught"))return;el.classList.add("caught");const r=el.getBoundingClientRect();eek(r.left+r.width/2,r.top);caughtRat();setTimeout(()=>el.remove(),400)}
 
 export function peek(side){
-  const el=h("button",{class:"peek alive peek-"+side,type:"button","aria-label":"A rat is peeking in. Tap to catch it."});
-  if(side==="b")el.style.left=`calc(${8+Math.random()*52}% )`;
+  // Cameos are a pointer game: out of the Tab order and hidden from screen readers, so nothing appears in the focus path by surprise.
+  const el=h("button",{class:"peek alive peek-"+side,type:"button",tabindex:"-1","aria-hidden":"true"});
+  if(side==="b")el.style.left=`calc(${8+Math.random()*32}% )`;
   else el.style.top=`${30+Math.random()*40}vh`;
   const r=h("span",{class:"pr"});r.append(krysa(Math.random()<.25?"sus":"classic"));el.append(r);
   el.addEventListener("click",()=>catchPeek(el));
@@ -66,14 +67,15 @@ export function peek(side){
 
 export function tailDangle(){
   const top=0;
-  const el=h("button",{class:"tail-dangle",type:"button","aria-label":"A rat tail is dangling. Tap to catch it.",style:`top:${top}px;left:${15+Math.random()*65}%`});
+  const el=h("button",{class:"tail-dangle",type:"button",tabindex:"-1","aria-hidden":"true",style:`top:${top}px;left:${15+Math.random()*65}%`});
   el.append(svg(`<path d="M14 0 C14 26 6 40 12 58 C17 74 7 90 12 86" fill="none" stroke="${RAT.pink}" stroke-width="4" stroke-linecap="round"/>`,"0 0 28 96"));
   el.addEventListener("click",()=>{if(el.classList.contains("caught"))return;el.classList.add("caught");const r=el.getBoundingClientRect();eek(r.left+14,r.top+30,"Hey, that's attached!");caughtRat();setTimeout(()=>el.remove(),300)});
   el.addEventListener("animationend",e=>{if(e.target===el&&!el.classList.contains("caught"))el.remove()});
   document.body.append(el);
 }
 
-export function canCameo(){return IDLE.on&&!reduced()&&document.visibilityState==="visible"&&!document.querySelector(".scrim,.peek,.tail-dangle,.scurry")&&Date.now()-IDLE.last>4000}
+// Not while something is open or someone is typing.
+export function canCameo(){return IDLE.on&&!reduced()&&document.visibilityState==="visible"&&!document.querySelector(".scrim,.lightbox,.ratv,.wrapped,#gate,.peek,.tail-dangle,.scurry")&&!document.activeElement?.matches?.("input,select,textarea")&&Date.now()-IDLE.last>4000}
 
 export function scheduleCameo(first?){clearTimeout((scheduleCameo as any).t);if(!IDLE.on)return;
   (scheduleCameo as any).t=setTimeout(()=>{if(canCameo()){const acts=[()=>peek("b"),()=>peek("b"),()=>peek("r"),()=>peek("l"),tailDangle,()=>scurry({dir:Math.random()<.5?1:-1,cheese:Math.random()<.6})];acts[Math.floor(Math.random()*acts.length)]()}scheduleCameo()},(first?15+Math.random()*10:25+Math.random()*35)*1000)}
