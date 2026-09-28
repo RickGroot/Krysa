@@ -82,7 +82,7 @@ export function joinWithTripCode(sb: SupabaseClient, fromLink: string | null): P
       msg,
     );
     screen(
-      h("div", { class: "greet", text: "Praha by night" }),
+      h("div", { class: "eyebrow", text: "Praha by night" }),
       h("h1", { class: "gate-title", text: "Krysa" }),
       h("p", { text: "The team planner for the FrontKon week. Enter the trip code to see the plan and the Rat Wall. You only need to do this once on each device." }),
       form,
