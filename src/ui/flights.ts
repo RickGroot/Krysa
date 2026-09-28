@@ -39,7 +39,7 @@ function flightCard(legs,now){
       checkin&&h("div",null,h("div",{class:"k",text:"Online check-in opens"}),h("div",{class:"v",text:fmtStamp(checkin)})),
       dep&&f.from==="PRG"&&h("div",null,h("div",{class:"k",text:"Be at the airport by"}),h("div",{class:"v",text:fmtStamp(dep-2*3600000)+" (desk closes "+fmtStamp(dep-40*60000).slice(-5)+")"})),
       dep&&f.to==="PRG"&&h("div",null,h("div",{class:"k",text:"Into town"}),h("div",{class:"v",text:"Allow about 45 min into town"}))),
-    h("div",{class:"fl-book"},h("div",{class:"k",style:"font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)",text:"Bookings"}),
+    h("div",{class:"fl-book"},h("div",{class:"k",text:"Bookings"}),
       legs.map(l=>h("div",{class:"bk"},maskedCode(l.booking,"code:"+l.id),l.booking&&copyBtn(l.booking,"copy:"+l.id),h("span",{text:(Array.isArray(l.people)?l.people.map(pname).join(", "):"")+(l.note?" · "+l.note:"")}),S.canWrite&&h("button",{class:"btn small ghost",type:"button","data-k":"edit:flights:"+l.id,onclick:()=>editFlight(l)},"Edit")))),
     h("div",{class:"fl-links"},h("a",{href:`https://www.google.com/search?q=${encodeURIComponent((f.flight||"")+" flight status")}`,target:"_blank",rel:"noopener",text:"Flight status"}),(()=>{const r=checkInRule(f.airline);return r.url?h("a",{href:r.url,target:"_blank",rel:"noopener",text:`Check in at ${f.airline.trim()}`}):null})()));
 }
@@ -66,5 +66,5 @@ export function maskedCode(code,key?){
   const dots="•".repeat(Math.min(code.length,6));const c=h("code",{text:dots,"aria-hidden":"true"});let shown=false,t;
   const set=v=>{shown=v;c.textContent=v?code:dots;if(v)c.removeAttribute("aria-hidden");else c.setAttribute("aria-hidden","true");b.textContent=v?"Hide code":"Show code"};
   const b=h("button",{class:"btn small ghost",type:"button","data-k":key,onclick:()=>{set(!shown);clearTimeout(t);if(shown)t=setTimeout(()=>set(false),20000)}},"Show code");
-  return h("span",{style:"display:inline-flex;gap:4px;align-items:center"},c,b);
+  return h("span",{class:"code-mask"},c,b);
 }

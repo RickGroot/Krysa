@@ -30,7 +30,7 @@ export function mediaFor(r,opts: any = {}){
   if(r.type==="meme")media.append(opts.bare||opts.fresh?memeEl(r,r.id):memeCached(r));
   else if(r.assetId&&/^[A-Za-z0-9_-]{8,64}$/.test(r.assetId)){const src=null;
     const m=r.type==="video"?h("video",{src,controls:!opts.bare,loop:true,muted:true,playsinline:true,autoplay:!!opts.autoplay,preload:"metadata"}):h("img",{src,alt:r.caption||"Rat meme",loading:"lazy"});
-    m.addEventListener("error",()=>m.replaceWith(h("p",{class:"empty",style:"padding:24px",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
+    m.addEventListener("error",()=>m.replaceWith(h("p",{class:"empty escaped",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
   return media;
 }
 
@@ -44,7 +44,7 @@ export function postCard(r,o: any = {}){
   const media=mediaFor(r,{fresh:o.fresh});
   if(S.wall.view==="grid")media.append(h("button",{class:"media-hit",type:"button","data-k":"open:"+r.id,"aria-label":r.caption?`Open "${r.caption}"`:"Open this rat",onclick:()=>openLightbox(r)}));
   return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
-    h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
+    h("div",{class:"post-acts"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
 }
 
 export function openLightbox(r){let ov;const close=()=>ov.close();
@@ -110,7 +110,7 @@ export function openCatchers(){
       if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}draw()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
     sheet.replaceChildren(h("h3",{id:"catch-t",tabindex:"-1",autofocus:true,text:"Rat catchers"}),
       h("div",{class:"sectionhead"},h("p",{text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the app is open, rats sneak in from the edges now and then. Tap one to catch it."}),toggle),
-      entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money",style:"font-weight:700;justify-self:end",text:`${n} rat${n===1?"":"s"}`})]))
+      entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money score",text:`${n} rat${n===1?"":"s"}`})]))
         :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}),
       h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"))))});
   draw();ov=openOverlay({labelledby:"catch-t",content:sheet});

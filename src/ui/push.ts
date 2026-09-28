@@ -79,7 +79,7 @@ export function openNotifications(){
     sheet.replaceChildren(
       h("h3",{id:"push-t",tabindex:"-1",text:"Notifications"}),
       h("p",{class:"muted",text:"A ping on this device, even when Krysa is closed. Each phone or browser switches on by itself."}),
-      h("div",{class:"checks",style:"flex-direction:column;align-items:flex-start;gap:10px"},
+      h("div",{class:"checks stack"},
         box("reminders","Reminders: check-in, leaving for the airport, what's next and to-dos that are due"),
         box("posts","New rats on the wall")),
       h("p",{class:"muted",text:blocker||(on?"On for this device.":"Off for this device.")}),

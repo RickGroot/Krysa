@@ -23,17 +23,8 @@ export function render(){
   const i=S.info;
   document.getElementById("title").textContent=i.title||"Prague week";
   {const hr=new Date().getHours();document.getElementById("greet").textContent=(hr<11?"Dobré ráno":hr<18?"Dobrý den":"Dobrý večer")+(S.meName?`, ${S.meName}`:"")}
-  const sub=document.getElementById("sub");sub.replaceChildren();
-  if(i.startDate&&i.endDate){sub.append(h("span",null,h("b",{text:fmtD(i.startDate)})," → ",h("b",{text:fmtD(i.endDate)})));
-    const diff=Math.round((+parseD(i.startDate)-+parseD(todayIso()))/864e5),end=Math.round((+parseD(i.endDate)-+parseD(todayIso()))/864e5);
-    sub.append(h("span",{text:diff>1?`${diff} days to go`:diff===1?"Tomorrow":end>=0?"Happening now":"Trip done"}))}
-  else sub.append(h("span",{text:"Dates not set yet"}));
-  if(i.hotelName)sub.append(h("span",{text:"Stay: "+i.hotelName}));
-  sub.append(h("span",{text:`${S.people.length} travelling`}));
   const open=S.todos.filter(t=>!t.done).length;
-  document.getElementById("c-ideas").textContent=S.ideas.length?S.ideas.length:"";
   document.getElementById("c-todo").textContent=open?open:"";document.getElementById("c-todo-sr").textContent=open?`, ${open} open to-do${open===1?"":"s"}`:"";
-  document.getElementById("c-rats").textContent=S.rats.length?S.rats.length:"";
   const fab=document.getElementById("fab"),add=ADD[S.tab];fab.hidden=!add||!S.canWrite||!S.loaded||!S.tabReady;if(add)fab.textContent=add[0];
   // Nothing tab-specific until the start tab is decided (boot.ts).
   if(S.tabReady){document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
@@ -77,7 +68,7 @@ export function renderPlan(main){
   if(live)main.append(daySection(today,true));
   const drafts=S.events.filter(e=>e.draft).length;
   if(drafts&&S.canWrite){const rm=armBtn(h("button",{class:"btn small ghost danger","data-k":"drafts:remove"},"Remove all"),"Tap again to remove",()=>bulkDrafts(false));
-    main.append(h("div",{class:"banner"},h("span",{text:`${drafts} suggested items (dashed). Tap one to keep, change or delete it.`}),h("span",{style:"display:flex;gap:6px"},h("button",{class:"btn small","data-k":"drafts:keep",onclick:()=>bulkDrafts(true)},"Keep all"),rm)))}
+    main.append(h("div",{class:"banner"},h("span",{text:`${drafts} suggested items (dashed). Tap one to keep, change or delete it.`}),h("span",{class:"banner-acts"},h("button",{class:"btn small","data-k":"drafts:keep",onclick:()=>bulkDrafts(true)},"Keep all"),rm)))}
   if(!days.length)return;
   main.append(h("div",{class:"daystrip"},days.map(d=>{const dt=parseD(d);return h("a",{href:"#"+anchor(d),class:d===today?"today":null,"data-k":"day:"+d,onclick:e=>{e.preventDefault();document.getElementById(anchor(d))?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}},h("span",{class:"cz",text:`${CZ[dt.getUTCDay()]} · ${EN[dt.getUTCDay()]}`}),h("span",{class:"n",text:dt.getUTCDate()}))})));
   for(const d of days)if(!(live&&d===today))main.append(daySection(d,false));
@@ -149,7 +140,7 @@ export function renderMoney(main){
   if(xs.length)main.append(h("div",{class:"list"},xs.map(x=>{const d=parseD(x.date);const n=Array.isArray(x.split)?x.split.length:S.people.length;
     return h("div",{class:"row"},h("span",{class:"walk",text:d?`${CZ[d.getUTCDay()]} ${d.getUTCDate()}`:""}),
       h("div",{class:"main"},h("div",{class:"ti",text:x.what}),h("div",{class:"meta",text:`${pname(x.paidBy)} paid · split ${n} way${n===1?"":"s"}${x.currency==="EUR"?` · ≈ ${fmtCzk(toCzk(x))}`:""}`})),
-      h("div",{class:"acts"},h("span",{class:"money",style:"font-weight:600",text:fmtAmt(x)}),S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:expenses:"+x.id,onclick:()=>editExpense(x)},"Edit")))})));
+      h("div",{class:"acts"},h("span",{class:"money amt",text:fmtAmt(x)}),S.canWrite&&h("button",{class:"btn small ghost","data-k":"edit:expenses:"+x.id,onclick:()=>editExpense(x)},"Edit")))})));
 }
 
 export function fmtDT(s){if(!s)return"";const[d,t]=splitDT(s);return fmtD(d)+(t?" "+t:"")}
