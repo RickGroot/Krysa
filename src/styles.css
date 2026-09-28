@@ -27,6 +27,8 @@ img{max-width:100%}
 body{background:var(--bg);background-image:radial-gradient(900px 420px at 50% -160px,var(--bg-glow),transparent 72%);background-repeat:no-repeat;color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.5;padding-inline:16px;padding-block:0 calc(120px + env(safe-area-inset-bottom,0px));font-variant-numeric:tabular-nums}
 .wrap{max-width:600px;margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
+/* 16px at least: iOS zooms the page into any smaller field on focus. */
+input,select,textarea{font-size:max(16px,1em)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .skip{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:800;text-decoration:none;transform:translateY(calc(-100% - 24px))}
 .skip:focus{transform:none}
@@ -173,7 +175,7 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 .filters button[aria-pressed="true"]{border-color:var(--tram);background:var(--tram);color:var(--tram-ink)}
 .checks{display:flex;flex-wrap:wrap;gap:6px 14px}
 .checks label{display:flex;gap:6px;align-items:center;font-weight:600;color:var(--ink);font-size:14.5px}
-.checks input{width:18px;height:18px;accent-color:var(--tram)}
+.checks input{width:18px;height:18px;flex:none;accent-color:var(--tram)}
 
 /* money */
 .money{white-space:nowrap}
