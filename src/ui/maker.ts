@@ -32,7 +32,7 @@ export function postRat(prefill?){
   const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
   const close=()=>{if(st.url)URL.revokeObjectURL(st.url);scrim.remove();document.removeEventListener("keydown",esc)};
   const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const err=h("div",{class:"err"});const body=h("div",{class:"mk",style:"display:grid;gap:12px"});
+  const err=h("div",{class:"err",role:"alert"});const body=h("div",{class:"mk",style:"display:grid;gap:12px"});
   const submit=h("button",{class:"btn primary",type:"submit"},"Post rat");
   let formEl=null;
   const prev=h("div",{class:"mk-prev"});
@@ -88,7 +88,7 @@ export function postRat(prefill?){
   const form=h("form",{class:"sheet","aria-labelledby":"mk-title",onsubmit:async e=>{e.preventDefault();err.textContent="";
       const base={caption:st.caption.trim(),by:S.uid,createdAt:new Date().toISOString(),squeaks:{}};
       if(st.mode==="upload"){
-        if(!st.file){err.textContent="Pick a file first";return}
+        if(!st.file){err.textContent="Pick a file first";document.getElementById("rat-file")?.focus();return}
         submit.disabled=true;submit.textContent="Uploading…";
         try{const prep=await prepFile(st.file);if(!prep){throw{code:"unsupported_type"}}
           const up=await S.assets.upload(prep.blob);

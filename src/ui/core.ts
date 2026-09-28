@@ -28,20 +28,24 @@ export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: 
   const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim)close()}});
   const close=()=>{scrim.remove();document.removeEventListener("keydown",esc)};
   const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
-  const err=h("div",{class:"err"});
-  const get={};
-  const mk=f=>{const id="f-"+f.id;let el;
+  const tid="sheet-t"+(++sheetN);
+  // role=alert from the start, so a message set later is announced.
+  const err=h("div",{class:"err",id:tid+"-err",role:"alert"});
+  const get={},els={};
+  const mk=f=>{const id="f-"+f.id;let el;const done=x=>(els[f.id]=el,x);
     if(f.type==="checks"){el=h("div",{class:"checks",id},f.options.map(([v,l])=>h("label",null,h("input",{type:"checkbox",value:v,checked:(f.value||[]).includes(v)}),l)));
-      get[f.id]=()=>[...el.querySelectorAll("input:checked")].map(x=>x.value);return h("div",{class:"field"},h("span",{class:"lbl",text:f.label}),el)}
-    if(f.type==="select"){el=h("select",{id},f.options.map(([v,l])=>h("option",{value:v,selected:String(f.value??"")===v},l)))}
-    else if(f.type==="textarea"){el=h("textarea",{id,placeholder:f.placeholder||""});el.value=f.value||""}
-    else{el=h("input",{id,type:f.type||"text",placeholder:f.placeholder||"",autocomplete:"off",inputmode:f.inputmode});el.value=f.value??""}
-    get[f.id]=()=>el.value.trim();return h("div",{class:"field"},h("label",{for:id,text:f.label}),el)};
+      get[f.id]=()=>[...el.querySelectorAll("input:checked")].map(x=>x.value);return done(h("div",{class:"field"},h("span",{class:"lbl",text:f.label}),el))}
+    if(f.type==="select"){el=h("select",{id,required:f.req},f.options.map(([v,l])=>h("option",{value:v,selected:String(f.value??"")===v},l)))}
+    else if(f.type==="textarea"){el=h("textarea",{id,required:f.req,placeholder:f.placeholder||""});el.value=f.value||""}
+    else{el=h("input",{id,type:f.type||"text",required:f.req,placeholder:f.placeholder||"",autocomplete:"off",inputmode:f.inputmode});el.value=f.value??""}
+    get[f.id]=()=>el.value.trim();return done(h("div",{class:"field"},h("label",{for:id,text:f.label}),el))};
   const body=[];for(const f of fields){if(Array.isArray(f))body.push(h("div",{class:"grid2"},f.map(mk)));else body.push(mk(f))}
   let armed=false;
   const del=onDelete?h("button",{class:"btn danger ghost",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again to delete";return}if(await onDelete())close()}},"Delete"):null;
-  const tid="sheet-t"+(++sheetN);
-  const form=h("form",{class:"sheet","aria-labelledby":tid,onsubmit:async e=>{e.preventDefault();const v={};for(const k in get)v[k]=get[k]();const r=await onSave(v);if(typeof r==="string"){err.textContent=r}else if(r!==false)close()}},
+  // onSave returns a message, or {msg, field} to point at the field that needs fixing.
+  const fail=(msg,field)=>{err.textContent=msg;const el=els[field];const t=el&&(el.matches("input,select,textarea")?el:el.querySelector("input"));if(t){t.setAttribute("aria-invalid","true");t.setAttribute("aria-describedby",err.id);t.focus()}};
+  const form=h("form",{class:"sheet","aria-labelledby":tid,novalidate:true,onsubmit:async e=>{e.preventDefault();form.querySelectorAll("[aria-invalid]").forEach(x=>{x.removeAttribute("aria-invalid");x.removeAttribute("aria-describedby")});
+    const v={};for(const k in get)v[k]=get[k]();const r=await onSave(v);if(typeof r==="string")fail(r,null);else if(r&&typeof r==="object")fail(r.msg,r.field);else if(r!==false)close()}},
     h("h3",{id:tid,text:title}),...body,err,
     h("div",{class:"sheetacts"},del,h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel"),h("button",{class:"btn primary",type:"submit"},saveLabel))));
   scrim.append(form);document.body.append(scrim);

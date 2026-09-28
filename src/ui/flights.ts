@@ -45,13 +45,13 @@ export function renderFlights(main){
 export function editFlight(f: any = {}){
   const all=S.people.map(p=>[p.id,p.name||"Someone"]);
   openSheet({title:f.id?"Edit booking":"Add a flight booking",
-    fields:[[{id:"flight",label:"Flight number",value:f.flight,placeholder:"AB1234"},{id:"date",label:"Date",type:"date",value:f.date}],
+    fields:[[{id:"flight",label:"Flight number",req:true,value:f.flight,placeholder:"AB1234"},{id:"date",label:"Date",type:"date",req:true,value:f.date}],
       [{id:"from",label:"From (airport code)",value:f.from||"AMS",placeholder:"AMS"},{id:"to",label:"To (airport code)",value:f.to||"PRG",placeholder:"PRG"}],
       [{id:"dep",label:"Departs",type:"time",value:f.dep},{id:"arr",label:"Lands",type:"time",value:f.arr}],
       [{id:"booking",label:"Booking code",value:f.booking,placeholder:"ABC123"},{id:"airline",label:"Airline",value:f.airline||"",placeholder:"KLM"}],
       {id:"note",label:"Note",value:f.note,placeholder:"Booked via the travel desk, seat 12A…"},
       {id:"people",label:"Who's on this booking",type:"checks",options:all,value:f.people||[]}],
-    onSave:v=>{if(!/^[A-Za-z0-9 ]{2,10}$/.test(v.flight))return"Add a flight number like AB1234";if(!v.date)return"Pick the date";
+    onSave:v=>{if(!/^[A-Za-z0-9 ]{2,10}$/.test(v.flight))return{msg:"Add a flight number like AB1234",field:"flight"};if(!v.date)return{msg:"Pick the date",field:"date"};
       const data: any={flight:v.flight.toUpperCase().replace(/\s+/g,""),date:v.date,from:v.from.toUpperCase().slice(0,4),to:v.to.toUpperCase().slice(0,4),dep:v.dep,arr:v.arr,booking:v.booking.toUpperCase(),airline:v.airline,note:v.note,people:v.people};
       if(f.id)return write(()=>S.db.doc("flights/"+f.id).update(data),"Saved");
       return write(()=>S.db.collection("flights").add(data),"Flight added")},

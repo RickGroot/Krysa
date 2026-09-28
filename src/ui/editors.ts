@@ -12,12 +12,12 @@ import { scurry } from "./idle";
 export function editEvent(ev: any = {},preset: any = {}){
   const days=tripDays();const d=ev.date||preset.date||days[0]||"";
   openSheet({title:ev.id?(ev.draft?"Suggested plan item":"Edit plan item"):"Add to the plan",saveLabel:ev.draft?"Keep":"Save",
-    fields:[{id:"title",label:"What",value:ev.title||preset.title,placeholder:"Team dinner at Lokál"},
-      [{id:"date",label:"Day",type:"date",value:d},{id:"kind",label:"Type",type:"select",options:kindOpts,value:ev.kind||preset.kind||"work"}],
+    fields:[{id:"title",label:"What",req:true,value:ev.title||preset.title,placeholder:"Team dinner at Lokál"},
+      [{id:"date",label:"Day",type:"date",req:true,value:d},{id:"kind",label:"Type",type:"select",options:kindOpts,value:ev.kind||preset.kind||"work"}],
       [{id:"time",label:"Start",type:"time",value:ev.time},{id:"endTime",label:"End",type:"time",value:ev.endTime}],
       {id:"location",label:"Where",value:ev.location??preset.location,placeholder:"Place name and street"},
       {id:"notes",label:"Notes",type:"textarea",value:ev.notes??preset.notes,placeholder:"Who's joining, booking ref, dress code…"}],
-    onSave:async v=>{if(!v.title)return"Give it a name first";if(!v.date)return"Pick a day";
+    onSave:async v=>{if(!v.title)return{msg:"Give it a name first",field:"title"};if(!v.date)return{msg:"Pick a day",field:"date"};
       const data: any={title:v.title,date:v.date,kind:v.kind,time:v.time,endTime:v.endTime,location:v.location,notes:v.notes,draft:false,updatedAt:new Date().toISOString()};
       if(ev.id){if(v.location!==(ev.location||"")){data.lat=null;data.lng=null}return write(()=>S.db.doc("events/"+ev.id).update(data),ev.draft?"Kept":"Saved")}
       data.createdBy=S.uid;data.createdAt=data.updatedAt;
@@ -30,12 +30,12 @@ export function editEvent(ev: any = {},preset: any = {}){
 
 export function editIdea(it: any = {}){
   openSheet({title:it.id?"Edit idea":"Suggest something",
-    fields:[{id:"title",label:"Idea",value:it.title,placeholder:"Sunset beers at Letná"},
+    fields:[{id:"title",label:"Idea",req:true,value:it.title,placeholder:"Sunset beers at Letná"},
       {id:"kind",label:"Type",type:"select",options:kindOpts,value:it.kind||"food"},
       {id:"location",label:"Where",value:it.location,placeholder:"Place name and street"},
       {id:"link",label:"Link",type:"url",value:it.link,placeholder:"https://…"},
       {id:"notes",label:"Why / details",type:"textarea",value:it.notes}],
-    onSave:v=>{if(!v.title)return"Describe the idea first";if(v.link&&!/^https?:\/\//i.test(v.link))return"Links start with https://";
+    onSave:v=>{if(!v.title)return{msg:"Describe the idea first",field:"title"};if(v.link&&!/^https?:\/\//i.test(v.link))return{msg:"Links start with https://",field:"link"};
       const data: any={title:v.title,kind:v.kind,location:v.location,link:v.link,notes:v.notes};
       if(it.id){if(v.location!==(it.location||"")){data.lat=null;data.lng=null}return write(()=>S.db.doc("ideas/"+it.id).update(data),"Saved")}
       return write(()=>S.db.collection("ideas").add({...data,votes:S.uid?{[S.uid]:true}:{},createdBy:S.uid,createdAt:new Date().toISOString()}),"Idea added")},
@@ -44,9 +44,9 @@ export function editIdea(it: any = {}){
 
 export function editTodo(t: any = {}){
   openSheet({title:t.id?"Edit to-do":"New to-do",
-    fields:[{id:"text",label:"Task",value:t.text,placeholder:"Book the team dinner"},
+    fields:[{id:"text",label:"Task",req:true,value:t.text,placeholder:"Book the team dinner"},
       [{id:"owner",label:"Who",value:t.owner,placeholder:"Name"},{id:"due",label:"By",type:"date",value:t.due}]],
-    onSave:v=>{if(!v.text)return"Write the task first";const data: any={text:v.text,owner:v.owner,due:v.due};
+    onSave:v=>{if(!v.text)return{msg:"Write the task first",field:"text"};const data: any={text:v.text,owner:v.owner,due:v.due};
       if(t.id)return write(()=>S.db.doc("todos/"+t.id).update(data),"Saved");
       return write(()=>S.db.collection("todos").add({...data,done:false,createdAt:new Date().toISOString()}),"Added")},
     onDelete:t.id?()=>removeDocs([snapOf("todos",t)],"To-do deleted"):null});
@@ -55,13 +55,13 @@ export function editTodo(t: any = {}){
 export function editPerson(p: any = {}){
   const[ad,at]=splitDT(p.arrive),[dd,dt]=splitDT(p.depart);
   openSheet({title:p.id?"Edit traveller":"Add traveller",
-    fields:[{id:"name",label:"Name",value:p.name},
+    fields:[{id:"name",label:"Name",req:true,value:p.name},
       [{id:"ad",label:"Arrives",type:"date",value:ad},{id:"at",label:"Landing time",type:"time",value:at}],
       {id:"arriveBy",label:"Flight / train in",value:p.arriveBy,placeholder:"e.g. AB1234"},
       [{id:"dd",label:"Leaves",type:"date",value:dd},{id:"dt",label:"Departure time",type:"time",value:dt}],
       {id:"departBy",label:"Flight / train out",value:p.departBy,placeholder:"e.g. AB1235"},
       {id:"phone",label:"Phone (optional)",type:"tel",value:p.phone},{id:"notes",label:"Notes",value:p.notes,placeholder:"Diet, room, anything useful"}],
-    onSave:v=>{if(!v.name)return"Add a name";
+    onSave:v=>{if(!v.name)return{msg:"Add a name",field:"name"};
       const data: any={name:v.name,arrive:joinDT(v.ad,v.at),arriveBy:v.arriveBy,depart:joinDT(v.dd,v.dt),departBy:v.departBy,phone:v.phone,notes:v.notes};
       if(p.id)return write(()=>S.db.doc("people/"+p.id).update(data),"Saved");
       return write(()=>S.db.collection("people").add(data),"Added")},
@@ -78,7 +78,7 @@ export function editInfo(){
       {id:"booking",label:"Booking reference / key code",value:i.booking},
       {id:"workBase",label:"Work location",value:i.workBase,placeholder:"Office / venue address"},
       {id:"notes",label:"General notes",type:"textarea",value:i.notes}],
-    onSave:v=>{if(v.startDate&&v.endDate&&v.endDate<v.startDate)return"The last day is before the first day";
+    onSave:v=>{if(v.startDate&&v.endDate&&v.endDate<v.startDate)return{msg:"The last day is before the first day",field:"endDate"};
       return write(()=>S.db.doc("trip/info").set({...S.info,...v}),"Trip details saved")}});
 }
 
@@ -90,12 +90,12 @@ export function editExpense(x: any = {}){
   const all=S.people.map(p=>[p.id,p.name||"Someone"]);
   const payer=x.paidBy||defaultPayer(S.people,S.meName,lastPayer());
   openSheet({title:x.id?"Edit expense":"Log an expense",
-    fields:[{id:"what",label:"What",value:x.what,placeholder:"Dinner at Lokál"},
-      [{id:"amount",label:"Amount",value:x.amount!=null?String(x.amount):"",inputmode:"decimal",placeholder:"1250"},{id:"currency",label:"Currency",type:"select",options:[["CZK","CZK (Kč)"],["EUR","EUR (€)"]],value:x.currency||"CZK"}],
-      [{id:"paidBy",label:"Paid by",type:"select",options:payer?all:[["","Who paid?"],...all],value:payer},{id:"date",label:"Day",type:"date",value:x.date||todayIso()}],
+    fields:[{id:"what",label:"What",req:true,value:x.what,placeholder:"Dinner at Lokál"},
+      [{id:"amount",label:"Amount",req:true,value:x.amount!=null?String(x.amount):"",inputmode:"decimal",placeholder:"1250"},{id:"currency",label:"Currency",type:"select",options:[["CZK","CZK (Kč)"],["EUR","EUR (€)"]],value:x.currency||"CZK"}],
+      [{id:"paidBy",label:"Paid by",type:"select",req:true,options:payer?all:[["","Who paid?"],...all],value:payer},{id:"date",label:"Day",type:"date",value:x.date||todayIso()}],
       {id:"split",label:"Split between",type:"checks",options:all,value:x.split||S.people.map(p=>p.id)}],
     onSave:v=>{const amount=parseFloat(String(v.amount).replace(/\s/g,"").replace(",","."));
-      if(!v.what)return"Say what it was for";if(!(amount>0))return"Enter an amount above zero";if(!v.paidBy)return"Pick who paid";if(!v.split.length)return"Pick at least one person to split with";
+      if(!v.what)return{msg:"Say what it was for",field:"what"};if(!(amount>0))return{msg:"Enter an amount above zero",field:"amount"};if(!v.paidBy)return{msg:"Pick who paid",field:"paidBy"};if(!v.split.length)return{msg:"Pick at least one person to split with",field:"split"};
       try{localStorage.setItem(PAYER_KEY,v.paidBy)}catch(e){}
       const data: any={what:v.what,amount:Math.round(amount*100)/100,currency:v.currency,paidBy:v.paidBy,date:v.date,split:v.split};
       if(x.id)return write(()=>S.db.doc("expenses/"+x.id).update(data),"Saved");
@@ -104,6 +104,6 @@ export function editExpense(x: any = {}){
 }
 
 export function editRate(){
-  openSheet({title:"Exchange rate",fields:[{id:"r",label:"CZK per 1 EUR",value:String(rate()),inputmode:"decimal"}],
-    onSave:v=>{const r=parseFloat(v.r.replace(",","."));if(!(r>1&&r<100))return"Enter a rate like 24.3";return write(()=>S.db.doc("trip/info").set({...S.info,eurCzk:r}),"Rate updated")}});
+  openSheet({title:"Exchange rate",fields:[{id:"r",label:"CZK per 1 EUR",req:true,value:String(rate()),inputmode:"decimal"}],
+    onSave:v=>{const r=parseFloat(v.r.replace(",","."));if(!(r>1&&r<100))return{msg:"Enter a rate like 24.3",field:"r"};return write(()=>S.db.doc("trip/info").set({...S.info,eurCzk:r}),"Rate updated")}});
 }
