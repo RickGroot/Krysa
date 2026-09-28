@@ -24,7 +24,7 @@ img{max-width:100%}
   }
 }
 *{box-sizing:border-box}
-body{background:var(--bg);background-image:radial-gradient(900px 420px at 50% -160px,var(--bg-glow),transparent 72%);background-repeat:no-repeat;color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.5;padding-inline:16px;padding-block:0 calc(120px + env(safe-area-inset-bottom,0px));font-variant-numeric:tabular-nums}
+body{background:var(--bg);background-image:radial-gradient(900px 420px at 50% -160px,var(--bg-glow),transparent 72%);background-repeat:no-repeat;color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.5;padding-inline:16px;padding-block:0 calc(156px + env(safe-area-inset-bottom,0px));font-variant-numeric:tabular-nums}
 .wrap{max-width:600px;margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
 /* 16px at least: iOS zooms the page into any smaller field on focus. */
@@ -147,6 +147,8 @@ dl.kv dt{color:var(--ink-2)} dl.kv dd{margin:0;overflow-wrap:anywhere}
 .sectionhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .sectionhead p{margin:0;color:var(--ink-2);font-size:14.5px}
 
+/* The add button steps aside while someone types in the page (the keyboard is up anyway). */
+body:has(main :is(input,select,textarea):focus) #fab{display:none}
 .fab{position:fixed;right:max(16px,calc(50% - 284px));bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:11;border:0;background:var(--tram);color:var(--tram-ink);border-radius:999px;padding:13px 20px;font-weight:800;font-size:15px;box-shadow:0 10px 24px color-mix(in srgb,var(--tram) 40%,transparent);cursor:pointer}
 
 /* sheet */

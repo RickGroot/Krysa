@@ -8,12 +8,16 @@ import { balances, rate, settle, toCzk, todayOn, tripDays, walkMin } from "./bou
 import { placeLine, removeDocs, snapOf, write } from "./core";
 import { h, keepFocus, toast } from "./dom";
 import { editEvent, editExpense, editIdea, editInfo, editPerson, editRate, editTodo } from "./editors";
-import { renderFlights } from "./flights";
+import { editFlight, renderFlights } from "./flights";
+import { postRat } from "./maker";
 import { scurry } from "./idle";
 import { watchAnims } from "./perf";
 import { paintStage } from "./stage";
 import { nowNextCard, planBadge, remindersEl } from "./timely";
 import { renderRats } from "./wall";
+
+// The one add button: what it adds follows the tab. Info has none; its cards have their own buttons.
+export const ADD={rats:["+ Rat",()=>postRat()],plan:["+ Plan item",()=>editEvent({},todayOn()?{date:todayIso()}:{})],flights:["+ Flight",()=>editFlight()],ideas:["+ Idea",()=>editIdea()],todo:["+ To-do",()=>editTodo()],money:["+ Expense",()=>editExpense()]};
 
 export function render(){
   const i=S.info;
@@ -30,7 +34,7 @@ export function render(){
   document.getElementById("c-ideas").textContent=S.ideas.length?S.ideas.length:"";
   document.getElementById("c-todo").textContent=open?open:"";document.getElementById("c-todo-sr").textContent=open?`, ${open} open to-do${open===1?"":"s"}`:"";
   document.getElementById("c-rats").textContent=S.rats.length?S.rats.length:"";
-  const fab=document.getElementById("fab");fab.hidden=!S.canWrite||!S.loaded||!S.tabReady;
+  const fab=document.getElementById("fab"),add=ADD[S.tab];fab.hidden=!add||!S.canWrite||!S.loaded||!S.tabReady;if(add)fab.textContent=add[0];
   // Nothing tab-specific until the start tab is decided (boot.ts).
   if(S.tabReady){document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>{if(b.dataset.tab===S.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});document.getElementById("more-btn").classList.toggle("here",["todo","money","info"].includes(S.tab));
     paintStage();planBadge()}
@@ -93,7 +97,7 @@ function daySection(d,isToday){
 export function voteCount(it){return Object.values(it.votes||{}).filter(Boolean).length}
 
 export function renderIdeas(main){
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"Suggest places and vote. Move winners into the plan."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:idea",onclick:()=>editIdea()},"+ Idea")));
+  main.append(h("div",{class:"sectionhead"},h("p",{text:"Suggest places and vote. Move winners into the plan."})));
   const present=Object.keys(KINDS).filter(k=>S.ideas.some(i=>i.kind===k));
   if(present.length>1){if(S.ideaFilter!=="all"&&!present.includes(S.ideaFilter))S.ideaFilter="all";
     main.append(h("div",{class:"filters"},[["all","All"],...present.map(k=>[k,KINDS[k]])].map(([k,l])=>h("button",{"data-k":"filter:"+k,"aria-pressed":S.ideaFilter===k,onclick:()=>{S.ideaFilter=k;render()}},l+(k==="all"?"":` ${S.ideas.filter(i=>i.kind===k).length}`)))))}
@@ -109,7 +113,7 @@ export function renderIdeas(main){
 }
 
 export function renderTodo(main){
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"Bookings and prep. Tick them off as you go."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:todo",onclick:()=>editTodo()},"+ To-do")));
+  main.append(h("div",{class:"sectionhead"},h("p",{text:"Bookings and prep. Tick them off as you go."})));
   const ts=[...S.todos].sort((a,b)=>(a.done-b.done)||(a.due||"9").localeCompare(b.due||"9"));
   if(!ts.length){main.append(h("p",{class:"empty",text:"Nothing to do. The rats are suspicious."}));return}
   main.append(h("div",{class:"list"},ts.map(t=>h("div",{class:"row"+(t.done?" done":"")},
@@ -131,7 +135,7 @@ export function convCard(){
 }
 
 export function renderMoney(main){
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"Log shared costs. Each one splits evenly between the people ticked."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:expense",onclick:()=>editExpense()},"+ Expense")));
+  main.append(h("div",{class:"sectionhead"},h("p",{text:"Log shared costs. Each one splits evenly between the people ticked."})));
   main.append(convCard());
   const total=S.expenses.reduce((s,e)=>s+toCzk(e),0);
   const bal=balances(),moves=settle(bal);

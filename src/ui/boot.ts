@@ -4,19 +4,16 @@ import { krysa } from "../art/rat";
 import { startTab } from "../lib/schedule";
 import { S, TABS } from "../state";
 import { tripLive } from "./bound";
-import { editEvent, editExpense, editIdea, editPerson, editTodo } from "./editors";
-import { editFlight } from "./flights";
 import { ratSays, setupIdle } from "./idle";
-import { postRat } from "./maker";
 import { syncPush } from "./push";
 import { goTab, openMore } from "./stage";
-import { render } from "./tabs";
+import { ADD, render } from "./tabs";
 import type { Runtime } from "../data/runtime";
 
 export function boot(RUNTIME: Runtime){
 document.querySelectorAll("nav.tabs button[data-tab]").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.tab)));
 document.getElementById("more-btn").addEventListener("click",openMore);
-document.getElementById("fab").addEventListener("click",()=>({plan:()=>editEvent(),ideas:()=>editIdea(),todo:()=>editTodo(),money:()=>editExpense(),info:()=>editPerson(),rats:()=>postRat(),flights:()=>editFlight()})[S.tab]());
+document.getElementById("fab").addEventListener("click",()=>ADD[S.tab]?.[1]());
 // The start tab: a #link, else this session's pick. Otherwise it waits for the trip dates (Plan while the trip is on),
 // and the hero stays empty until then so the Rat Wall's scene doesn't flash first.
 const hashTab=location.hash.slice(1),pickTab=()=>startTab({hash:hashTab,saved:S.savedTab,live:tripLive()},TABS);
