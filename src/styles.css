@@ -127,6 +127,14 @@ section.day.is-today{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tram) 
 .row .meta{font-size:13.5px;color:var(--ink-2);overflow-wrap:anywhere}
 .row .meta a{color:var(--vltava)}
 .row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+/* Idea rows put their buttons under the title, so the title gets the width; notes stop at three lines. */
+.row.idea{grid-template-columns:auto 1fr;align-items:start}
+.row.idea .acts{grid-column:2;justify-content:flex-start}
+.row.idea .note{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* Other rows do the same when the list gets very narrow (200% zoom on a phone). */
+.list{container-type:inline-size}
+@container (max-width:300px){.row{grid-template-columns:auto 1fr}.row .acts{grid-column:2;justify-content:flex-start}}
+@container (max-width:200px){.row.idea{grid-template-columns:1fr}.row.idea .acts{grid-column:1}.row.idea .vote{justify-self:start}}
 .vote{display:grid;justify-items:center;border:1px solid var(--line);background:var(--surface-2);border-radius:16px;padding:5px 8px;min-width:48px;cursor:pointer}
 .vote .v{font-family:var(--display);font-weight:700;font-size:18px;line-height:1.1}
 .vote .l{font-size:10.5px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em}
@@ -176,7 +184,7 @@ html:has(body>:is(.scrim,.lightbox,.ratv,.wrapped)){overflow:hidden}
 .place a:hover{text-decoration:underline}
 .walk{font-size:12.5px;font-weight:700}
 .pill{display:inline-block;font-size:11px;font-weight:800;padding:1px 8px;border-radius:999px;background:var(--gold);color:var(--tram-ink);margin-left:8px;vertical-align:2px;letter-spacing:.04em}
-.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filters{display:flex;gap:6px;overflow-x:auto;padding:4px 2px;scrollbar-width:none}
 .filters button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--ink-2)}
 .filters button[aria-pressed="true"]{border-color:var(--tram);background:var(--tram);color:var(--tram-ink)}
 .checks{display:flex;flex-wrap:wrap;gap:6px 14px}
@@ -679,3 +687,11 @@ body[data-scene="light"] .greet{color:#7a2414}
 .gate-title{font-family:var(--display);font-size:34px;letter-spacing:.06em;margin:0}
 .gate-form{display:grid;gap:10px}
 .demo-banner{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:35;display:flex;gap:10px;align-items:center;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 16px;font-size:13px;font-weight:700;box-shadow:var(--shadow);width:max-content;max-width:calc(100% - 24px)}
+
+/* Tap targets: small controls keep their look but get a hit area of at least 44 × 44px. */
+.btn.small,.chips button,.filters button,.react,.linkish,.rm-close,.place a,.fl-links a,.row .meta a{position:relative}
+.btn.small::before,.chips button::before,.filters button::before,.react::before,.linkish::before,.rm-close::before,.place a::before,.fl-links a::before,.row .meta a::before{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}
+.btn.small,.chips button,.filters button,.react{min-height:36px}
+.vote{min-height:44px}
+/* Below 320px (a phone at 200% zoom) the tab bar keeps its icons; the names stay for screen readers. */
+@media (max-width:319px){nav.tabs button>span:first-of-type{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}

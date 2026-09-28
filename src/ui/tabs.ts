@@ -104,11 +104,11 @@ export function renderIdeas(main){
   const ideas=S.ideas.filter(i=>S.ideaFilter==="all"||i.kind===S.ideaFilter).sort((a,b)=>voteCount(b)-voteCount(a)||(walkMin(a)??99)-(walkMin(b)??99)||(a.title||"").localeCompare(b.title||""));
   if(!ideas.length){main.append(h("p",{class:"empty",text:"No ideas yet. Add the first one."}));return}
   main.append(h("div",{class:"list"},ideas.map(it=>{const mine=!!(S.uid&&it.votes&&it.votes[S.uid]);const k=KINDS[it.kind]?it.kind:"food";
-    return h("div",{class:"row"},
+    return h("div",{class:"row idea"},
       h("button",{class:"vote",type:"button","data-k":"vote:"+it.id,"aria-pressed":mine,"aria-label":`Vote for ${it.title} (${voteCount(it)})`,disabled:!S.canWrite||!S.uid,onclick:()=>write(()=>S.db.doc("ideas/"+it.id).update({votes:{[S.uid]:!mine}}))},h("span",{class:"v",text:voteCount(it)}),h("span",{class:"l",text:mine?"voted":"vote"})),
       h("div",{class:"main"},h("div",{class:"ti",text:it.title}),h("div",{class:"meta"},h("span",{class:"chip k-"+k,text:KINDS[k]}),it.scheduled&&` · planned ${fmtD(it.scheduled)}`),
         placeLine(it),
-        it.notes&&h("div",{class:"meta",text:it.notes}),it.link&&/^https?:\/\//i.test(it.link)&&h("div",{class:"meta"},h("a",{href:it.link,target:"_blank",rel:"noopener",text:it.link.replace(/^https?:\/\/(www\.)?/,"").slice(0,48)}))),
+        it.notes&&h("div",{class:"meta note",text:it.notes}),it.link&&/^https?:\/\//i.test(it.link)&&h("div",{class:"meta"},h("a",{href:it.link,target:"_blank",rel:"noopener",text:it.link.replace(/^https?:\/\/(www\.)?/,"").slice(0,48)}))),
       S.canWrite&&h("div",{class:"acts"},h("button",{class:"btn small","data-k":"plan:"+it.id,onclick:()=>editEvent({},{title:it.title,kind:it.kind,notes:it.notes,location:it.location,lat:it.lat,lng:it.lng,fromIdea:it.id})},"Plan it"),h("button",{class:"btn small ghost","data-k":"edit:ideas:"+it.id,onclick:()=>editIdea(it)},"Edit")))})));
 }
 
