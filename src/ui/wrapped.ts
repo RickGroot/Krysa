@@ -29,7 +29,7 @@ export function wrappedSlides(){
     {scene:"ideas",k:"The Rat Wall",big:`${rs.length} rat${rs.length===1?"":"s"}`,sub:`${memes} Krysa meme${memes===1?"":"s"}, ${rs.length-memes} upload${rs.length-memes===1?"":"s"} and ${love} reaction${love===1?"":"s"}.${topPoster?` Most prolific: ${nm(topPoster[0])} with ${topPoster[1]}.`:""}`},
     best&&loveOf(best)>0?{scene:"rats",k:"Most loved rat",media:best,sub:`${loveOf(best)} reaction${loveOf(best)===1?"":"s"}${best.by?` · posted by ${nm(best.by)}`:""}`}:null,
     {scene:"money",k:"Rat catcher champion",big:sc[0]?cn(sc[0]):"Nobody yet",sub:sc[0]?`${sc[0].n} rat${sc[0].n===1?"":"s"} caught.${sc[1]?` Runner-up: ${cn(sc[1])} with ${sc[1].n}.`:""}`:"The rats are still winning."},
-    {scene:"money",k:"Where the money went",big:fmtCzk(total),sub:S.expenses.length?`≈ ${fmtEur(total/rate())} across ${S.expenses.length} expense${S.expenses.length===1?"":"s"}.${big?` Biggest: ${big.what} (${fmtAmt(big)}).`:""}${topPayer?` ${pname(topPayer[0])} paid the most.`:""}`:"Nothing logged yet."},
+    {scene:"money",k:"Where the money went",big:fmtCzk(total),num:true,sub:S.expenses.length?`≈ ${fmtEur(total/rate())} across ${S.expenses.length} expense${S.expenses.length===1?"":"s"}.${big?` Biggest: ${big.what} (${fmtAmt(big)}).`:""}${topPayer?` ${pname(topPayer[0])} paid the most.`:""}`:"Nothing logged yet."},
     {scene:"plan",k:"The plan",big:`${S.events.filter(e=>!e.draft).length} plans`,sub:`${S.ideas.length} ideas${topIdea&&voteCount(topIdea)?`, fan favourite: ${topIdea.title}`:""}. ${done} to-do${done===1?"":"s"} ticked off.`},
     {scene:"flights",k:"Na shledanou, Praha",big:"See you next time",sub:"Krysa will guard the Airbnb until you're back.",rat:true},
   ].filter(Boolean);
@@ -44,7 +44,7 @@ export function openWrapped(){
   const show=n=>{i=Math.max(0,Math.min(slides.length-1,n));const s=slides[i];
     const sv=svg(SCENES[s.scene](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMid slice");sv.classList.add("wr-scene");
     const light=HERO[s.scene]&&HERO[s.scene].light;
-    const body=h("div",{class:"wr-body"+(light?" light":"")},h("div",{class:"wr-k",text:s.k}),s.big&&h("div",{class:"wr-big",text:s.big}),s.media&&h("div",{class:"wr-media"},mediaFor(s.media,{bare:true,autoplay:true})),s.rat&&(()=>{const k=h("div",{class:"wr-rat alive"});k.append(krysa("cheers"));return k})(),h("p",{class:"wr-sub",text:s.sub}));
+    const body=h("div",{class:"wr-body"+(light?" light":"")},h("div",{class:"wr-k",text:s.k}),s.big&&h("div",{class:"wr-big"+(s.num?" num":""),text:s.big}),s.media&&h("div",{class:"wr-media"},mediaFor(s.media,{bare:true,autoplay:true})),s.rat&&(()=>{const k=h("div",{class:"wr-rat alive"});k.append(krysa("cheers"));return k})(),h("p",{class:"wr-sub",text:s.sub}));
     stage.replaceChildren(sv,body);
     // Each bar is a CSS animation; the next slide comes on its animationend, so pausing it pauses the story.
     [...bars.children].forEach((b,j)=>{const f=b.firstChild;f.classList.remove("run");f.classList.toggle("done",j<i)});
