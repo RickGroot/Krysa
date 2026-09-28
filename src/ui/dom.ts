@@ -27,6 +27,13 @@ export function keepFocus(root,build){
   el.focus({preventScroll:true});if(sel&&el.setSelectionRange)try{el.setSelectionRange(sel[0],sel[1])}catch(e){}
 }
 
+/** A button that asks for a second tap: the first arms it and shows `label`; it disarms after `ms` or when focus leaves. */
+export function armBtn(btn,label,fn,ms=4000){let armed=false,t,idle="";
+  const disarm=()=>{armed=false;clearTimeout(t);btn.textContent=idle;btn.classList.remove("armed")};
+  btn.addEventListener("click",async e=>{if(!armed){armed=true;idle=btn.textContent;btn.textContent=label;btn.classList.add("armed");t=setTimeout(disarm,ms);return}disarm();await fn(e)});
+  btn.addEventListener("blur",()=>{if(armed)disarm()});
+  return btn}
+
 export const reduced=()=>{try{return matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){return false}};
 
 export function toastAction(msg,label,fn,ms=8000){

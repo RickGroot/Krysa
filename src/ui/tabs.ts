@@ -6,7 +6,7 @@ import { fmtAmt, fmtCzk, fmtEur } from "../lib/money";
 import { KINDS, S, pname } from "../state";
 import { balances, rate, settle, toCzk, todayOn, tripDays, walkMin } from "./bound";
 import { placeLine, removeDocs, snapOf, write } from "./core";
-import { h, keepFocus, toast } from "./dom";
+import { armBtn, h, keepFocus, toast } from "./dom";
 import { editEvent, editExpense, editIdea, editInfo, editPerson, editRate, editTodo } from "./editors";
 import { editFlight, renderFlights } from "./flights";
 import { postRat } from "./maker";
@@ -76,7 +76,7 @@ export function renderPlan(main){
   // While the trip is on, today comes first; the day strip and the other days follow.
   if(live)main.append(daySection(today,true));
   const drafts=S.events.filter(e=>e.draft).length;
-  if(drafts&&S.canWrite){let armed=false;const rm=h("button",{class:"btn small ghost danger","data-k":"drafts:remove",onclick:()=>{if(!armed){armed=true;rm.textContent="Tap again to remove";return}bulkDrafts(false)}},"Remove all");
+  if(drafts&&S.canWrite){const rm=armBtn(h("button",{class:"btn small ghost danger","data-k":"drafts:remove"},"Remove all"),"Tap again to remove",()=>bulkDrafts(false));
     main.append(h("div",{class:"banner"},h("span",{text:`${drafts} suggested items (dashed). Tap one to keep, change or delete it.`}),h("span",{style:"display:flex;gap:6px"},h("button",{class:"btn small","data-k":"drafts:keep",onclick:()=>bulkDrafts(true)},"Keep all"),rm)))}
   if(!days.length)return;
   main.append(h("div",{class:"daystrip"},days.map(d=>{const dt=parseD(d);return h("a",{href:"#"+anchor(d),class:d===today?"today":null,"data-k":"day:"+d,onclick:e=>{e.preventDefault();document.getElementById(anchor(d))?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})}},h("span",{class:"cz",text:`${CZ[dt.getUTCDay()]} · ${EN[dt.getUTCDay()]}`}),h("span",{class:"n",text:dt.getUTCDate()}))})));

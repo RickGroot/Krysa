@@ -691,7 +691,9 @@ body[data-scene="light"] .greet{color:#7a2414}
 .gate-card .eyebrow{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--tram-text)}
 .gate-title{font-family:var(--display);font-size:34px;letter-spacing:.06em;margin:0}
 .gate-form{display:grid;gap:10px}
-.demo-banner{position:fixed;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));z-index:35;display:flex;gap:10px;align-items:center;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 16px;font-size:13px;font-weight:700;box-shadow:var(--shadow);width:max-content;max-width:calc(100% - 24px)}
+.demo-banner{position:relative;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;width:fit-content;max-width:100%;margin-top:10px;background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--ink);text-shadow:none;border-radius:18px;padding:4px 4px 4px 14px;font-size:13px;font-weight:700}
+.demo-banner .rm-close{min-width:44px;min-height:44px}
+.armed{background:var(--danger);color:var(--tram-ink);border-color:var(--danger)}
 
 /* Tap targets: small controls keep their look but get a hit area of at least 44 × 44px. */
 .btn.small,.chips button,.filters button,.react,.linkish,.rm-close,.place a,.fl-links a,.row .meta a{position:relative}

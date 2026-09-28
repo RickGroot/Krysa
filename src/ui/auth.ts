@@ -1,7 +1,7 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { SCENES } from "../art/scenes";
 import { setBackgroundInert } from "./a11y";
-import { h, svg } from "./dom";
+import { armBtn, h, svg } from "./dom";
 
 /** Full-screen illustrated card used for sign-in and account states. */
 function screen(...content: HTMLElement[]): HTMLElement {
@@ -140,24 +140,17 @@ export function showDemoBanner(): void {
     "div",
     { class: "demo-banner", role: "status" },
     h("span", { text: "Made-up demo trip, saved in this browser." }),
-    h(
-      "button",
-      {
-        class: "btn small ghost",
-        type: "button",
-        onclick: () => {
-          try {
-            for (const k of Object.keys(localStorage)) if (k.startsWith("krysa-") || k.startsWith("pw-")) localStorage.removeItem(k);
-            sessionStorage.removeItem("pw-tab");
-          } catch {
-            /* nothing stored */
-          }
-          location.reload();
-        },
-      },
-      "Reset demo",
-    ),
-    h("button", { class: "rm-close", type: "button", "aria-label": "Dismiss", onclick: () => b.remove() }, "×"),
+    armBtn(h("button", { class: "btn small ghost", type: "button" }, "Reset demo"), "Tap again to reset", () => {
+      try {
+        for (const k of Object.keys(localStorage)) if (k.startsWith("krysa-") || k.startsWith("pw-")) localStorage.removeItem(k);
+        sessionStorage.removeItem("pw-tab");
+      } catch {
+        /* nothing stored */
+      }
+      location.reload();
+    }),
+    h("button", { class: "rm-close", type: "button", "aria-label": "Dismiss the demo note", onclick: () => b.remove() }, "×"),
   );
-  document.body.append(b);
+  // In the page, above the header: a fixed banner covered the mascot and the Rat TV and Wrapped close buttons.
+  (document.querySelector(".stage-in") ?? document.body).prepend(b);
 }

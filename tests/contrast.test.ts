@@ -61,7 +61,7 @@ const TEXT: [string, string[]][] = [
   ["gold", ["surface", "card", "voteTint"]],
   ["danger", ["surface", "surface-2", "card"]],
   ...KINDS.map((k): [string, string[]] => [k, ["surface", "card"]]),
-  ["tram-ink", ["tram", "vltava", "gold"]],
+  ["tram-ink", ["tram", "vltava", "gold", "danger"]],
   ["bg", ["ink"]],
 ];
 const UI: [string, string[]][] = [

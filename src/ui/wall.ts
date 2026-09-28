@@ -7,7 +7,7 @@ import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
 import { removeDocs, snapOf, write } from "./core";
-import { h, keepFocus, reduced, svg, toast } from "./dom";
+import { armBtn, h, keepFocus, reduced, svg, toast } from "./dom";
 import { IDLE, scheduleCameo } from "./idle";
 import { postRat, saveMemeImage } from "./maker";
 import { render } from "./tabs";
@@ -36,7 +36,7 @@ export function mediaFor(r,opts: any = {}){
 export function postCard(r,o: any = {}){
   const who=r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
   const canDel=S.canWrite&&((r.by&&r.by===S.uid)||S.isOwner);
-  let armed=false;const del=canDel?h("button",{class:"btn small ghost danger extra",type:"button","data-k":"del:"+r.id,onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again";return}if(await deleteRat(r))o.close?.()}},"Delete"):null;
+  const del=canDel?armBtn(h("button",{class:"btn small ghost danger extra",type:"button","data-k":"del:"+r.id},"Delete"),"Tap again",async()=>{if(await deleteRat(r))o.close?.()}):null;
   const reacts=h("div",{class:"reacts"},REACTS.map(([k,label,icon])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
     const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
     b.append(icon(),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));

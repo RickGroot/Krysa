@@ -3,7 +3,7 @@
 import { hasCoords } from "../lib/geo";
 import { S } from "../state";
 import { walkMin } from "./bound";
-import { h, toast, toastAction } from "./dom";
+import { armBtn, h, toast, toastAction } from "./dom";
 import { render } from "./tabs";
 
 export async function write(fn,okMsg?){if(!S.db){toast("Saving isn't available here");return false}try{await fn();if(okMsg)toast(okMsg);return true}catch(e){if(e&&e.code==="invalid_argument"&&!S._validated){S.canWrite=false;render();toast("View only. Reload and enter the trip code to make changes.")}else if(e&&e.code==="quota_exceeded"){toast("The planner is full, delete a few old items")}else{toast("Couldn't save, try again")}return false}}
@@ -40,8 +40,7 @@ export function openSheet({title,fields,onSave,onDelete=null,saveLabel="Save"}: 
     else{el=h("input",{id,type:f.type||"text",required:f.req,placeholder:f.placeholder||"",autocomplete:"off",inputmode:f.inputmode});el.value=f.value??""}
     get[f.id]=()=>el.value.trim();return done(h("div",{class:"field"},h("label",{for:id,text:f.label}),el))};
   const body=[];for(const f of fields){if(Array.isArray(f))body.push(h("div",{class:"grid2"},f.map(mk)));else body.push(mk(f))}
-  let armed=false;
-  const del=onDelete?h("button",{class:"btn danger ghost",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again to delete";return}if(await onDelete())close()}},"Delete"):null;
+  const del=onDelete?armBtn(h("button",{class:"btn danger ghost",type:"button"},"Delete"),"Tap again to delete",async()=>{if(await onDelete())close()}):null;
   // onSave returns a message, or {msg, field} to point at the field that needs fixing.
   const fail=(msg,field)=>{err.textContent=msg;const el=els[field];const t=el&&(el.matches("input,select,textarea")?el:el.querySelector("input"));if(t){t.setAttribute("aria-invalid","true");t.setAttribute("aria-describedby",err.id);t.focus()}};
   const form=h("form",{class:"sheet","aria-labelledby":tid,novalidate:true,onsubmit:async e=>{e.preventDefault();form.querySelectorAll("[aria-invalid]").forEach(x=>{x.removeAttribute("aria-invalid");x.removeAttribute("aria-describedby")});
