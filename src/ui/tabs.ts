@@ -129,7 +129,7 @@ export function renderMoney(main){
     h("div",null,h("div",{class:"big money",text:fmtCzk(total)}),h("div",{class:"muted",text:`≈ ${fmtEur(total/rate())} spent together · ${S.expenses.length} expenses`})),
     moves.length?h("div",{class:"settle"},moves.map(m=>h("div",null,h("b",{text:pname(m.from)}),h("span",{class:"arrow",text:"pays →"}),h("b",{text:pname(m.to)}),h("span",{class:"money",text:fmtCzk(m.amt)}),h("span",{class:"muted money",text:`(${fmtEur(m.amt/rate())})`}))))
       :h("p",{class:"empty",text:S.expenses.length?"All square.":"Nothing logged yet. Add the first shared cost."}),
-    S.people.length&&S.expenses.length&&h("div",{class:"bal"},S.people.map(p=>{const v=bal[p.id]||0;return[h("span",{text:p.name||"Someone"}),h("span",{class:"money "+(v>0.5?"pos":v<-0.5?"neg":""),text:(v>0.5?"gets back ":v<-0.5?"owes ":"")+fmtCzk(Math.abs(v))})]}))));
+    S.people.length&&S.expenses.length&&h("div",{class:"bal"},S.people.flatMap(p=>{const v=bal[p.id]||0;return[h("span",{text:p.name||"Someone"}),h("span",{class:"money "+(v>0.5?"pos":v<-0.5?"neg":""),text:(v>0.5?"gets back ":v<-0.5?"owes ":"")+fmtCzk(Math.abs(v))})]}))));
   const xs=[...S.expenses].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||"").localeCompare(a.createdAt||""));
   if(xs.length)main.append(h("div",{class:"list"},xs.map(x=>{const d=parseD(x.date);const n=Array.isArray(x.split)?x.split.length:S.people.length;
     return h("div",{class:"row"},h("span",{class:"walk",text:d?`${CZ[d.getUTCDay()]} ${d.getUTCDate()}`:""}),
