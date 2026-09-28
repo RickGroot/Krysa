@@ -44,7 +44,7 @@ export function postCard(r,o: any = {}){
     const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
     b.append(icon(),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
   const media=mediaFor(r,{fresh:o.fresh});
-  if(S.wall.view==="grid"){media.style.cursor="zoom-in";media.addEventListener("click",()=>openLightbox(r))}
+  if(S.wall.view==="grid")media.append(h("button",{class:"media-hit",type:"button","data-k":"open:"+r.id,"aria-label":r.caption?`Open "${r.caption}"`:"Open this rat",onclick:()=>openLightbox(r)}));
   return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
     h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
 }

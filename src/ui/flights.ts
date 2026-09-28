@@ -9,7 +9,7 @@ import { h, toast } from "./dom";
 
 export const AIRPORTS={AMS:"Amsterdam",PRG:"Prague"};
 
-export function copyBtn(text,key?){const b=h("button",{class:"btn small ghost",type:"button","data-k":key,onclick:async()=>{try{await navigator.clipboard.writeText(text);toast("Copied "+text)}catch(e){toast("Couldn't copy. Select the code instead.")}}},"Copy");return b}
+export function copyBtn(text,key?){const b=h("button",{class:"btn small ghost",type:"button","data-k":key,"aria-label":"Copy booking code",onclick:async()=>{try{await navigator.clipboard.writeText(text);toast("Booking code copied")}catch(e){toast("Couldn't copy. Show the code and select it instead.")}}},"Copy");return b}
 
 export function renderFlights(main){
   main.append(h("div",{class:"sectionhead"},h("p",{text:"Everyone's flights. Check-in and leave-for-the-airport reminders show up on the Rats page when it's time."}),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:flight",onclick:()=>editFlight()},"+ Flight")));
@@ -60,7 +60,9 @@ export function editFlight(f: any = {}){
 
 export function maskedCode(code,key?){
   if(!code)return h("code",{text:"—"});
-  const dots="•".repeat(Math.min(code.length,6));const c=h("code",{text:dots});let shown=false,t;
-  const b=h("button",{class:"btn small ghost",type:"button","data-k":key,"aria-label":"Show booking code",onclick:()=>{shown=!shown;c.textContent=shown?code:dots;b.textContent=shown?"Hide":"Show";clearTimeout(t);if(shown)t=setTimeout(()=>{shown=false;c.textContent=dots;b.textContent="Show"},20000)}},"Show");
+  // Hidden until asked for, and again after 20 s. The dots mean nothing to a screen reader.
+  const dots="•".repeat(Math.min(code.length,6));const c=h("code",{text:dots,"aria-hidden":"true"});let shown=false,t;
+  const set=v=>{shown=v;c.textContent=v?code:dots;if(v)c.removeAttribute("aria-hidden");else c.setAttribute("aria-hidden","true");b.textContent=v?"Hide code":"Show code"};
+  const b=h("button",{class:"btn small ghost",type:"button","data-k":key,onclick:()=>{set(!shown);clearTimeout(t);if(shown)t=setTimeout(()=>set(false),20000)}},"Show code");
   return h("span",{style:"display:inline-flex;gap:4px;align-items:center"},c,b);
 }

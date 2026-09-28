@@ -45,10 +45,11 @@ export function render(){
 
 export function evCard(e){
   const k=KINDS[e.kind]?e.kind:"work";
-  const openIt=()=>{if(S.canWrite)editEvent(e)};
-  return h("div",{class:"ev k-"+k+(e.draft?" draft":""),"data-k":"ev:"+e.id,role:S.canWrite?"button":null,tabindex:S.canWrite?"0":null,onclick:openIt,onkeydown:ev=>{if((ev.key==="Enter"||ev.key===" ")&&ev.target===ev.currentTarget){ev.preventDefault();openIt()}}},
+  // The title is the card's one button; its ::after covers the card, and Route/Map sit above it.
+  const title=S.canWrite?h("button",{class:"ev-open",type:"button","data-k":"ev:"+e.id,onclick:()=>editEvent(e)},e.title):e.title;
+  return h("div",{class:"ev k-"+k+(e.draft?" draft":"")},
     h("span",{class:"t",text:e.time?(e.endTime?`${e.time}\n–${e.endTime}`:e.time):"any"}),
-    h("span",null,h("div",{class:"ti"},e.title,e.draft&&h("span",{class:"pill",text:"Suggested"})),
+    h("span",null,h("div",{class:"ti"},title,e.draft&&h("span",{class:"pill",text:"Suggested"})),
       h("div",{class:"meta"},h("span",{class:"chip k-"+k,text:KINDS[k]})),
       placeLine(e),
       e.notes&&h("div",{class:"meta",text:e.notes})));
@@ -91,7 +92,7 @@ export function renderIdeas(main){
   if(!ideas.length){main.append(h("p",{class:"empty",text:"No ideas yet. Add the first one."}));return}
   main.append(h("div",{class:"list"},ideas.map(it=>{const mine=!!(S.uid&&it.votes&&it.votes[S.uid]);const k=KINDS[it.kind]?it.kind:"food";
     return h("div",{class:"row"},
-      h("button",{class:"vote",type:"button","data-k":"vote:"+it.id,"aria-pressed":mine,"aria-label":mine?"Remove your vote":"Vote for this",disabled:!S.canWrite||!S.uid,onclick:()=>write(()=>S.db.doc("ideas/"+it.id).update({votes:{[S.uid]:!mine}}))},h("span",{class:"v",text:voteCount(it)}),h("span",{class:"l",text:mine?"voted":"vote"})),
+      h("button",{class:"vote",type:"button","data-k":"vote:"+it.id,"aria-pressed":mine,"aria-label":`Vote for ${it.title} (${voteCount(it)})`,disabled:!S.canWrite||!S.uid,onclick:()=>write(()=>S.db.doc("ideas/"+it.id).update({votes:{[S.uid]:!mine}}))},h("span",{class:"v",text:voteCount(it)}),h("span",{class:"l",text:mine?"voted":"vote"})),
       h("div",{class:"main"},h("div",{class:"ti",text:it.title}),h("div",{class:"meta"},h("span",{class:"chip k-"+k,text:KINDS[k]}),it.scheduled&&` · planned ${fmtD(it.scheduled)}`),
         placeLine(it),
         it.notes&&h("div",{class:"meta",text:it.notes}),it.link&&/^https?:\/\//i.test(it.link)&&h("div",{class:"meta"},h("a",{href:it.link,target:"_blank",rel:"noopener",text:it.link.replace(/^https?:\/\/(www\.)?/,"").slice(0,48)}))),
@@ -103,7 +104,7 @@ export function renderTodo(main){
   const ts=[...S.todos].sort((a,b)=>(a.done-b.done)||(a.due||"9").localeCompare(b.due||"9"));
   if(!ts.length){main.append(h("p",{class:"empty",text:"Nothing to do. The rats are suspicious."}));return}
   main.append(h("div",{class:"list"},ts.map(t=>h("div",{class:"row"+(t.done?" done":"")},
-    h("input",{type:"checkbox",class:"check",id:"todo-"+t.id,"data-k":"todo:"+t.id,checked:!!t.done,disabled:!S.canWrite,"aria-label":"Done",onchange:e=>{const d=e.target.checked;write(()=>S.db.doc("todos/"+t.id).update({done:d})).then(ok=>{if(ok&&d)scurry()})}}),
+    h("input",{type:"checkbox",class:"check",id:"todo-"+t.id,"data-k":"todo:"+t.id,checked:!!t.done,disabled:!S.canWrite,onchange:e=>{const d=e.target.checked;write(()=>S.db.doc("todos/"+t.id).update({done:d})).then(ok=>{if(ok&&d)scurry()})}}),
     h("label",{class:"main",for:"todo-"+t.id},h("div",{class:"ti",text:t.text}),(t.owner||t.due)&&h("div",{class:"meta",text:[t.owner,t.due&&"by "+fmtD(t.due)].filter(Boolean).join(" · ")})),
     S.canWrite&&h("div",{class:"acts"},h("button",{class:"btn small ghost","data-k":"edit:todos:"+t.id,onclick:()=>editTodo(t)},"Edit"))))));
 }
