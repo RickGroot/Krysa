@@ -17,6 +17,16 @@ export const SVGNS="http://www.w3.org/2000/svg";
 
 export function svg(markup: string, vb: string): any {const el=document.createElementNS(SVGNS,"svg");el.setAttribute("viewBox",vb);el.setAttribute("aria-hidden","true");el.innerHTML=markup;return el}
 
+/** Runs build(), which replaces what is inside root, then puts focus back where it was: on the element with the same data-k, else on its neighbour, else on root. */
+export function keepFocus(root,build){
+  const a: any=document.activeElement,was=!!root&&a!==root&&root.contains(a),k=was&&a.closest("[data-k]")?.dataset.k;
+  const keys=k?[...root.querySelectorAll("[data-k]")].map(e=>e.dataset.k):[],sel=k&&"selectionStart" in a?[a.selectionStart,a.selectionEnd]:null;
+  build();
+  if(!was)return;
+  const all=[...root.querySelectorAll("[data-k]")],el=(k&&(all.find(e=>e.dataset.k===k)||all[Math.min(keys.indexOf(k),all.length-1)]))||root;
+  el.focus({preventScroll:true});if(sel&&el.setSelectionRange)try{el.setSelectionRange(sel[0],sel[1])}catch(e){}
+}
+
 export const reduced=()=>{try{return matchMedia("(prefers-reduced-motion:reduce)").matches}catch(e){return false}};
 
 export function toastAction(msg,label,fn,ms=8000){

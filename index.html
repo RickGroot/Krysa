@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Manrope:wght@400;500;600;700;800&family=Archivo:wdth,wght@62..125,800&family=Anton&family=Comic+Neue:wght@700&display=swap">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <div class="stage" id="stage">
   <div class="hero-slot" id="hero-slot" aria-hidden="true"></div>
   <div class="stage-in">
@@ -30,9 +31,6 @@
   <div class="hero-text" id="hero-text"></div>
   </div>
 </div>
-<div class="wrap">
-  <main id="main"><p class="empty">The rats are fetching the plan…</p></main>
-</div>
 <nav class="tabs" role="tablist" aria-label="Sections">
   <button role="tab" data-tab="rats" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="7" r="3.2"/><circle cx="17.5" cy="7" r="3.2"/><path d="M12 21c-4.2 0-7-3-7-6.8C5 11 8 9 12 9s7 2 7 5.2C19 18 16.2 21 12 21z"/><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M9.3 13.6h.01M14.7 13.6h.01" stroke-width="2.4"/></svg><span>Rats</span><span class="count" id="c-rats"></span></button>
   <button role="tab" data-tab="plan" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2"/></svg><span>Plan</span></button>
@@ -41,6 +39,9 @@
   <button role="tab" id="more-btn" aria-selected="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg><span>More</span><span class="count" id="c-todo"></span></button>
 </nav>
 <button class="fab" id="fab" hidden>+ Add</button>
+<div class="wrap">
+  <main id="main" tabindex="-1"><p class="empty">The rats are fetching the plan…</p></main>
+</div>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

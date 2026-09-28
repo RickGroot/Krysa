@@ -4,7 +4,7 @@ import { fmtClock, fmtD, inDur, nowLocalUTC } from "../lib/dates";
 import { KINDS, S } from "../state";
 import { leaveBy, nowNext, reminders } from "./bound";
 import { placeLine } from "./core";
-import { h } from "./dom";
+import { h, keepFocus } from "./dom";
 import { goTab } from "./stage";
 
 export function nowNextCard(compact?){
@@ -28,13 +28,13 @@ export function dismissReminder(id){DISMISSED.add(id);try{localStorage.setItem("
 export function remindersEl(){
   const list=reminders();if(!list.length)return h("div",{id:"rem",hidden:true});
   return h("section",{class:"rem",id:"rem","aria-label":"Reminders"},list.slice(0,4).map(r=>h("div",{class:"rm",role:"status"},
-    h("span",{class:"rm-bell","aria-hidden":"true"}),h("div",{class:"rm-x"},h("span",{text:r.text}),r.link&&h("a",{href:r.link[1],target:"_blank",rel:"noopener",text:r.link[0]}),r.tab&&r.tab!==S.tab&&h("button",{class:"linkish",type:"button",onclick:()=>goTab(r.tab)},"Open")),
-    h("button",{class:"rm-close",type:"button","aria-label":"Dismiss reminder",onclick:()=>dismissReminder(r.id)},"×"))));
+    h("span",{class:"rm-bell","aria-hidden":"true"}),h("div",{class:"rm-x"},h("span",{text:r.text}),r.link&&h("a",{href:r.link[1],target:"_blank",rel:"noopener","data-k":"rm-link:"+r.id,text:r.link[0]}),r.tab&&r.tab!==S.tab&&h("button",{class:"linkish",type:"button","data-k":"rm-open:"+r.id,onclick:()=>goTab(r.tab)},"Open")),
+    h("button",{class:"rm-close",type:"button","data-k":"rm:"+r.id,"aria-label":"Dismiss reminder",onclick:()=>dismissReminder(r.id)},"×"))));
 }
 
-export function refreshTimely(){
+export function refreshTimely(){keepFocus(document.getElementById("main"),()=>{
   const r=document.getElementById("rem");if(r)r.replaceWith(remindersEl());
   const n=document.getElementById("nn");if(n){const c=nowNextCard(n.classList.contains("compact"));if(c)n.replaceWith(c);else n.remove()}
-}
+})}
 
 setInterval(()=>{if(S.loaded&&document.visibilityState==="visible")refreshTimely()},60000);

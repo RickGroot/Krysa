@@ -28,6 +28,9 @@ body{background:var(--bg);background-image:radial-gradient(900px 420px at 50% -1
 .wrap{max-width:600px;margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.skip{position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top,0px));z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:800;text-decoration:none;transform:translateY(calc(-100% - 24px))}
+.skip:focus{transform:none}
+#main:focus{outline:none}
 
 /* top bar */
 header.top{padding-block:18px 12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}

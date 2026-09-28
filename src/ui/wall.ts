@@ -39,14 +39,14 @@ export function mediaFor(r,opts: any = {}){
 export function postCard(r,o: any = {}){
   const who=r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
   const canDel=S.canWrite&&((r.by&&r.by===S.uid)||S.isOwner);
-  let armed=false;const del=canDel?h("button",{class:"btn small ghost danger extra",type:"button",onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again";return}if(await deleteRat(r))o.close?.()}},"Delete"):null;
+  let armed=false;const del=canDel?h("button",{class:"btn small ghost danger extra",type:"button","data-k":"del:"+r.id,onclick:async()=>{if(!armed){armed=true;del.textContent="Tap again";return}if(await deleteRat(r))o.close?.()}},"Delete"):null;
   const reacts=h("div",{class:"reacts"},REACTS.map(([k,label,icon])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
-    const b=h("button",{class:"react",type:"button","aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
+    const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
     b.append(icon(),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
   const media=mediaFor(r,{fresh:o.fresh});
   if(S.wall.view==="grid"){media.style.cursor="zoom-in";media.addEventListener("click",()=>openLightbox(r))}
   return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
-    h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button",onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
+    h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
 }
 
 export function openLightbox(r){const lb=h("div",{class:"lightbox","aria-label":r.caption?`Rat post: ${r.caption}`:"Rat post",onclick:e=>{if(e.target===lb)close()}});const close=()=>{lb.remove();document.removeEventListener("keydown",esc)};const esc=e=>{if(e.key==="Escape")close()};document.addEventListener("keydown",esc);
@@ -82,11 +82,11 @@ export function renderRats(main){
   const day=Math.floor(Date.now()/864e5);
   const fact=h("div",{class:"ratfact alive"});fact.append(krysa("classic"),h("div",null,h("div",{class:"lbl",text:"Rat fact of the day"}),h("p",{text:RAT_FACTS[day%RAT_FACTS.length]})));
   main.append(fact);
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"The official Rat Wall. Post memes, react to the good ones."}),h("span",{style:"display:flex;gap:6px;flex-wrap:wrap"},S.rats.length>0&&h("button",{class:"btn small",type:"button",onclick:()=>ratTV(wallList())},"Rat TV"),h("button",{class:"btn small",type:"button",onclick:openWrapped},"Rat Wrapped"),S.canWrite&&h("button",{class:"btn primary small",onclick:()=>postRat()},"+ Rat"))));
+  main.append(h("div",{class:"sectionhead"},h("p",{text:"The official Rat Wall. Post memes, react to the good ones."}),h("span",{style:"display:flex;gap:6px;flex-wrap:wrap"},S.rats.length>0&&h("button",{class:"btn small",type:"button","data-k":"ratv",onclick:()=>ratTV(wallList())},"Rat TV"),h("button",{class:"btn small",type:"button","data-k":"wrapped",onclick:openWrapped},"Rat Wrapped"),S.canWrite&&h("button",{class:"btn primary small","data-k":"add:rat",onclick:()=>postRat()},"+ Rat"))));
   const top=[...S.rats].filter(r=>loveOf(r)>0).sort((a,b)=>loveOf(b)-loveOf(a)).slice(0,3);
-  if(top.length){main.append(h("section",{class:"fame"},h("h3",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>{const b=h("button",{class:"fame-item",type:"button",onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}));return b}))))}
+  if(top.length){main.append(h("section",{class:"fame"},h("h3",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>{const b=h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}));return b}))))}
   requestAnimationFrame(()=>document.querySelectorAll(".fame-item .media").forEach(m=>{const mm=m.querySelector(".meme");if(mm)mm.style.transform=`scale(${m.clientWidth/360})`}));
-  const opt=(label,key,list)=>h("span",{style:"display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"},h("span",{class:"lblx",text:label}),h("span",{class:"chips"},list.map(([k,l])=>h("button",{type:"button","aria-pressed":S.wall[key]===k,onclick:()=>{S.wall[key]=k;if(k==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},l))));
+  const opt=(label,key,list)=>h("span",{style:"display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap"},h("span",{class:"lblx",text:label}),h("span",{class:"chips"},list.map(([k,l])=>h("button",{type:"button","data-k":`wall:${key}:${k}`,"aria-pressed":S.wall[key]===k,onclick:()=>{S.wall[key]=k;if(k==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},l))));
   main.append(h("div",{class:"wallbar"},h("div",{class:"row2"},opt("View","view",[["feed","Feed"],["grid","Grid"]]),opt("Sort","sort",[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]])),h("div",{class:"row2"},opt("Show","filter",[["all","All"],["memes","Krysa memes"],["uploads","Uploads"],["mine","Mine"]]))));
   const rs=wallList();
   if(!rs.length){main.append(h("p",{class:"empty",text:S.rats.length?"No rats match this filter.":"No rats yet. Unacceptable."}))}
@@ -101,7 +101,7 @@ export function ensureProfiles(ids){ids=[...new Set<any>(ids.filter(Boolean))].f
 export function catchersCard(){
   // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
   const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
-  const toggle=h("button",{class:"btn small",type:"button","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
+  const toggle=h("button",{class:"btn small",type:"button","data-k":"sneaky","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
     if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}render()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
   return h("div",{class:"card"},h("h3",null,"Rat catchers",toggle),
     h("p",{class:"muted",text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the page is open, rats sneak in from the edges now and then. Tap one to catch it."}),
