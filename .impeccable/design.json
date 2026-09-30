@@ -1,0 +1,798 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-30T08:48:55.555Z",
+  "title": "Design System: Krysa",
+  "extensions": {
+    "colorMeta": {
+      "red": {
+        "role": "primary",
+        "displayName": "PID Red",
+        "canonical": "#d4231c",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 28.7)",
+          "oklch(26.4% 0.108 28.7)",
+          "oklch(37.9% 0.150 28.7)",
+          "oklch(49.3% 0.192 28.7)",
+          "oklch(60.7% 0.155 28.7)",
+          "oklch(72.1% 0.113 28.7)",
+          "oklch(83.6% 0.071 28.7)",
+          "oklch(95.0% 0.028 28.7)"
+        ]
+      },
+      "on-red": {
+        "role": "primary",
+        "displayName": "White on Red",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "red-text": {
+        "role": "primary",
+        "displayName": "Red Text",
+        "canonical": "#ff6f61",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 28.0)",
+          "oklch(26.4% 0.108 28.0)",
+          "oklch(37.9% 0.150 28.0)",
+          "oklch(49.3% 0.178 28.0)",
+          "oklch(60.7% 0.155 28.0)",
+          "oklch(72.1% 0.113 28.0)",
+          "oklch(83.6% 0.071 28.0)",
+          "oklch(95.0% 0.028 28.0)"
+        ]
+      },
+      "signal": {
+        "role": "secondary",
+        "displayName": "Signal Amber",
+        "canonical": "#ffb627",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 77.8)",
+          "oklch(26.4% 0.108 77.8)",
+          "oklch(37.9% 0.150 77.8)",
+          "oklch(49.3% 0.163 77.8)",
+          "oklch(60.7% 0.155 77.8)",
+          "oklch(72.1% 0.113 77.8)",
+          "oklch(83.6% 0.071 77.8)",
+          "oklch(95.0% 0.028 77.8)"
+        ]
+      },
+      "on-signal": {
+        "role": "secondary",
+        "displayName": "Ink on Amber",
+        "canonical": "#15171c",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 268.2)",
+          "oklch(26.4% 0.010 268.2)",
+          "oklch(37.9% 0.010 268.2)",
+          "oklch(49.3% 0.010 268.2)",
+          "oklch(60.7% 0.010 268.2)",
+          "oklch(72.1% 0.010 268.2)",
+          "oklch(83.6% 0.010 268.2)",
+          "oklch(95.0% 0.010 268.2)"
+        ]
+      },
+      "signal-text": {
+        "role": "secondary",
+        "displayName": "Amber as Text",
+        "canonical": "#ffb627",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 77.8)",
+          "oklch(26.4% 0.108 77.8)",
+          "oklch(37.9% 0.150 77.8)",
+          "oklch(49.3% 0.163 77.8)",
+          "oklch(60.7% 0.155 77.8)",
+          "oklch(72.1% 0.113 77.8)",
+          "oklch(83.6% 0.071 77.8)",
+          "oklch(95.0% 0.028 77.8)"
+        ]
+      },
+      "good": {
+        "role": "secondary",
+        "displayName": "Settled Green",
+        "canonical": "#44d39a",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 162.5)",
+          "oklch(26.4% 0.108 162.5)",
+          "oklch(37.9% 0.147 162.5)",
+          "oklch(49.3% 0.147 162.5)",
+          "oklch(60.7% 0.147 162.5)",
+          "oklch(72.1% 0.113 162.5)",
+          "oklch(83.6% 0.071 162.5)",
+          "oklch(95.0% 0.028 162.5)"
+        ]
+      },
+      "danger": {
+        "role": "secondary",
+        "displayName": "Error Coral",
+        "canonical": "#ff7070",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 22.5)",
+          "oklch(26.4% 0.108 22.5)",
+          "oklch(37.9% 0.150 22.5)",
+          "oklch(49.3% 0.175 22.5)",
+          "oklch(60.7% 0.155 22.5)",
+          "oklch(72.1% 0.113 22.5)",
+          "oklch(83.6% 0.071 22.5)",
+          "oklch(95.0% 0.028 22.5)"
+        ]
+      },
+      "kf-work": {
+        "role": "tertiary",
+        "displayName": "Metro B Yellow",
+        "canonical": "#f2b705",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 85.0)",
+          "oklch(26.4% 0.108 85.0)",
+          "oklch(37.9% 0.150 85.0)",
+          "oklch(49.3% 0.166 85.0)",
+          "oklch(60.7% 0.155 85.0)",
+          "oklch(72.1% 0.113 85.0)",
+          "oklch(83.6% 0.071 85.0)",
+          "oklch(95.0% 0.028 85.0)"
+        ]
+      },
+      "kf-sight": {
+        "role": "tertiary",
+        "displayName": "Metro A Green",
+        "canonical": "#2fbf68",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 151.7)",
+          "oklch(26.4% 0.108 151.7)",
+          "oklch(37.9% 0.150 151.7)",
+          "oklch(49.3% 0.173 151.7)",
+          "oklch(60.7% 0.155 151.7)",
+          "oklch(72.1% 0.113 151.7)",
+          "oklch(83.6% 0.071 151.7)",
+          "oklch(95.0% 0.028 151.7)"
+        ]
+      },
+      "kf-food": {
+        "role": "tertiary",
+        "displayName": "Tram Orange",
+        "canonical": "#ff8a3d",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 50.5)",
+          "oklch(26.4% 0.108 50.5)",
+          "oklch(37.9% 0.150 50.5)",
+          "oklch(49.3% 0.167 50.5)",
+          "oklch(60.7% 0.155 50.5)",
+          "oklch(72.1% 0.113 50.5)",
+          "oklch(83.6% 0.071 50.5)",
+          "oklch(95.0% 0.028 50.5)"
+        ]
+      },
+      "kf-night": {
+        "role": "tertiary",
+        "displayName": "Night Tram Violet",
+        "canonical": "#8b98ff",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 276.5)",
+          "oklch(26.4% 0.108 276.5)",
+          "oklch(37.9% 0.150 276.5)",
+          "oklch(49.3% 0.150 276.5)",
+          "oklch(60.7% 0.150 276.5)",
+          "oklch(72.1% 0.113 276.5)",
+          "oklch(83.6% 0.071 276.5)",
+          "oklch(95.0% 0.028 276.5)"
+        ]
+      },
+      "kf-coffee": {
+        "role": "tertiary",
+        "displayName": "Kavárna Tan",
+        "canonical": "#d6a06a",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 65.5)",
+          "oklch(26.4% 0.095 65.5)",
+          "oklch(37.9% 0.095 65.5)",
+          "oklch(49.3% 0.095 65.5)",
+          "oklch(60.7% 0.095 65.5)",
+          "oklch(72.1% 0.095 65.5)",
+          "oklch(83.6% 0.071 65.5)",
+          "oklch(95.0% 0.028 65.5)"
+        ]
+      },
+      "kf-travel": {
+        "role": "tertiary",
+        "displayName": "Airport Steel",
+        "canonical": "#a9b1c2",
+        "tonalRamp": [
+          "oklch(15.0% 0.026 265.5)",
+          "oklch(26.4% 0.026 265.5)",
+          "oklch(37.9% 0.026 265.5)",
+          "oklch(49.3% 0.026 265.5)",
+          "oklch(60.7% 0.026 265.5)",
+          "oklch(72.1% 0.026 265.5)",
+          "oklch(83.6% 0.026 265.5)",
+          "oklch(95.0% 0.026 265.5)"
+        ]
+      },
+      "kf-ink": {
+        "role": "tertiary",
+        "displayName": "Line Ink",
+        "canonical": "#15171c",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 268.2)",
+          "oklch(26.4% 0.010 268.2)",
+          "oklch(37.9% 0.010 268.2)",
+          "oklch(49.3% 0.010 268.2)",
+          "oklch(60.7% 0.010 268.2)",
+          "oklch(72.1% 0.010 268.2)",
+          "oklch(83.6% 0.010 268.2)",
+          "oklch(95.0% 0.010 268.2)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Asphalt Night",
+        "canonical": "#131211",
+        "tonalRamp": [
+          "oklch(15.0% 0.003 67.7)",
+          "oklch(26.4% 0.003 67.7)",
+          "oklch(37.9% 0.003 67.7)",
+          "oklch(49.3% 0.003 67.7)",
+          "oklch(60.7% 0.003 67.7)",
+          "oklch(72.1% 0.003 67.7)",
+          "oklch(83.6% 0.003 67.7)",
+          "oklch(95.0% 0.003 67.7)"
+        ]
+      },
+      "bg-light": {
+        "role": "neutral",
+        "displayName": "Worn Enamel",
+        "canonical": "#f5f4f0",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 95.1)",
+          "oklch(26.4% 0.005 95.1)",
+          "oklch(37.9% 0.005 95.1)",
+          "oklch(49.3% 0.005 95.1)",
+          "oklch(60.7% 0.005 95.1)",
+          "oklch(72.1% 0.005 95.1)",
+          "oklch(83.6% 0.005 95.1)",
+          "oklch(95.0% 0.005 95.1)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Tarmac",
+        "canonical": "#1b1a18",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 84.6)",
+          "oklch(26.4% 0.004 84.6)",
+          "oklch(37.9% 0.004 84.6)",
+          "oklch(49.3% 0.004 84.6)",
+          "oklch(60.7% 0.004 84.6)",
+          "oklch(72.1% 0.004 84.6)",
+          "oklch(83.6% 0.004 84.6)",
+          "oklch(95.0% 0.004 84.6)"
+        ]
+      },
+      "surface-light": {
+        "role": "neutral",
+        "displayName": "Enamel White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Raised Tarmac",
+        "canonical": "#252421",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 91.6)",
+          "oklch(26.4% 0.006 91.6)",
+          "oklch(37.9% 0.006 91.6)",
+          "oklch(49.3% 0.006 91.6)",
+          "oklch(60.7% 0.006 91.6)",
+          "oklch(72.1% 0.006 91.6)",
+          "oklch(83.6% 0.006 91.6)",
+          "oklch(95.0% 0.006 91.6)"
+        ]
+      },
+      "surface-2-light": {
+        "role": "neutral",
+        "displayName": "Station Tile",
+        "canonical": "#eae8e2",
+        "tonalRamp": [
+          "oklch(15.0% 0.008 91.5)",
+          "oklch(26.4% 0.008 91.5)",
+          "oklch(37.9% 0.008 91.5)",
+          "oklch(49.3% 0.008 91.5)",
+          "oklch(60.7% 0.008 91.5)",
+          "oklch(72.1% 0.008 91.5)",
+          "oklch(83.6% 0.008 91.5)",
+          "oklch(95.0% 0.008 91.5)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#2f2d2a",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 78.2)",
+          "oklch(26.4% 0.006 78.2)",
+          "oklch(37.9% 0.006 78.2)",
+          "oklch(49.3% 0.006 78.2)",
+          "oklch(60.7% 0.006 78.2)",
+          "oklch(72.1% 0.006 78.2)",
+          "oklch(83.6% 0.006 78.2)",
+          "oklch(95.0% 0.006 78.2)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "#423f3a",
+        "tonalRamp": [
+          "oklch(15.0% 0.009 80.7)",
+          "oklch(26.4% 0.009 80.7)",
+          "oklch(37.9% 0.009 80.7)",
+          "oklch(49.3% 0.009 80.7)",
+          "oklch(60.7% 0.009 80.7)",
+          "oklch(72.1% 0.009 80.7)",
+          "oklch(83.6% 0.009 80.7)",
+          "oklch(95.0% 0.009 80.7)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Chalk",
+        "canonical": "#f1ece2",
+        "tonalRamp": [
+          "oklch(15.0% 0.014 84.6)",
+          "oklch(26.4% 0.014 84.6)",
+          "oklch(37.9% 0.014 84.6)",
+          "oklch(49.3% 0.014 84.6)",
+          "oklch(60.7% 0.014 84.6)",
+          "oklch(72.1% 0.014 84.6)",
+          "oklch(83.6% 0.014 84.6)",
+          "oklch(95.0% 0.014 84.6)"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Timetable Black",
+        "canonical": "#14171d",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 264.2)",
+          "oklch(26.4% 0.013 264.2)",
+          "oklch(37.9% 0.013 264.2)",
+          "oklch(49.3% 0.013 264.2)",
+          "oklch(60.7% 0.013 264.2)",
+          "oklch(72.1% 0.013 264.2)",
+          "oklch(83.6% 0.013 264.2)",
+          "oklch(95.0% 0.013 264.2)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Faded Timetable",
+        "canonical": "#aaa69c",
+        "tonalRamp": [
+          "oklch(15.0% 0.015 88.7)",
+          "oklch(26.4% 0.015 88.7)",
+          "oklch(37.9% 0.015 88.7)",
+          "oklch(49.3% 0.015 88.7)",
+          "oklch(60.7% 0.015 88.7)",
+          "oklch(72.1% 0.015 88.7)",
+          "oklch(83.6% 0.015 88.7)",
+          "oklch(95.0% 0.015 88.7)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Edge",
+        "canonical": "#78746b",
+        "tonalRamp": [
+          "oklch(15.0% 0.014 86.9)",
+          "oklch(26.4% 0.014 86.9)",
+          "oklch(37.9% 0.014 86.9)",
+          "oklch(49.3% 0.014 86.9)",
+          "oklch(60.7% 0.014 86.9)",
+          "oklch(72.1% 0.014 86.9)",
+          "oklch(83.6% 0.014 86.9)",
+          "oklch(95.0% 0.014 86.9)"
+        ]
+      },
+      "board": {
+        "role": "neutral",
+        "displayName": "Board Black",
+        "canonical": "#0b0a09",
+        "tonalRamp": [
+          "oklch(15.0% 0.003 68.6)",
+          "oklch(26.4% 0.003 68.6)",
+          "oklch(37.9% 0.003 68.6)",
+          "oklch(49.3% 0.003 68.6)",
+          "oklch(60.7% 0.003 68.6)",
+          "oklch(72.1% 0.003 68.6)",
+          "oklch(83.6% 0.003 68.6)",
+          "oklch(95.0% 0.003 68.6)"
+        ]
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "LED Amber",
+        "canonical": "#ffb627",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 77.8)",
+          "oklch(26.4% 0.108 77.8)",
+          "oklch(37.9% 0.150 77.8)",
+          "oklch(49.3% 0.163 77.8)",
+          "oklch(60.7% 0.155 77.8)",
+          "oklch(72.1% 0.113 77.8)",
+          "oklch(83.6% 0.071 77.8)",
+          "oklch(95.0% 0.028 77.8)"
+        ]
+      },
+      "board-ink": {
+        "role": "neutral",
+        "displayName": "Board Chalk",
+        "canonical": "#f4efe4",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 86.4)",
+          "oklch(26.4% 0.016 86.4)",
+          "oklch(37.9% 0.016 86.4)",
+          "oklch(49.3% 0.016 86.4)",
+          "oklch(60.7% 0.016 86.4)",
+          "oklch(72.1% 0.016 86.4)",
+          "oklch(83.6% 0.016 86.4)",
+          "oklch(95.0% 0.016 86.4)"
+        ]
+      },
+      "board-dim": {
+        "role": "neutral",
+        "displayName": "Board Dim",
+        "canonical": "#a3a097",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 91.6)",
+          "oklch(26.4% 0.013 91.6)",
+          "oklch(37.9% 0.013 91.6)",
+          "oklch(49.3% 0.013 91.6)",
+          "oklch(60.7% 0.013 91.6)",
+          "oklch(72.1% 0.013 91.6)",
+          "oklch(83.6% 0.013 91.6)",
+          "oklch(95.0% 0.013 91.6)"
+        ]
+      },
+      "board-red": {
+        "role": "primary",
+        "displayName": "Leave-now Red",
+        "canonical": "#ff6f61",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 28.0)",
+          "oklch(26.4% 0.108 28.0)",
+          "oklch(37.9% 0.150 28.0)",
+          "oklch(49.3% 0.178 28.0)",
+          "oklch(60.7% 0.155 28.0)",
+          "oklch(72.1% 0.113 28.0)",
+          "oklch(83.6% 0.071 28.0)",
+          "oklch(95.0% 0.028 28.0)"
+        ]
+      },
+      "plate": {
+        "role": "neutral",
+        "displayName": "Plate Enamel",
+        "canonical": "#fbfaf6",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 95.1)",
+          "oklch(26.4% 0.005 95.1)",
+          "oklch(37.9% 0.005 95.1)",
+          "oklch(49.3% 0.005 95.1)",
+          "oklch(60.7% 0.005 95.1)",
+          "oklch(72.1% 0.005 95.1)",
+          "oklch(83.6% 0.005 95.1)",
+          "oklch(95.0% 0.005 95.1)"
+        ]
+      },
+      "plate-ink": {
+        "role": "neutral",
+        "displayName": "Plate Ink",
+        "canonical": "#15171c",
+        "tonalRamp": [
+          "oklch(15.0% 0.010 268.2)",
+          "oklch(26.4% 0.010 268.2)",
+          "oklch(37.9% 0.010 268.2)",
+          "oklch(49.3% 0.010 268.2)",
+          "oklch(60.7% 0.010 268.2)",
+          "oklch(72.1% 0.010 268.2)",
+          "oklch(83.6% 0.010 268.2)",
+          "oklch(95.0% 0.010 268.2)"
+        ]
+      },
+      "plate-red": {
+        "role": "primary",
+        "displayName": "Plate Frame Red",
+        "canonical": "#c8102e",
+        "tonalRamp": [
+          "oklch(15.0% 0.066 22.3)",
+          "oklch(26.4% 0.108 22.3)",
+          "oklch(37.9% 0.150 22.3)",
+          "oklch(49.3% 0.192 22.3)",
+          "oklch(60.7% 0.155 22.3)",
+          "oklch(72.1% 0.113 22.3)",
+          "oklch(83.6% 0.071 22.3)",
+          "oklch(95.0% 0.028 22.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Clock",
+        "purpose": "The clock on Today, over the sky. Archivo 800 at width 70%."
+      },
+      "headline": {
+        "displayName": "Plate title",
+        "purpose": "The tab's name on its enamel street plate, uppercase."
+      },
+      "title": {
+        "displayName": "Section head",
+        "purpose": "Section and day heads, uppercase condensed Archivo."
+      },
+      "body": {
+        "displayName": "Reading text",
+        "purpose": "Everything you read, in Manrope with tabular figures."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, small buttons, filters and meta lines."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "0 10px 28px rgb(0 0 0 / .45)",
+        "purpose": "The departure board, sheets, the toast and the sign-in card (dark theme; light uses 0 8px 22px rgb(20 23 29 / .14))."
+      },
+      {
+        "name": "add-button",
+        "value": "0 8px 22px rgb(0 0 0 / .38)",
+        "purpose": "The floating add button only."
+      },
+      {
+        "name": "plate",
+        "value": "inset 0 0 0 2px #fbfaf6, inset 0 0 0 3.5px #c8102e, 0 6px 16px rgb(0 0 0 / .3)",
+        "purpose": "The street plate's thin inner red line and the way it hangs off the scene."
+      },
+      {
+        "name": "now-halo",
+        "value": "0 0 0 4px color-mix(in srgb, #ffb627 32%, transparent)",
+        "purpose": "The node of the stop that is on now."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": "150ms–250ms ease-out",
+        "purpose": "Hover and state changes on controls."
+      },
+      {
+        "name": "split-flap",
+        "value": ".38s cubic-bezier(.2,.7,.2,1)",
+        "purpose": "A changed departure status flips; it starts half-turned but readable."
+      },
+      {
+        "name": "sheet-up",
+        "value": ".22s cubic-bezier(.2,.8,.2,1)",
+        "purpose": "Sheets slide up already opaque."
+      },
+      {
+        "name": "sky-settle",
+        "value": ".45s cubic-bezier(.2,.7,.2,1)",
+        "purpose": "A new scene in the band settles in from 104%."
+      },
+      {
+        "name": "signal-pulse",
+        "value": "1.6s ease-in-out infinite",
+        "purpose": "The live dot and \"Leave now\" pulse; nothing moves under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tiny",
+        "value": "320px"
+      },
+      {
+        "name": "narrow",
+        "value": "360px"
+      },
+      {
+        "name": "sheet",
+        "value": "640px"
+      },
+      {
+        "name": "wide",
+        "value": "700px"
+      },
+      {
+        "name": "rail",
+        "value": "900px"
+      },
+      {
+        "name": "band-fade",
+        "value": "980px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one action on a screen: PID red with white label, signage corners.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Join the trip</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:1px solid var(--rule,#423f3a);border-radius:5px;background:var(--surface,#1b1a18);color:var(--ink,#f1ece2);font:700 .9375rem/1.1 Manrope,system-ui,sans-serif;cursor:pointer;transition:background-color .15s,border-color .15s}.ds-btn:hover{border-color:var(--ink-2,#aaa69c)}.ds-btn:focus-visible{outline:2px solid var(--focus,#ffb627);outline-offset:2px}.ds-btn-primary{background:var(--red,#d4231c);border-color:var(--red,#d4231c);color:#fff}.ds-btn-primary:hover{filter:brightness(1.08)}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary actions beside a heading or on a row: no border until hovered.",
+      "html": "<button class=\"ds-btn-quiet\">+ Add</button>",
+      "css": ".ds-btn-quiet{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--ink,#f1ece2);font:700 .8125rem/1 Manrope,system-ui,sans-serif;cursor:pointer}.ds-btn-quiet:hover{background:var(--surface-2,#252421)}.ds-btn-quiet:focus-visible{outline:2px solid var(--focus,#ffb627);outline-offset:2px}"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A labelled field: 16px text so iOS never zooms, a 3:1 edge, ink border on focus.",
+      "html": "<label class=\"ds-field\"><span>Trip code</span><input placeholder=\"The code from your group chat\"></label>",
+      "css": ".ds-field{display:grid;gap:6px;font:700 .8125rem/1.2 Manrope,system-ui,sans-serif;color:var(--ink-2,#aaa69c)}.ds-field input{min-height:46px;padding:10px 12px;border:1px solid var(--field-border,#78746b);border-radius:5px;background:var(--surface-2,#252421);color:var(--ink,#f1ece2);font:500 1rem Manrope,system-ui,sans-serif}.ds-field input::placeholder{color:var(--ink-2,#aaa69c);opacity:1}.ds-field input:focus{border-color:var(--ink,#f1ece2);outline:2px solid var(--focus,#ffb627);outline-offset:2px}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tabs",
+      "description": "Five tabs docked at the bottom; the current one marked by an ink bar, counts in amber.",
+      "html": "<nav class=\"ds-tabs\"><a aria-current=\"page\">Today</a><a>Week</a><a>Rats</a><a>Money</a><a>Trip<i>4</i></a></nav>",
+      "css": ".ds-tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface,#1b1a18);border-top:1px solid var(--line,#2f2d2a)}.ds-tabs a{position:relative;display:grid;place-items:center;min-height:60px;color:var(--ink-2,#aaa69c);font:700 .6875rem/1 Manrope,system-ui,sans-serif;cursor:pointer}.ds-tabs a:hover,.ds-tabs a[aria-current]{color:var(--ink,#f1ece2)}.ds-tabs a[aria-current]::before{content:'';position:absolute;top:-1px;left:26%;right:26%;height:3px;background:var(--ink,#f1ece2)}.ds-tabs i{position:absolute;top:8px;left:calc(50% + 10px);min-width:18px;height:18px;border-radius:4px;background:#ffb627;color:#15171c;font:800 .6875rem/18px Manrope,sans-serif;font-style:normal;text-align:center}"
+    },
+    {
+      "name": "Line Badge and Tags",
+      "kind": "chip",
+      "refersTo": "line-badge",
+      "description": "Plan types as metro and tram line badges; the Now tag in signal amber.",
+      "html": "<span class=\"ds-lb\" style=\"--kf:#f2b705\" aria-label=\"Work\"><svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4.5\" y=\"5.5\" width=\"15\" height=\"10\" rx=\"1.5\"/><path d=\"M2.5 18.5h19\"/></svg></span> <span class=\"ds-lb\" style=\"--kf:#ff8a3d\" aria-label=\"Food\"><svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3.5v7.5M4.5 3.5v4.5a2.5 2.5 0 0 0 5 0V3.5M7 11v9.5M17 20.5V3.5c-2.2 1-3.5 3.6-3.5 7h3.5\"/></svg></span> <span class=\"ds-tag\">Now</span>",
+      "css": ".ds-lb{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;background:var(--kf);color:#15171c;vertical-align:middle}.ds-tag{display:inline-block;padding:4px 6px;border-radius:4px;background:#ffb627;color:#15171c;font:800 .625rem/1 Manrope,sans-serif;letter-spacing:.08em;text-transform:uppercase;vertical-align:middle}"
+    },
+    {
+      "name": "Street Plate",
+      "kind": "custom",
+      "refersTo": "plate",
+      "description": "The tab's name on a Prague enamel street plate: red frame, thin inner line, Czech name below.",
+      "html": "<div class=\"ds-plate\"><b>Week</b><small lang=\"cs\">Týden</small></div>",
+      "css": ".ds-plate{display:inline-grid;background:#fbfaf6;color:#15171c;border:3px solid #c8102e;border-radius:6px;padding:6px 14px;box-shadow:inset 0 0 0 2px #fbfaf6,inset 0 0 0 3.5px #c8102e,0 6px 16px rgb(0 0 0 / .3)}.ds-plate b{font:800 1.625rem/1 Archivo,'Arial Narrow',sans-serif;font-stretch:76%;text-transform:uppercase;letter-spacing:.02em}.ds-plate small{font:800 .625rem/1.1 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#c8102e;margin-top:3px}"
+    },
+    {
+      "name": "Departure Board",
+      "kind": "custom",
+      "refersTo": "board",
+      "description": "The next departure in full with a live leave-by count in LED amber, then the two after it.",
+      "html": "<section class=\"ds-board\"><header><b>Next up</b><span>Odjezdy</span></header><div class=\"ds-dep lead\"><time>11:05</time><span class=\"ds-lb\" style=\"--kf:#a9b1c2\"></span><div><strong>Jules lands (KR404)</strong><em>10:25 · about 35 min by metro or tram</em></div><span class=\"st\">Leave in 33 min</span></div><div class=\"ds-dep\"><time>18:00</time><span class=\"ds-lb\" style=\"--kf:#8b98ff\"></span><div><strong>Sunset beers at Letná</strong></div><span class=\"st\">in 8 h 8 min</span></div></section>",
+      "css": ".ds-board{background:#0b0a09;color:#f4efe4;border-radius:8px;padding:12px 0 4px;box-shadow:0 10px 28px rgb(0 0 0 / .45);font-family:Manrope,system-ui,sans-serif}.ds-board header{display:flex;justify-content:space-between;padding:0 16px 10px;border-bottom:1px solid #26241f}.ds-board header b{font:800 1.0625rem/1 Archivo,sans-serif;font-stretch:80%;text-transform:uppercase;letter-spacing:.06em;color:#ffb627}.ds-board header span{font:800 .75rem/1 Archivo,sans-serif;font-stretch:80%;letter-spacing:.24em;text-transform:uppercase;color:#a3a097}.ds-dep{display:grid;grid-template-columns:64px 22px 1fr auto;gap:4px 10px;padding:11px 16px;border-top:1px solid #26241f}.ds-dep:first-of-type{border-top:0}.ds-dep time{font:800 1.375rem/1 Archivo,sans-serif;font-stretch:72%;color:#ffb627}.ds-dep.lead time{font-size:1.75rem}.ds-dep strong{display:block;font-weight:700}.ds-dep.lead strong{font-size:1.125rem;font-weight:800}.ds-dep em{display:block;font-style:normal;font-weight:800;font-size:.875rem;color:#ffb627}.ds-dep .st{font:800 .8125rem/1.3 Manrope,sans-serif;color:#a3a097;text-align:right}.ds-dep.lead .st{color:#ffb627}.ds-lb{width:22px;height:22px;border-radius:5px;background:var(--kf)}"
+    },
+    {
+      "name": "Line of Stops",
+      "kind": "custom",
+      "refersTo": "stop",
+      "description": "A day's plan as stops on a line: what's over steps back in ink-2, the current stop glows amber.",
+      "html": "<ol class=\"ds-line\"><li class=\"past\"><time>08:30</time><i></i><span>Coffee at Onesip</span></li><li class=\"now\"><time>09:30</time><i></i><span>Work block</span></li><li><time>11:05</time><i></i><span>Jules lands (KR404)</span></li></ol>",
+      "css": ".ds-line{list-style:none;margin:0;padding:0;font-family:Manrope,system-ui,sans-serif;color:var(--ink,#f1ece2)}.ds-line li{position:relative;display:grid;grid-template-columns:48px 18px 1fr;column-gap:10px;padding:8px 0 14px;font-weight:700}.ds-line li::before{content:'';position:absolute;left:66px;top:0;bottom:0;width:2px;background:var(--rule,#423f3a)}.ds-line li:first-child::before{top:14px}.ds-line li:last-child::before{bottom:calc(100% - 14px)}.ds-line time{font:800 1.0625rem/1.1 Archivo,sans-serif;font-stretch:76%}.ds-line i{position:relative;z-index:1;width:14px;height:14px;margin:3px 2px 0;border-radius:50%;background:var(--bg,#131211);border:3px solid var(--ink,#f1ece2)}.ds-line .past{color:var(--ink-2,#aaa69c)}.ds-line .past i{border-color:var(--rule,#423f3a);background:var(--rule,#423f3a)}.ds-line .now i{border-color:#ffb627;background:#ffb627;box-shadow:0 0 0 4px color-mix(in srgb,#ffb627 32%,transparent)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Odjezdy, the group's departure board",
+    "overview": "Krysa is set like Prague's public-transport wayfinding. The page is the street: warm asphalt at night (the default, dark theme) or worn enamel by day (light). The few objects that carry the important information are the ones a PID stop would have: a white enamel street plate with a red frame naming the tab, a near-black departure board with amber LED times, square line badges in metro and tram colours for the plan types, and a line of stops for the day. Everything else is hairline-ruled rows straight on the page ground. It is dense and quick to scan, read on a phone held in one hand, outdoors in daylight or in a dim bar.\n\nTwo voices of type carry it: condensed Archivo caps for anything you glance at (the clock, titles, times, codes) and Manrope for anything you read. There is one action colour, PID red, and one status colour, signal amber. The board and the plates are physical objects: they keep their exact colours whether the phone is light or dark. Motion is signalling, never decoration: a changed time flips like a split-flap, the live dot pulses, a new sky settles into place. Under reduced motion nothing moves.\n\nThe build rejects the itinerary-of-cards default: stacked rounded cards under a decorative hero. The illustrated Prague scenes and Krysa the rat are a separate, pinned art layer with their own stylesheet (`src/art/art.css`). The UI frames and sizes the art but never styles inside it. Where the build departed from the direction contract, this file follows the build: panels round to 8px and sheets to 14px (the contract said 4–6px signage corners), heads-up and the Rat Wall's posts are surfaced as well as the three planning objects, and the split-flap and the sky run longer than the 150–250ms state motion.",
+    "keyCharacteristics": [
+      "Dark by default (asphalt), light by preference (enamel), with the same structure in both.",
+      "One action colour (PID red), one status colour (signal amber), six line colours for plan types.",
+      "Hairline rows on the page ground. On the planning tabs only the departure board, the bill and the flight ticket are surfaced.",
+      "Condensed Archivo 800 at widths of 68–80% for signs, Manrope 400–800 for reading, tabular figures everywhere.",
+      "Signage corners, no pills. A circle means a stop on a line.",
+      "Motion that signals: split-flap times, a pulsing live dot, a sky that settles in when it changes. Nothing moves under reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The Red Means Go Rule",
+        "body": "On the page, red only goes on things you press or follow: primary buttons, the add button, link underlines. Status, counts, selection and \"today\" are never red. Two reds are not actions, and each belongs to its object: the board's \"Leave now\" (`board-red`) and the plate's enamel frame (`plate-red`).",
+        "section": "colors"
+      },
+      {
+        "name": "The Amber Is Now Rule",
+        "body": "Status is amber or ink. Amber marks what is happening or needs you now. Ink marks where you are: today's station, the active tab, a pressed control. Green is only for settled good news.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fixed Objects Rule",
+        "body": "The departure board, the toast (a strip of the board), the enamel plates and the line-badge fills keep one set of values in both themes. Only the page around them re-themes. On the board, amber does the job red does on the page, so the board's link underlines and the toast's button are amber.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tested Pair Rule",
+        "body": "Every text and UI pair is listed in `tests/contrast.test.ts` and passes in both themes: 4.5:1 for text, 3:1 for control boundaries and focus. Add a new pairing to the test before it ships. Tested today: ink on bg, surface, surface-2 and both amber tints; ink-2 on bg, surface, surface-2 and the heads-up tint; red-text, signal-text and good on bg and surface; danger on bg, surface and surface-2; on-red on red; on-signal on signal; board-ink and board-dim on board and board-2; amber and board-red on board; plate-ink and plate-red on plate; kf-ink on every line fill and on amber; bg on ink, good and danger. Boundaries: field-border on surface and surface-2, red and focus on bg and surface, amber on board.",
+        "section": "colors"
+      },
+      {
+        "name": "The Sign and Reading Rule",
+        "body": "Archivo is for things you glance at: the clock, plate titles, section and sheet heads, departure and stop times, flight numbers and airport codes, day numbers and vote counts. Manrope is for things you read, amounts included. Never set a sentence in Archivo.",
+        "section": "typography"
+      },
+      {
+        "name": "The Width, Not Weight Rule",
+        "body": "Archivo exists only at 800, so hierarchy in the sign layer comes from size and width, never from a lighter cut. Widths run from 68% for the biggest codes to 80% for section heads, set with `font-stretch`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Art Faces Stay in the Art Rule",
+        "body": "Anton, Comic Neue and Cinzel are loaded for memes and scene art only. No UI surface uses them.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thumb Column Rule",
+        "body": "Everything you act on is within a thumb's reach: the tab bar at the bottom, the add button bottom right, a sheet's action bar stuck to its bottom edge. Every control has a hit area of at least 44 × 44px. Small controls keep their look and extend the hit area with an invisible `::before`.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline Default Rule",
+        "body": "A list is rows ruled with 1px `line` on the page ground: no card, no shadow, no fill. On the planning tabs only three objects are surfaced: the departure board, the bill (účet) and the flight ticket. Heads-up is one amber-tinted panel. The Rat Wall frames its posts and hall of fame because they hold media.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Board Lifts Rule",
+        "body": "Of the surfaced objects only the departure board carries the lift. The bill and the ticket are flat paper: surface fill and a 1px hairline border. Everything else that lifts is an overlay.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Signage Corner Rule",
+        "body": "Controls get 4–5px corners, panels 8px, sheets 14px. Nothing is a pill and no button is fully round. A circle means a stop on a line.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Dashed Line Rule",
+        "body": "A dashed line means paper, or not yet. Paper: the bill's tear lines, the ticket's perforation and its flight path. Not yet: a suggested stop (dashed node, dashed underline), the suggestions banner, the upload drop zone. Anything settled gets a solid hairline.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Ink Invert Rule",
+        "body": "A pressed or selected control inverts to an ink ground with page-colour text: segmented buttons, filters, votes, chips, boxed toggles, today's station. It is never red and never amber. The one amber selection is a reaction you gave, because that is status.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep PID red (`red`) for things you press or follow: primary buttons, the add button and link underlines (2px, 3px offset).",
+      "Do mark status with signal amber (`signal` fill with `on-signal`, `signal-text` as text) or with ink.",
+      "Do rule lists with 1px `line` hairlines directly on the page ground, with 12px above and below each row.",
+      "Do set signs, times and codes in Archivo 800 condensed with `font-stretch` (68–80%), and everything you read in Manrope with tabular figures.",
+      "Do keep the departure board, the toast, the plates and the line-badge fills at their fixed values in both themes.",
+      "Do step past items back with `ink-2` and greyscale badges, not with opacity.",
+      "Do invert pressed and selected controls to an ink ground with page-colour text.",
+      "Do add every new text or boundary pair to `tests/contrast.test.ts` (4.5:1 text, 3:1 boundaries) for both themes.",
+      "Do give every control a 44 × 44px hit area and every field at least 16px text.",
+      "Do keep motion to signalling (0.15–0.25s ease-out for state, 0.38s for the split-flap, 0.45s for a new sky scaling in from 104%) and stop all of it under reduced motion."
+    ],
+    "donts": [
+      "Don't build the itinerary-of-cards default: stacked rounded cards under a decorative hero.",
+      "Don't use red for status, counts, selection or \"today\". The only red status is the board's \"Leave now\" in `board-red`.",
+      "Don't wrap planning rows in cards or give the bill and the ticket a shadow. Only the board and overlays lift; the add button and the plates have their own shadows.",
+      "Don't round anything into a pill or past 14px. Circles are only for stops, stations and the live dot.",
+      "Don't set sentences in Archivo or fake a lighter Archivo. It ships at 800 only.",
+      "Don't use Anton, Comic Neue or Cinzel outside the meme maker and the scene art, and don't style inside the art from the app stylesheet.",
+      "Don't re-theme the departure board or the plates for light mode.",
+      "Don't load fonts or assets from third parties. Every face is self-hosted."
+    ]
+  }
+}
