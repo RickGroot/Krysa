@@ -36,6 +36,7 @@ Without Supabase keys (or with `pnpm dev:demo`) the app runs in **demo mode**: a
 | `pnpm test` | Unit tests (Vitest) |
 | `pnpm typecheck` | Strict check of `src/lib`, `src/data` and tests, loose check of the UI |
 | `pnpm seed [file]` | Load a seed file into Supabase (reads `.env`). Without a file it loads the demo trip |
+| `pnpm icons` | Re-render the app icons in `public/icons` with your local Chrome or Edge (`scripts/icons.mjs`) |
 
 ## Setting up Supabase
 

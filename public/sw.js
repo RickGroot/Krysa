@@ -1,7 +1,7 @@
 // Krysa service worker: the app shell works offline, data comes from Supabase
 // (and the app's own localStorage cache) and is never cached here.
-// v3: the Odjezdy redesign; v2 made the fonts the app's own files.
-const CACHE = "krysa-v3";
+// v4: the new app icon (Krysa clinking two beers); v3: the Odjezdy redesign; v2 made the fonts the app's own files.
+const CACHE = "krysa-v4";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
