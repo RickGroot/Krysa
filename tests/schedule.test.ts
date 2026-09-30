@@ -150,19 +150,24 @@ describe("reminders", () => {
 });
 
 describe("startTab", () => {
-  const TABS = ["rats", "flights", "plan", "ideas", "todo", "money", "info"];
-  it("opens on Plan while the trip is on, the Rat Wall otherwise", () => {
-    expect(startTab({ live: true }, TABS)).toBe("plan");
-    expect(startTab({ live: false }, TABS)).toBe("rats");
+  const TABS = ["today", "week", "rats", "money", "trip"];
+  const ALIAS = { plan: "today", ideas: "week", flights: "trip", todo: "trip", info: "trip" };
+  it("opens on Today, before, during and after the trip", () => {
+    expect(startTab({}, TABS, ALIAS)).toBe("today");
   });
   it("follows a #link or notification first", () => {
-    expect(startTab({ hash: "money", saved: "ideas", live: true }, TABS)).toBe("money");
+    expect(startTab({ hash: "money", saved: "week" }, TABS, ALIAS)).toBe("money");
   });
   it("keeps the tab picked earlier this session", () => {
-    expect(startTab({ hash: "", saved: "ideas", live: true }, TABS)).toBe("ideas");
+    expect(startTab({ hash: "", saved: "rats" }, TABS, ALIAS)).toBe("rats");
+  });
+  it("sends the old tab names to where they live now", () => {
+    expect(startTab({ hash: "todo" }, TABS, ALIAS)).toBe("trip");
+    expect(startTab({ saved: "plan" }, TABS, ALIAS)).toBe("today");
+    expect(startTab({ hash: "ideas" }, TABS, ALIAS)).toBe("week");
   });
   it("ignores anything that isn't a tab", () => {
-    expect(startTab({ hash: "main", saved: "nope", live: true }, TABS)).toBe("plan");
+    expect(startTab({ hash: "main", saved: "nope" }, TABS, ALIAS)).toBe("today");
   });
 });
 

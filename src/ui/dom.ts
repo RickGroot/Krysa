@@ -17,7 +17,7 @@ const toastHost=()=>[...document.querySelectorAll("dialog.ov[open]")].pop()||doc
 export function toast(msg){const t=h("div",{class:"toast",role:"status",text:msg});toastHost().append(t);setTimeout(()=>t.remove(),2200)}
 
 /** The app behind the trip-code screen: out of reach for taps, Tab and screen readers. */
-export function shellInert(on){for(const el of document.querySelectorAll(".skip,.stage,.wrap,nav.tabs,#fab"))el.inert=on}
+export function shellInert(on){for(const el of document.querySelectorAll(".skip,.page,nav.tabs,#fab"))el.inert=on}
 
 export const SVGNS="http://www.w3.org/2000/svg";
 

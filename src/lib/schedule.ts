@@ -140,11 +140,15 @@ export function splitFlights<T extends Flight>(flights: T[], now: number): { upc
 
 /**
  * The tab to open on: a #link (or a tapped notification), then the tab picked
- * earlier this session; otherwise Plan while the trip is on, so the day's
- * plan comes first, and the Rat Wall before and after it.
+ * earlier this session, else the first tab (Today, the one home). Old tab
+ * names go through `alias`, so links and saved sessions from before still land.
  */
-export function startTab(o: { hash?: string | null; saved?: string | null; live: boolean }, tabs: readonly string[]): string {
-  return [o.hash, o.saved].find((t): t is string => !!t && tabs.includes(t)) ?? (o.live ? "plan" : "rats");
+export function startTab(o: { hash?: string | null; saved?: string | null }, tabs: readonly string[], alias: Readonly<Record<string, string>> = {}): string {
+  for (const t of [o.hash, o.saved]) {
+    const k = t ? (tabs.includes(t) ? t : alias[t]) : undefined;
+    if (k && tabs.includes(k)) return k;
+  }
+  return tabs[0];
 }
 
 export interface ReminderInput {

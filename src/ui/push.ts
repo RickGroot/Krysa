@@ -1,10 +1,9 @@
 /* eslint-disable */
-// More → Notifications: switch push notifications on or off for this device.
+// Trip → Settings → Notifications: switch push notifications on or off for this device.
 // The krysa-notify Supabase function does the sending (see README).
 import { b64uDecode } from "../lib/webpush";
 import { S } from "../state";
 import { h, toast } from "./dom";
-import { openOverlay } from "./overlay";
 
 const PREFS_KEY = "krysa-push-prefs";
 
@@ -62,30 +61,29 @@ export async function syncPush(){
   }catch(e){/* best effort: the next start tries again */}
 }
 
-export function openNotifications(){
-  const sheet=h("div",{class:"sheet"});
-  const {close}=openOverlay({labelledby:"push-t",content:sheet});
+/** Trip → Settings: switch push notifications on or off for this device, and pick what they're for. */
+export function notifSection(){
+  const box=h("div",{class:"notif",id:"notif"});
   const draw=async()=>{
     const blocker=pushBlocker(),on=await pushOn(),prefs=pushPrefs();
     const err=h("p",{class:"err",role:"status"});
-    const box=(k,label)=>h("label",null,h("input",{type:"checkbox",checked:prefs[k],disabled:!!blocker,onchange:async e=>{
+    const check=(k,label)=>h("label",{class:"checkline"},h("input",{type:"checkbox",class:"check",checked:prefs[k],disabled:!!blocker,"data-k":"push:"+k,onchange:async e=>{
       prefs[k]=e.target.checked;savePrefs(prefs);err.textContent="";
       if(!on)return;
-      try{const sub=await currentSub();if(sub)await S.push.save(keysOf(sub),prefs)}catch(x){err.textContent="Couldn't save that. Try again."}}}),label);
-    const btn=h("button",{class:"btn primary",type:"button",disabled:!!blocker,onclick:async()=>{
+      try{const sub=await currentSub();if(sub)await S.push.save(keysOf(sub),prefs)}catch(x){err.textContent="Couldn't save that. Try again."}}}),h("span",{text:label}));
+    const btn=h("button",{class:"btn"+(on?"":" primary"),type:"button","data-k":"push:switch",disabled:!!blocker,onclick:async()=>{
       btn.disabled=true;err.textContent="";
       try{if(on){await disable();toast("Notifications off on this device")}else{await enable(prefs);toast("Notifications on")}await draw()}
       catch(x){err.textContent=(x&&x.message)||"Couldn't change notifications. Try again.";btn.disabled=false}}},on?"Turn off":"Turn on");
     // Where notifications can't be switched on, the choices would only be greyed-out boxes: leave them out.
-    sheet.replaceChildren(...[
-      h("h3",{id:"push-t",tabindex:"-1",text:"Notifications"}),
-      h("p",{class:"muted",text:"A ping on this device, even when Krysa is closed. Each phone or browser switches on by itself."}),
-      !blocker&&h("div",{class:"checks stack"},
-        box("reminders","Reminders: check-in, leaving for the airport, what's next and to-dos that are due"),
-        box("posts","New rats on the wall")),
-      h("p",{class:"muted",text:blocker||(on?"On for this device.":"Off for this device.")}),
-      err,
-      h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"),btn))].filter(Boolean));
+    box.replaceChildren(...[
+      h("div",{class:"notif-head"},h("div",null,h("h3",{text:"Notifications"}),h("p",{class:"row-meta",text:blocker?"Not available here":on?"On for this device":"Off for this device"})),!blocker&&btn),
+      h("p",{class:"hint",text:blocker||"A ping on this device, even when Krysa is closed. Each phone or browser switches on by itself."}),
+      !blocker&&h("div",{class:"checks"},
+        check("reminders","Reminders: check-in, leaving for the airport, what's next and to-dos that are due"),
+        check("posts","New rats on the wall")),
+      err].filter(Boolean));
   };
   void draw();
+  return box;
 }

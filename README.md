@@ -1,6 +1,14 @@
 # Krysa · Prague Week
 
-A rat-themed team planner for a conference week in Prague: the Rat Wall with a Krysa meme maker, flights, a day-by-day plan that opens on Today while the trip is on (with "Now & next" and when to leave), ideas with voting, to-dos, a koruna/euro expense splitter and trip info. It installs on phones as a PWA, with optional push notifications for reminders and new posts.
+A rat-themed team planner for a conference week in Prague, styled like the city's transit signs. Five tabs:
+
+- **Today**, the one home. Before the trip it counts down and lists what to book and pack. During it, a departure board shows what's next and when to leave, with today's stops below it. After it, it shows who owes whom.
+- **Week**: the days as stops on a line, and the ideas the group votes on before they go on a day.
+- **Rats**: the Rat Wall, with a Krysa meme maker.
+- **Money**: a koruna/euro converter, the bill (who pays whom) and every shared cost.
+- **Trip**: flights with check-in timing, to-dos, the stay, who's coming, Prague basics and settings.
+
+It installs on phones as a PWA, with optional push notifications for reminders and new posts.
 
 Built for a real FrontKon trip. Everything in this repo is a made-up demo trip: the people, flights, costs and posts are invented, and the venues are public places.
 
@@ -13,7 +21,7 @@ pnpm install --ignore-scripts
 pnpm dev
 ```
 
-Without Supabase keys (or with `pnpm dev:demo`) the app runs in **demo mode**: a made-up trip stored in your browser. The demo is always "on": day 2 of the trip is today, so Today, reminders and the Rat Wall look alive whenever you open it. "Reset demo" in the note at the top starts over.
+Without Supabase keys (or with `pnpm dev:demo`) the app runs in **demo mode**: a made-up trip stored in your browser. The demo is always "on": day 2 of the trip is today, so Today, reminders and the Rat Wall look alive whenever you open it. "Reset" in the demo note at the top starts over.
 
 ## Scripts
 
@@ -72,7 +80,7 @@ Phones get a ping for the reminders the app already shows (online check-in openi
    select cron.schedule('krysa-notify', '* * * * *', 'select krysa.run_notify()');
    ```
    The function creates the key pair pushes are signed with (VAPID) on its first run, so there are no keys to generate or copy.
-4. In the app: **More → Notifications → Turn on**, on each device. iPhones and iPads only support this from the Home Screen: add Krysa there first (Share → Add to Home Screen), open it from there, then switch on. Notifications need the built app, so use `pnpm build` and `pnpm preview` to try them locally.
+4. In the app: **Trip → Settings → Notifications → Turn on**, on each device. iPhones and iPads only support this from the Home Screen: add Krysa there first (Share → Add to Home Screen), open it from there, then switch on. Notifications need the built app, so use `pnpm build` and `pnpm preview` to try them locally.
 
 **Is it running?** Each run's answer lands in `net._http_response`:
 
@@ -100,7 +108,6 @@ src/
     money.ts         balances and settle-up in haléře, CZK/EUR
     schedule.ts      now & next, leave-by times, check-in rules, reminders
     geo.ts           walking-time estimates from where you stay
-    catchers.ts      the rat-catcher scoreboard: devices with the same name add up
     demo.ts          keeps the demo trip "on" by moving its dates
     notify.ts        which reminders and posts to push, and to whom
     webpush.ts       Web Push on WebCrypto: VAPID signing and payload encryption (RFC 8291/8292)
@@ -113,8 +120,14 @@ src/
     scenes.ts        the illustrated Prague scenes behind each tab
     meme.ts, model.ts  the meme maker's options and rendering
     export.ts        meme → PNG on a canvas
+    art.css          the artwork's styles: Krysa's living parts, meme templates, scene motion
   fonts/             the five typefaces, served with the app (Latin + Czech subsets, OFL.txt)
-  ui/                tabs, Rat Wall, idle rats, Rat Wrapped, reminders, notifications switch
+  styles.css         the app's look (tokens for both themes, checked by tests/contrast.test.ts)
+  ui/
+    stage.ts         the band on each tab: a Prague scene with a street plate; on Today, the clock
+    today.ts, week.ts, wall.ts, money.ts, trip.ts   the five tabs
+    timely.ts        the departure board and heads-up rows; they tick every minute
+    parts.ts, icons.ts  line badges, a stop on the day's line, empty states, the drawn icon set
     overlay.ts       every sheet and full-screen view is a modal <dialog>: stacking, Escape, focus
     dom.ts           h() to build elements, keepFocus() so a re-render keeps keyboard focus, toasts
 supabase/            schema, demo seed
@@ -139,7 +152,7 @@ The data layer mirrors the claude.ai artifact runtime the app started life on (`
 
 - **Supabase mode is only tested by hand.** It ran against a real project (a wrong code, joining with the right one, live updates between two browsers, uploading and deleting a Rat Wall post), and the SQL was tested on plain Postgres with stand-ins for Supabase's auth, storage and Realtime publication (the guess limit, deep merge, strangers blocked, delete rules).
 - **A device is a member, not a person.** Clearing the browser's data means entering the code again, and posts from the old session can then only be removed by an owner. Anonymous users are never cleaned up automatically; delete old ones under Authentication → Users if you like.
-- **The rat-catcher scoreboard matches people by name.** Devices with the same display name (ignoring case and spaces) add up, so a phone and a laptop count as one catcher. Two people with the same name share a score too, and names can't be changed in the app: fix a mismatch in the SQL editor with `update krysa.profiles set name = 'Rick' where name = 'Rick G';`. Posts, reactions and votes are still per device.
+- **Names are per device.** Posts, reactions and votes belong to the device, shown with the name it picked. Names can't be changed in the app: fix one in the SQL editor with `update krysa.profiles set name = 'Rick' where name = 'Rick G';`.
 - **No CAPTCHA on anonymous sign-in.** Supabase rate-limits anonymous sign-ins per IP (30 an hour by default) and recommends a CAPTCHA against abuse. Fine for a small group; add Turnstile or hCaptcha before using it more widely.
 - **The UI layer is loosely typed.** It was ported from a single-file prototype. `src/ui` and `src/art` type-check with `strict: false`, plus [`loose-dom.d.ts`](src/ui/loose-dom.d.ts). Tighten module by module. `src/lib` and `src/data` are strict.
 - **No end-to-end tests.** The logic that can cost money or time (settle-up, reminders, now & next, check-in rules, data merging, the demo date shift) has unit tests, a test checks the colour contrast of both themes, and one checks that every font the app asks for is there. The UI was checked by hand in a browser (demo mode, phone and desktop sizes, light and dark), not with a screen reader or on a real iPhone.

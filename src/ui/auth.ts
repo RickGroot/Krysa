@@ -9,6 +9,7 @@ function screen(...content: HTMLElement[]): HTMLElement {
   sc.setAttribute("preserveAspectRatio", "xMidYMax slice");
   sc.classList.add("gate-scene");
   const root = h("div", { class: "gate", id: "gate" }, sc, h("div", { class: "gate-card" }, ...content));
+  root.querySelector("input")?.setAttribute("enterkeyhint", "go");
   document.body.append(root);
   // The app behind the gate is out of reach: no tabbing into it, no second h1 for screen readers.
   shellInert(true);
@@ -89,9 +90,8 @@ export function joinWithTripCode(sb: SupabaseClient, fromLink: string | null): P
       msg,
     );
     screen(
-      h("div", { class: "eyebrow", text: "Praha by night" }),
-      h("h1", { class: "gate-title", text: "Krysa" }),
-      h("p", { text: "The team planner for the FrontKon week. Enter the trip code to see the plan and the Rat Wall. You only need to do this once on each device." }),
+      h("div", { class: "plate gate-plate" }, h("h1", { text: "Krysa" }), h("span", { class: "cs", lang: "cs", text: "Praha" })),
+      h("p", { text: "The team planner for the FrontKon week. Enter the trip code from the group chat to see the plan and the Rat Wall. You only do this once on each device." }),
       form,
     );
     if (fromLink) {
@@ -109,8 +109,8 @@ export async function ensureProfile(sb: SupabaseClient, user: User): Promise<voi
     const name = h("input", { id: "gate-name", required: true, maxlength: "40", autocomplete: "given-name", placeholder: "Your first name" });
     const msg = h("p", { class: "err", role: "status" });
     screen(
-      h("h1", { class: "gate-title", text: "Welcome" }),
-      h("p", { text: "What should the rats call you?" }),
+      h("div", { class: "plate gate-plate" }, h("h1", { text: "Welcome" }), h("span", { class: "cs", lang: "cs", text: "Vítejte" })),
+      h("p", { text: "What should the rats call you? Your name goes on your posts and reactions." }),
       h(
         "form",
         {
@@ -137,9 +137,9 @@ export async function ensureProfile(sb: SupabaseClient, user: User): Promise<voi
 export function showDemoBanner(): void {
   const b = h(
     "div",
-    { class: "demo-banner", role: "status" },
+    { class: "band-note demo", role: "status" },
     h("span", { text: "Made-up demo trip, saved in this browser." }),
-    armBtn(h("button", { class: "btn small ghost", type: "button" }, "Reset demo"), "Tap again to reset", () => {
+    armBtn(h("button", { class: "btn small quiet", type: "button" }, "Reset"), "Tap again to reset", () => {
       try {
         for (const k of Object.keys(localStorage)) if (k.startsWith("krysa-") || k.startsWith("pw-")) localStorage.removeItem(k);
         sessionStorage.removeItem("pw-tab");
@@ -148,8 +148,8 @@ export function showDemoBanner(): void {
       }
       location.reload();
     }),
-    h("button", { class: "rm-close", type: "button", "aria-label": "Dismiss the demo note", onclick: () => b.remove() }, closeIcon()),
+    h("button", { class: "icon-btn", type: "button", "aria-label": "Dismiss the demo note", onclick: () => b.remove() }, closeIcon()),
   );
-  // In the page, above the header: a fixed banner covered the mascot and the Rat TV and Wrapped close buttons.
-  (document.querySelector(".stage-in") ?? document.body).prepend(b);
+  // In the band, above the tab's title, so it never covers a control.
+  (document.getElementById("band-notes") ?? document.body).append(b);
 }

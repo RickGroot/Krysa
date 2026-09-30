@@ -7,7 +7,6 @@ import { S, kindOpts } from "../state";
 import { rate, tripDays } from "./bound";
 import { openSheet, removeDocs, snapOf, write } from "./core";
 import { toast } from "./dom";
-import { scurry } from "./idle";
 
 export function editEvent(ev: any = {},preset: any = {}){
   const days=tripDays();const d=ev.date||preset.date||days[0]||"";
@@ -99,7 +98,7 @@ export function editExpense(x: any = {}){
       try{localStorage.setItem(PAYER_KEY,v.paidBy)}catch(e){}
       const data: any={what:v.what,amount:Math.round(amount*100)/100,currency:v.currency,paidBy:v.paidBy,date:v.date,split:v.split};
       if(x.id)return write(()=>S.db.doc("expenses/"+x.id).update(data),"Saved");
-      return write(()=>S.db.collection("expenses").add({...data,createdBy:S.uid,createdAt:new Date().toISOString()}),"Logged").then(ok=>{if(ok)scurry();return ok})},
+      return write(()=>S.db.collection("expenses").add({...data,createdBy:S.uid,createdAt:new Date().toISOString()}),"Logged")},
     onDelete:x.id?()=>removeDocs([snapOf("expenses",x)],"Expense deleted"):null});
 }
 

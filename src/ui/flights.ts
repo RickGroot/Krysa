@@ -6,42 +6,62 @@ import { checkInRule, flightEnd, splitFlights } from "../lib/schedule";
 import { S, pname } from "../state";
 import { openSheet, removeDocs, snapOf, write } from "./core";
 import { h, toast } from "./dom";
+import { note } from "./parts";
 
 export const AIRPORTS={AMS:"Amsterdam",PRG:"Prague"};
 
-export function copyBtn(text,key?){const b=h("button",{class:"btn small ghost",type:"button","data-k":key,"aria-label":"Copy booking code",onclick:async()=>{try{await navigator.clipboard.writeText(text);toast("Booking code copied")}catch(e){toast("Couldn't copy. Show the code and select it instead.")}}},"Copy");return b}
+export function copyBtn(text,key?){const b=h("button",{class:"btn small quiet",type:"button","data-k":key,"aria-label":"Copy booking code",onclick:async()=>{try{await navigator.clipboard.writeText(text);toast("Booking code copied")}catch(e){toast("Couldn't copy. Show the code and select it instead.")}}},"Copy");return b}
 
-export function renderFlights(main){
-  main.append(h("div",{class:"sectionhead"},h("p",{text:"Everyone's flights. Check-in and leave-for-the-airport reminders show up at the top of Plan when it's time."})));
+/** Where a flight stands: landed, in the air, check-in open, or how many days to go. */
+function flightState(f,now){
+  const dep=dtUTC(f.date,f.dep),end=flightEnd(f);if(dep==null)return{text:""};
+  if(end!=null&&now>=end)return{text:"Landed"};
+  if(now>=dep)return{text:"In the air",cls:"air"};
+  if(now>=dep-checkInRule(f.airline).opensH*3600000)return{text:"Check-in open",cls:"open"};
+  const days=Math.round((+parseD(f.date)-+parseD(todayIso()))/864e5);return{text:days<=0?"Today":days===1?"Tomorrow":`In ${days} days`};
+}
+
+const people=legs=>[...new Set(legs.flatMap(l=>Array.isArray(l.people)?l.people:[]))];
+
+/** One line for Today: number, when, where to, who. */
+export function flightRow(legs,now){
+  const f=legs[0],st=flightState(f,now),who=people(legs).map(pname).join(", ");
+  return h("li",{class:"row flrow"},h("span",{class:"fl-no",text:f.flight||"Flight"}),
+    h("div",{class:"row-main"},h("div",{class:"row-ti",text:`${f.from||"—"} → ${f.to||"—"} · ${fmtD(f.date)} ${f.dep||""}`}),who&&h("p",{class:"row-meta",text:who})),
+    st.text&&h("span",{class:"state "+(st.cls||""),text:st.text}));
+}
+
+export function renderFlights(sec){
   const now=nowLocalUTC(),{upcoming,landed}=splitFlights(S.flights,now);
-  if(!upcoming.length&&!landed.length){main.append(h("p",{class:"empty",text:"No flights yet. Add the first booking."}));return}
+  if(!upcoming.length&&!landed.length){sec.append(note("sus","No flights yet. Add the first booking and Krysa watches the check-in times."));return}
   // What's still to come first, soonest on top; flights that have landed fold away at the end.
-  for(const legs of upcoming)main.append(flightCard(legs,now));
-  if(landed.length)main.append(h("details",{class:"landed"},h("summary",null,`Landed (${landed.length})`),h("div",{class:"landed-list"},landed.map(legs=>flightCard(legs,now)))));
+  sec.append(h("div",{class:"tickets"},upcoming.map(legs=>flightCard(legs,now))));
+  if(landed.length)sec.append(h("details",{class:"earlier"},h("summary",null,`Landed · ${landed.length}`),h("div",{class:"tickets"},landed.map(legs=>flightCard(legs,now)))));
 }
 
 function flightCard(legs,now){
-  const f=legs[0];const dep=dtUTC(f.date,f.dep),arr=dtUTC(f.date,f.arr),end=flightEnd(f);
+  const f=legs[0];const dep=dtUTC(f.date,f.dep),arr=dtUTC(f.date,f.arr);
   const dur=dep!=null&&arr!=null&&arr>dep?Math.round((arr-dep)/60000):null;
-  const checkin=dep!=null?dep-checkInRule(f.airline).opensH*3600000:null;
-  let state="",cls="";
-  if(dep!=null){if(end!=null&&now>=end)state="Landed";else if(now>=dep)state="In the air";else if(now>=checkin){state="Check-in open";cls=" open"}else{const days=Math.round((+parseD(f.date)-+parseD(todayIso()))/864e5);state=days<=0?"Today":days===1?"Tomorrow":`In ${days} days`}}
-  const people=[...new Set(legs.flatMap(l=>Array.isArray(l.people)?l.people:[]))];
+  const rule=checkInRule(f.airline),checkin=dep!=null?dep-rule.opensH*3600000:null,st=flightState(f,now);
+  // The plane sits where the flight is: at the gate, on its way (by the clock), or landed.
   const plane=h("div",{class:"fl-plane"});plane.append(planeSvg());
-  return h("section",{class:"flight"},
-    h("div",{class:"fl-head"},h("div",{class:"fl-no"},f.flight||"Flight",h("small",{text:`${f.airline?f.airline+" · ":""}${fmtD(f.date)}`})),state&&h("span",{class:"fl-state"+cls,text:state})),
-    h("div",{class:"fl-route"},
-      h("div",{class:"fl-end"},h("div",{class:"code",text:f.from||"—"}),h("div",{class:"time",text:f.dep||""}),h("div",{class:"city",text:AIRPORTS[f.from]||""})),
-      h("div",{class:"fl-line"},plane,dur&&h("div",{class:"fl-dur",text:`${Math.floor(dur/60)} h ${dur%60} min`})),
-      h("div",{class:"fl-end to"},h("div",{class:"code",text:f.to||"—"}),h("div",{class:"time",text:f.arr||""}),h("div",{class:"city",text:AIRPORTS[f.to]||""}))),
-    h("div",{class:"fl-meta"},
-      h("div",null,h("div",{class:"k",text:"On board"}),h("div",{class:"v"},people.length?people.map(pname).join(", "):"Nobody yet")),
-      checkin&&h("div",null,h("div",{class:"k",text:"Online check-in opens"}),h("div",{class:"v",text:fmtStamp(checkin)})),
-      dep&&f.from==="PRG"&&h("div",null,h("div",{class:"k",text:"Be at the airport by"}),h("div",{class:"v",text:fmtStamp(dep-2*3600000)+" (desk closes "+fmtStamp(dep-40*60000).slice(-5)+")"})),
-      dep&&f.to==="PRG"&&h("div",null,h("div",{class:"k",text:"Into town"}),h("div",{class:"v",text:"Allow about 45 min into town"}))),
-    h("div",{class:"fl-book"},h("div",{class:"k",text:"Bookings"}),
-      legs.map(l=>h("div",{class:"bk"},maskedCode(l.booking,"code:"+l.id),l.booking&&copyBtn(l.booking,"copy:"+l.id),h("span",{text:(Array.isArray(l.people)?l.people.map(pname).join(", "):"")+(l.note?" · "+l.note:"")}),S.canWrite&&h("button",{class:"btn small ghost",type:"button","data-k":"edit:flights:"+l.id,onclick:()=>editFlight(l)},"Edit")))),
-    h("div",{class:"fl-links"},h("a",{href:`https://www.google.com/search?q=${encodeURIComponent((f.flight||"")+" flight status")}`,target:"_blank",rel:"noopener",text:"Flight status"}),(()=>{const r=checkInRule(f.airline);return r.url?h("a",{href:r.url,target:"_blank",rel:"noopener",text:`Check in at ${f.airline.trim()}`}):null})()));
+  if(dep!=null)plane.style.setProperty("--p",String(arr!=null&&arr>dep?Math.min(1,Math.max(0,(now-dep)/(arr-dep))):now>=dep?1:0));
+  const who=people(legs);
+  return h("article",{class:"ticket","aria-label":`${f.flight||"Flight"} ${f.from||""} to ${f.to||""}, ${fmtD(f.date)}`},
+    h("div",{class:"tk-head"},h("span",{class:"fl-no",text:f.flight||"Flight"}),h("span",{class:"tk-when",text:`${f.airline?f.airline+" · ":""}${fmtD(f.date)}`}),st.text&&h("span",{class:"state "+(st.cls||""),text:st.text})),
+    h("div",{class:"tk-route"},
+      h("div",{class:"tk-end"},h("span",{class:"code",text:f.from||"—"}),h("span",{class:"time",text:f.dep||""}),h("span",{class:"city",text:AIRPORTS[f.from]||""})),
+      h("div",{class:"tk-line"},plane,dur&&h("span",{class:"tk-dur",text:`${Math.floor(dur/60)} h ${dur%60} min`})),
+      h("div",{class:"tk-end to"},h("span",{class:"code",text:f.to||"—"}),h("span",{class:"time",text:f.arr||""}),h("span",{class:"city",text:AIRPORTS[f.to]||""}))),
+    h("dl",{class:"tk-facts"},
+      h("div",null,h("dt",{text:"On board"}),h("dd",{text:who.length?who.map(pname).join(", "):"Nobody yet"})),
+      checkin&&h("div",null,h("dt",{text:"Online check-in"}),h("dd",{text:`opens ${fmtStamp(checkin)}`})),
+      dep&&f.from==="PRG"&&h("div",null,h("dt",{text:"At the airport by"}),h("dd",{text:fmtStamp(dep-2*3600000)+` (desk closes ${fmtStamp(dep-rule.desksCloseMin*60000).slice(-5)})`})),
+      dep&&f.to==="PRG"&&h("div",null,h("dt",{text:"Into town"}),h("dd",{text:"About 45 min from the airport"}))),
+    h("div",{class:"tk-book"},legs.map(l=>h("div",{class:"bk"},h("span",{class:"bk-who"},h("small",{text:"Booking"}),(Array.isArray(l.people)&&l.people.length?l.people.map(pname).join(", "):"Nobody named")+(l.note?" · "+l.note:"")),
+      l.booking?[maskedCode(l.booking,"code:"+l.id),copyBtn(l.booking,"copy:"+l.id)]:h("span",{class:"hint",text:"No booking code"}),S.canWrite&&h("button",{class:"btn small quiet",type:"button","data-k":"edit:flights:"+l.id,onclick:()=>editFlight(l)},"Edit")))),
+    h("div",{class:"tk-links"},rule.url&&h("a",{class:"btn small primary",href:rule.url,target:"_blank",rel:"noopener",text:`Check in at ${f.airline.trim()}`}),
+      h("a",{class:"btn small",href:`https://www.google.com/search?q=${encodeURIComponent((f.flight||"")+" flight status")}`,target:"_blank",rel:"noopener",text:"Flight status"})));
 }
 
 export function editFlight(f: any = {}){
@@ -61,10 +81,10 @@ export function editFlight(f: any = {}){
 }
 
 export function maskedCode(code,key?){
-  if(!code)return h("code",{text:"—"});
+  if(!code)return h("code",{class:"bk-code",text:"—"});
   // Hidden until asked for, and again after 20 s. The dots mean nothing to a screen reader.
-  const dots="•".repeat(Math.min(code.length,6));const c=h("code",{text:dots,"aria-hidden":"true"});let shown=false,t;
-  const set=v=>{shown=v;c.textContent=v?code:dots;if(v)c.removeAttribute("aria-hidden");else c.setAttribute("aria-hidden","true");b.textContent=v?"Hide code":"Show code"};
-  const b=h("button",{class:"btn small ghost",type:"button","data-k":key,onclick:()=>{set(!shown);clearTimeout(t);if(shown)t=setTimeout(()=>set(false),20000)}},"Show code");
+  const dots="•".repeat(Math.min(code.length,6));const c=h("code",{class:"bk-code",text:dots,"aria-hidden":"true"});let shown=false,t;
+  const set=v=>{shown=v;c.textContent=v?code:dots;if(v)c.removeAttribute("aria-hidden");else c.setAttribute("aria-hidden","true");b.textContent=v?"Hide":"Show";b.setAttribute("aria-label",v?"Hide the booking code":"Show the booking code")};
+  const b=h("button",{class:"btn small quiet",type:"button","data-k":key,"aria-label":"Show the booking code",onclick:()=>{set(!shown);clearTimeout(t);if(shown)t=setTimeout(()=>set(false),20000)}},"Show");
   return h("span",{class:"code-mask"},c,b);
 }

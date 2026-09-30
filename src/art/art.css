@@ -1,0 +1,211 @@
+/* The artwork: Krysa's living parts, the meme templates, backgrounds, filters and stickers, and the scene motion.
+   Kept apart from the app styles (src/styles.css) so the UI can change without touching the art. */
+/* living rat: parts animate only inside .alive */
+.k-svg *{transform-box:fill-box}
+@media (prefers-reduced-motion:no-preference){
+  .alive .k-eyes{transform-origin:center;animation:k-blink 4.8s infinite}
+  .alive .k-look{animation:k-look 11s infinite}
+  .alive .k-tail{transform-origin:0% 80%;animation:k-tail 2.6s ease-in-out infinite alternate}
+  .alive .k-ear.l{transform-origin:80% 90%;animation:k-earl 6.5s infinite}
+  .alive .k-ear.r{transform-origin:20% 90%;animation:k-earr 8.3s infinite}
+  .alive .k-nose{transform-origin:center;animation:k-sniff 5.2s infinite}
+  .alive .k-wh.l{transform-origin:100% 50%;animation:k-whl 5.2s infinite}
+  .alive .k-wh.r{transform-origin:0% 50%;animation:k-whr 5.2s infinite}
+  .alive .k-body{transform-origin:50% 100%;animation:k-breathe 3.4s ease-in-out infinite}
+  .alive .k-head{transform-origin:50% 95%;animation:k-tilt 13s ease-in-out infinite}
+  .alive.sleep .k-eyes{animation:none;transform:scaleY(.12)}
+  .alive.sleep .k-look,.alive.sleep .k-ear,.alive.sleep .k-nose,.alive.sleep .k-wh{animation:none}
+  .alive.sleep .k-tail{animation-duration:6s}
+  .alive.sleep .k-body{animation-duration:5.5s}
+  .alive.sleep .k-head{animation:k-doze 5.5s ease-in-out infinite}
+}
+@keyframes k-blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes k-look{0%,30%{transform:translateX(0)}34%,46%{transform:translateX(-2.4px)}50%,62%{transform:translateX(2.4px)}66%,100%{transform:translateX(0)}}
+@keyframes k-tail{from{transform:rotate(-7deg)}to{transform:rotate(9deg)}}
+@keyframes k-earl{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-14deg)}92%{transform:rotate(3deg)}95%{transform:rotate(-8deg)}}
+@keyframes k-earr{0%,70%,100%{transform:rotate(0)}73%{transform:rotate(14deg)}77%{transform:rotate(-2deg)}}
+@keyframes k-sniff{0%,40%,60%,100%{transform:scale(1)}43%,49%,55%{transform:scale(1.25)}46%,52%,58%{transform:scale(.95)}}
+@keyframes k-whl{0%,40%,60%,100%{transform:rotate(0)}43%,49%,55%{transform:rotate(7deg)}46%,52%,58%{transform:rotate(-3deg)}}
+@keyframes k-whr{0%,40%,60%,100%{transform:rotate(0)}43%,49%,55%{transform:rotate(-7deg)}46%,52%,58%{transform:rotate(3deg)}}
+@keyframes k-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.015,1.03)}}
+@keyframes k-tilt{0%,40%,62%,100%{transform:rotate(0)}46%,56%{transform:rotate(-7deg)}}
+@keyframes k-doze{0%,100%{transform:rotate(-4deg) translateY(1px)}50%{transform:rotate(-9deg) translateY(3px)}}
+/* memes: templates, backgrounds, filters and stickers */
+.mv-shake,.mv-vibe{transform-origin:50% 90%}
+.bp{background:#fbf7ee;color:#17181a;display:grid;font-family:var(--body)}
+.bp-head{display:flex;justify-content:space-between;background:#c1121f;color:#fff;font:800 clamp(9px,3.6cqw,16px)/1 var(--display);letter-spacing:.08em;padding:3% 4%}
+.bp-body{display:grid;grid-template-columns:44% 1fr;gap:4%;padding:4%}
+.bp-art{border-radius:4px;overflow:hidden}
+.bp-info{display:grid;align-content:start;gap:2%;min-width:0}
+.bp-l{font-size:clamp(7px,2.4cqw,11px);letter-spacing:.1em;color:#6b6f75;font-weight:700}
+.bp-name{font:800 clamp(14px,6cqw,30px)/1 var(--display);font-stretch:80%;text-transform:uppercase;overflow-wrap:anywhere}
+.bp-route{display:flex;align-items:center;gap:6%;font:800 clamp(16px,8cqw,40px)/1 var(--display);font-stretch:80%}
+.bp-route span{font-size:.6em;color:#c1121f}
+.bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:4% 6%}
+.bp-v{font:800 clamp(10px,3.8cqw,18px)/1.1 var(--display)}
+.bp-note{margin:0 4%;padding:2.5% 0;border-top:1px dashed #b9b2a3;font-size:clamp(10px,3.6cqw,17px);font-weight:600}
+.bp-code{height:clamp(18px,8cqw,40px);margin:0 4% 4%;background:repeating-linear-gradient(90deg,#17181a 0 2px,transparent 2px 4px,#17181a 4px 5px,transparent 5px 8px,#17181a 8px 11px,transparent 11px 12px)}
+.meme.lay-wanted{background:#e8d3a2;padding:6% 9%;justify-items:center;text-align:center;color:#3a2412;box-shadow:inset 0 0 40px rgb(120 70 20 / .35)}
+.wt-h{font:700 clamp(28px,15cqw,80px)/1 "Times New Roman",Times,serif;letter-spacing:.06em}
+.wt-frame{width:78%;border:4px solid #3a2412;margin:3% 0}
+.wt-name{font:800 clamp(16px,8cqw,40px)/1.05 "Times New Roman",Times,serif;text-transform:uppercase;overflow-wrap:anywhere}
+.wt-for{font:italic clamp(11px,4.2cqw,20px)/1.2 "Times New Roman",Times,serif;margin-top:1.5%}
+.wt-rew{font:700 clamp(12px,5.4cqw,26px)/1 "Times New Roman",Times,serif;margin-top:3%;letter-spacing:.06em}
+.bg-sky{background:linear-gradient(#7ec8f2,#d7f1ff)}
+.bg-stage{background:linear-gradient(#1a1030,#090612)}
+.bg-synth{background:linear-gradient(#2a0a4a,#a0287a 62%)}
+.fx-night{filter:grayscale(1) sepia(1) hue-rotate(60deg) saturate(4) brightness(.95) contrast(1.2)}
+.fx-vhs{filter:saturate(1.45) contrast(1.1)}
+.fx-vhs .rats{filter:drop-shadow(2px 0 0 rgb(255 0 60 / .55)) drop-shadow(-2px 0 0 rgb(0 200 255 / .55))}
+.fx-night .art::after,.fx-vhs .art::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,rgb(0 0 0 / .2) 0 2px,transparent 2px 4px)}
+.fx-vhs .art::before{content:"PLAY ▶";position:absolute;z-index:5;left:5%;top:47%;color:#fff;font:700 clamp(8px,4cqw,16px)/1 ui-monospace,Menlo,monospace;text-shadow:1px 1px 0 #000}
+.st-fly{transform-box:fill-box}
+@media (prefers-reduced-motion:no-preference){
+  .mv-shake{animation:mv-shake .18s linear infinite}
+  .mv-vibe{animation:mv-vibe .8s ease-in-out infinite alternate}
+  .st-fly{animation:st-fly 6s linear infinite}
+  .st-laser{animation:blinkdot .35s linear infinite}
+}
+@keyframes mv-shake{0%{transform:translate(0,0)}25%{transform:translate(-1.2%,.6%)}50%{transform:translate(1%,-.6%)}75%{transform:translate(-.8%,-.4%)}100%{transform:translate(0,0)}}
+@keyframes mv-vibe{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes st-fly{from{transform:translateX(-30px)}to{transform:translateX(130px)}}
+.meme{width:100%;display:grid;container-type:inline-size;background:#000;--display:var(--condensed)}
+.art{position:relative;aspect-ratio:1/1;overflow:hidden;container-type:inline-size;width:100%}
+.stl{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
+.rats{position:absolute;inset:0}
+.rats .r{position:absolute}
+.rats .r svg{width:100%;height:100%;display:block}
+.cnt-1 .r0{left:13%;top:13%;width:74%;height:74%}
+.cnt-1.sz-tiny .r0{left:39%;top:64%;width:22%;height:22%}
+.cnt-1.sz-huge .r0{left:-35%;top:-6%;width:170%;height:170%}
+.cnt-3 .r0{left:25%;top:30%;width:50%;height:50%;z-index:2}
+.cnt-3 .r1{left:1%;top:40%;width:42%;height:42%}
+.cnt-3 .r2{left:57%;top:40%;width:42%;height:42%}
+.cnt-3 .r2 svg{transform:scaleX(-1)}
+.cnt-3.sz-tiny .r{transform:scale(.5);transform-origin:50% 100%}
+.cnt-3.sz-huge .r{transform:scale(1.45);transform-origin:50% 60%}
+.cnt-9 .r{width:31%;height:31%}
+.cnt-9 .r0{left:3%;top:4%}
+.cnt-9 .r1{left:35%;top:2%}
+.cnt-9 .r2{left:66%;top:5%}
+.cnt-9 .r3{left:-3%;top:35%}
+.cnt-9 .r4{left:34%;top:34%}
+.cnt-9 .r5{left:71%;top:36%}
+.cnt-9 .r6{left:5%;top:66%}
+.cnt-9 .r7{left:36%;top:65%}
+.cnt-9 .r8{left:67%;top:67%}
+.cnt-9 .r:nth-child(even) svg{transform:scaleX(-1)}
+.cnt-9.sz-tiny .r{transform:scale(.6)}
+.cnt-9.sz-huge .r{transform:scale(1.35)}
+.mv-tilt{transform:rotate(-12deg)}
+.mv-flip{transform:scaleX(-1)}
+.mv-upside{transform:rotate(180deg)}
+.meme .mt{position:absolute;left:4%;right:4%;z-index:3;text-align:center;font-family:Anton,Impact,"Arial Narrow Bold",sans-serif;text-transform:uppercase;color:#fff;font-size:clamp(16px,8cqw,46px);line-height:1.05;letter-spacing:.01em;text-shadow:2px 2px 0 #000,-2px 2px 0 #000,2px -2px 0 #000,-2px -2px 0 #000,0 2px 0 #000,2px 0 0 #000,0 -2px 0 #000,-2px 0 0 #000;overflow-wrap:anywhere}
+.meme .mt.top{top:4%}
+.meme .mt.bot{bottom:4%}
+.font-comic .mt,.font-comic .capbar,.font-comic .stxt,.font-comic .sbub{font-family:"Comic Neue","Comic Sans MS","Chalkboard SE",cursive;font-weight:700;text-transform:none}
+.font-clean .mt,.font-clean .capbar,.font-clean .stxt,.font-clean .sbub{font-family:var(--body);font-weight:700;text-transform:none}
+.font-serif .mt,.font-serif .capbar,.font-serif .stxt,.font-serif .sbub{font-family:"Times New Roman",Times,Georgia,serif;font-weight:700;text-transform:none}
+.font-impact .capbar,.font-impact .stxt,.font-impact .sbub{font-family:Anton,Impact,"Arial Narrow Bold",sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em}
+.font-whisper .mt{font-family:var(--body);font-weight:400;text-transform:lowercase;font-size:clamp(12px,5cqw,26px);text-shadow:0 1px 3px rgb(0 0 0 / .6)}
+.font-whisper .capbar,.font-whisper .stxt,.font-whisper .sbub{font-family:var(--body);font-weight:400;text-transform:lowercase}
+.col-yellow .mt{color:#ffe14d}
+.col-red .mt{color:#ff3b30}
+.col-black .mt{color:#111;text-shadow:2px 2px 0 #fff,-2px 2px 0 #fff,2px -2px 0 #fff,-2px -2px 0 #fff,0 2px 0 #fff,2px 0 0 #fff,0 -2px 0 #fff,-2px 0 0 #fff}
+.capbar{background:#fff;color:#111;padding:4% 5%;white-space:pre-line;font:600 clamp(14px,5.4cqw,30px)/1.2 var(--body);overflow-wrap:anywhere}
+.lay-poster{padding:7% 10% 6%}
+.pframe{border:2px solid #eee;padding:1.2%}
+.ptitle{color:#fff;font-family:"Times New Roman",Times,serif;text-transform:uppercase;letter-spacing:.12em;font-size:clamp(20px,9cqw,52px);text-align:center;line-height:1.05;margin-top:5%;overflow-wrap:anywhere}
+.psub{color:#ccc;font-family:"Times New Roman",Times,serif;font-size:clamp(11px,3.8cqw,20px);text-align:center;margin-top:2%}
+.lay-duo{grid-template-columns:1fr 1fr;gap:3px}
+.lay-stack{gap:3px}
+.srow{display:grid;grid-template-columns:1fr 1fr}
+.stxt{background:#fff;color:#111;display:grid;place-items:center;text-align:center;padding:6%;font:700 clamp(13px,4.6cqw,28px)/1.15 var(--body);overflow-wrap:anywhere}
+.sbub{position:absolute;z-index:3;left:5%;right:30%;top:5%;background:#fff;color:#111;border:2px solid #111;border-radius:16px;padding:3% 4%;font:700 clamp(11px,4.8cqw,24px)/1.15 var(--body);overflow-wrap:anywhere}
+.sbub::after{content:"";position:absolute;right:16%;bottom:-11px;width:16px;height:16px;background:#fff;border-right:2px solid #111;border-bottom:2px solid #111;transform:rotate(45deg) skew(10deg,10deg)}
+.news{position:absolute;z-index:3;left:0;right:0;bottom:6%;display:grid}
+.ntag{justify-self:start;background:#c1121f;color:#fff;font:800 clamp(9px,3.4cqw,16px)/1 var(--display);padding:1.4% 2.6%;letter-spacing:.06em}
+.nhead{background:#fff;color:#111;font:800 clamp(12px,5cqw,26px)/1.1 var(--display);font-stretch:80%;text-transform:uppercase;padding:1.8% 3%;overflow-wrap:anywhere}
+.ntick{background:#111;color:#ffe14d;overflow:hidden;white-space:nowrap;font:600 clamp(9px,3.4cqw,16px)/1.7 var(--body)}
+.ntick span{display:inline-block;padding-left:3%}
+.live{position:absolute;z-index:3;left:4%;top:4%;background:rgb(0 0 0 / .55);color:#fff;font:700 clamp(8px,3cqw,14px)/1 var(--body);padding:1.4% 2.2%;display:flex;gap:.4em;align-items:center;letter-spacing:.06em}
+.live i{width:.65em;height:.65em;border-radius:50%;background:#ff3b30;display:inline-block}
+.bg-tram{background:#c1121f}
+.bg-vltava{background:#1c5a66}
+.bg-gold{background:#b8892b}
+.bg-slate{background:#39424f}
+.bg-plum{background:#5b3a6e}
+.bg-pink{background:#e98aa8}
+.bg-white{background:#f4f4f1}
+.bg-black{background:#111}
+.bg-sunburst{background:repeating-conic-gradient(from 0deg at 50% 62%,#ffcf3f 0 10deg,#ff9f1c 10deg 20deg)}
+.bg-vapor{background:linear-gradient(180deg,#ff71ce 0%,#b967ff 55%,#01cdfe 100%)}
+.bg-void{background:radial-gradient(circle at 50% 55%,#555 0,#151515 50%,#000 100%)}
+.bg-prague{background:linear-gradient(#0b1a3a,#2b4580)}
+.fx-fried{filter:saturate(3.4) contrast(1.9) brightness(1.08) hue-rotate(-10deg)}
+.fx-noir{filter:grayscale(1) contrast(1.35)}
+.fx-vintage{filter:sepia(.85) saturate(1.3) contrast(.92)}
+.fx-potato{filter:blur(1.3px) contrast(1.5) saturate(1.8)}
+.fx-invert{filter:invert(1) hue-rotate(180deg)}
+.fx-trippy{filter:hue-rotate(90deg) saturate(1.6)}
+.st-tw,.st-rise,.st-drip,.st-pulse,.st-bob,.st-flick,.st-drop,.st-fall{transform-box:fill-box;transform-origin:center}
+.st-flick{transform-origin:50% 100%}
+@media (prefers-reduced-motion:no-preference){
+  .mv-bounce{animation:mv-bounce .9s ease-in-out infinite}
+  .mv-spin{animation:mv-spin 3.2s linear infinite}
+  .fx-trippy{animation:trip 5s linear infinite}
+  .ntick span{padding-left:100%;animation:tick 14s linear infinite}
+  .live i{animation:blinkdot 1.2s infinite}
+  .st-tw{animation:st-tw 1.8s ease-in-out infinite}
+  .st-rise{animation:st-rise 3s ease-in infinite}
+  .st-drip{animation:st-drip 2.2s ease-in infinite}
+  .st-pulse{animation:st-pulse .8s ease-in-out infinite alternate}
+  .st-bob{animation:st-bob 1.6s ease-in-out infinite alternate}
+  .st-flick{animation:st-flick .5s ease-in-out infinite alternate}
+  .st-drop{animation:st-drop .9s linear infinite}
+  .st-fall{animation:st-fall 3.5s linear infinite}
+  .st-glow{animation:blinkdot 1.4s ease-in-out infinite}
+  .alive .k-prop{transform-origin:center;animation:k-prop .3s linear infinite alternate}
+  .alive .k-steam{animation:k-steam 2.4s ease-in-out infinite}
+  .alive .k-balloon{transform-origin:50% 100%;animation:k-bal 3s ease-in-out infinite alternate}
+  .alive .k-halo{animation:k-halo 2.4s ease-in-out infinite alternate}
+  .alive .k-type{animation:k-type .22s ease-in-out infinite alternate}.alive .k-type.k2{animation-delay:.11s}
+  .alive .k-tears{stroke-dasharray:4 3;animation:k-tears 1s linear infinite}
+}
+@keyframes mv-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10%)}}
+@keyframes mv-spin{to{transform:rotate(360deg)}}
+@keyframes trip{from{filter:hue-rotate(0) saturate(1.6)}to{filter:hue-rotate(360deg) saturate(1.6)}}
+@keyframes tick{to{transform:translateX(-100%)}}
+@keyframes blinkdot{50%{opacity:.25}}
+@keyframes st-tw{0%,100%{transform:scale(.6);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+@keyframes st-rise{0%{transform:translateY(8px);opacity:0}20%{opacity:1}100%{transform:translateY(-30px);opacity:0}}
+@keyframes st-drip{0%{transform:translateY(-2px);opacity:0}20%{opacity:1}100%{transform:translateY(12px);opacity:0}}
+@keyframes st-pulse{to{transform:scale(1.25)}}
+@keyframes st-bob{to{transform:translateY(-3px) rotate(8deg)}}
+@keyframes st-flick{to{transform:scaleY(1.15) skewX(4deg)}}
+@keyframes st-drop{from{transform:translateY(0);opacity:1}to{transform:translateY(22px);opacity:0}}
+@keyframes st-fall{from{transform:translateY(-12px) rotate(0)}to{transform:translateY(112px) rotate(240deg)}}
+@keyframes k-prop{to{transform:scaleX(-1)}}
+@keyframes k-steam{0%{opacity:0;transform:translateY(3px)}50%{opacity:.9}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes k-bal{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes k-halo{to{transform:translateY(-2px)}}
+@keyframes k-type{to{transform:translateY(-2px)}}
+@keyframes k-tears{to{stroke-dashoffset:-14}}
+/* illustration motion */
+.hz-tw,.hz-ff,.hz-bob,.hz-pulse,.hz-glow{transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:no-preference){
+  .hz-tw{animation:st-tw 2.6s ease-in-out infinite}
+  .hz-stars{animation:hz-stars 2.6s ease-in-out infinite}
+  .hz-ff{animation:hz-ff 4s ease-in-out infinite alternate}
+  .hz-bob{animation:hz-bob 3.2s ease-in-out infinite alternate}
+  .hz-pulse{animation:hz-pulse 2s ease-out infinite}
+  .hz-glow{animation:hz-glow 5s ease-in-out infinite alternate}
+  .hz-tail{transform-box:fill-box;transform-origin:100% 0;animation:k-tail 2.8s ease-in-out infinite alternate}
+}
+@keyframes hz-ff{from{transform:translate(0,0);opacity:.4}to{transform:translate(6px,-8px);opacity:1}}
+@keyframes hz-bob{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-6px) rotate(2deg)}}
+@keyframes hz-pulse{0%{transform:scale(.6);opacity:.8}100%{transform:scale(1.8);opacity:0}}
+@keyframes hz-stars{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes hz-glow{from{opacity:.7}to{opacity:1}}
+/* Art that scrolls out of view stops moving (src/ui/perf.ts). */
+.offscreen,.offscreen *{animation-play-state:paused!important}

@@ -37,8 +37,9 @@ export function toCzk(e: Expense, rate: number): number {
   return amount * (e.currency === "EUR" ? rate : 1);
 }
 
+/** "1 250 Kč": the amount never breaks from its unit. */
 export function fmtCzk(n: number): string {
-  return `${Math.round(n).toLocaleString("cs-CZ")} Kč`;
+  return `${Math.round(n).toLocaleString("cs-CZ")}\u00a0Kč`;
 }
 
 export function fmtEur(n: number): string {

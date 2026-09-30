@@ -11,3 +11,6 @@ dist
 
 # Supabase CLI state (made by `supabase functions deploy`)
 supabase/.temp
+
+# Design review captures (screenshots of the demo), regenerated per review
+.impeccable/review/

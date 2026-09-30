@@ -38,36 +38,45 @@ function palette(t: Record<string, string>): (name: string) => RGB {
     if (!hex) throw new Error(`Missing token --${n}`);
     return rgb(hex);
   };
-  const nav = mix(c("surface"), c("bg"), 0.9);
   const derived: Record<string, RGB> = {
-    // Cards, lists and days: color-mix(surface 78%, transparent) over the page.
-    card: mix(c("surface"), c("bg"), 0.78),
-    // The selected tab: tram 12% over the 90% surface bar.
-    navActive: mix(c("tram"), nav, 0.12),
-    // Reminder cards: tram 14% into surface.
-    remTint: mix(c("tram"), c("surface"), 0.14),
-    // A voted idea: gold 16% into surface.
-    voteTint: mix(c("gold"), c("surface"), 0.16),
+    // Heads-up rows: amber 14% into the surface.
+    huTint: mix(c("signal"), c("surface"), 0.14),
+    // A reaction you gave: amber 16% into the surface.
+    reactTint: mix(c("signal"), c("surface"), 0.16),
   };
   return (n) => derived[n] ?? c(n);
 }
 
 const KINDS = ["k-work", "k-food", "k-sight", "k-night", "k-travel", "k-coffee"];
+const FILLS = ["kf-work", "kf-food", "kf-sight", "kf-night", "kf-travel", "kf-coffee"];
 const TEXT: [string, string[]][] = [
-  ["ink", ["bg", "surface", "surface-2", "card"]],
-  ["ink-2", ["bg", "surface", "surface-2", "card", "remTint"]],
-  ["tram-text", ["bg", "surface", "card", "navActive"]],
-  ["vltava", ["surface", "card", "remTint"]],
-  ["gold", ["surface", "card", "voteTint"]],
-  ["danger", ["surface", "surface-2", "card"]],
-  ...KINDS.map((k): [string, string[]] => [k, ["surface", "card"]]),
-  ["tram-ink", ["tram", "vltava", "gold", "danger"]],
-  ["bg", ["ink"]],
+  ["ink", ["bg", "surface", "surface-2", "huTint", "reactTint"]],
+  ["ink-2", ["bg", "surface", "surface-2", "huTint"]],
+  ["red-text", ["bg", "surface"]],
+  ["signal-text", ["bg", "surface"]],
+  ["danger", ["bg", "surface", "surface-2"]],
+  ["good", ["bg", "surface"]],
+  ...KINDS.map((k): [string, string[]] => [k, ["bg", "surface"]]),
+  ["on-red", ["red"]],
+  ["on-signal", ["signal"]],
+  // The departure board and the enamel plates are the same in both themes.
+  ["board-ink", ["board", "board-2"]],
+  ["board-dim", ["board", "board-2"]],
+  ["amber", ["board"]],
+  ["board-red", ["board"]],
+  ["plate-ink", ["plate"]],
+  ["plate-red", ["plate"]],
+  // Line badges draw their icon in --kf-ink; the amber toast button and the in-the-air state too.
+  ...FILLS.map((f): [string, string[]] => ["kf-ink", [f]]),
+  ["kf-ink", ["amber"]],
+  // Pressed filters, votes and chips invert: the page colour on ink.
+  ["bg", ["ink", "good", "danger"]],
 ];
 const UI: [string, string[]][] = [
   ["field-border", ["surface", "surface-2"]],
-  ["tram", ["bg", "surface"]],
+  ["red", ["bg", "surface"]],
   ["focus", ["bg", "surface"]],
+  ["amber", ["board"]],
 ];
 
 const below = (pairs: [string, string[]][], c: (n: string) => RGB, min: number): string[] =>

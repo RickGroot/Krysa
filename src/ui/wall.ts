@@ -3,14 +3,15 @@
 import { resolveAsset } from "./bound";
 import { memeCached, memeEl } from "../art/meme";
 import { krysa, ratSvg } from "../art/rat";
-import { catchers } from "../lib/catchers";
 import { fmtD } from "../lib/dates";
 import { S } from "../state";
 import { removeDocs, snapOf, write } from "./core";
-import { SVGNS, armBtn, h, keepFocus, reduced, svg, toast } from "./dom";
-import { IDLE, scheduleCameo } from "./idle";
+import { SVGNS, armBtn, h, svg } from "./dom";
+import { icon } from "./icons";
 import { openOverlay } from "./overlay";
 import { postRat, saveMemeImage } from "./maker";
+import { note, secHead } from "./parts";
+import { goTab } from "./stage";
 import { render } from "./tabs";
 
 export async function deleteRat(r){
@@ -33,6 +34,8 @@ export const loveOf=r=>REACTS.reduce((n,[k])=>n+reactCount(r,k),0);
 
 export function saveWall(){try{localStorage.setItem("pw-wall",JSON.stringify(S.wall))}catch(e){}}
 
+const posterOf=r=>r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
+
 export function mediaFor(r,opts: any = {}){
   const media=h("div",{class:"media"});
   if(r.type==="meme")media.append(opts.bare||opts.fresh?memeEl(r,r.id):memeCached(r));
@@ -40,26 +43,37 @@ export function mediaFor(r,opts: any = {}){
     const m=r.type==="video"?h("video",{src,"aria-label":r.caption?`Rat video: ${r.caption}`:"Rat video",controls:!opts.bare,loop:true,muted:true,playsinline:true,autoplay:!!opts.autoplay,preload:"metadata"}):h("img",{src,alt:r.caption||"Rat meme",loading:"lazy"});
     // Newer uploads know their shape, so the feed keeps their space and doesn't jump when they load.
     if(typeof r.ar==="number"&&r.ar>.1&&r.ar<10)m.style.aspectRatio=String(r.ar);
-    m.addEventListener("error",()=>m.replaceWith(h("p",{class:"empty escaped",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
+    m.addEventListener("error",()=>m.replaceWith(h("p",{class:"escaped",text:"This rat escaped."})));media.append(m);resolveAsset(r.assetId).then(u=>{if(u)m.setAttribute("src",u)}).catch(()=>{})}
   return media;
 }
 
+/** A square tile of a post (hall of fame, Today). Memes are drawn 360px wide and scaled down to the tile. */
+export function thumb(r,key,label?){
+  const media=mediaFor(r,{bare:true});
+  return h("button",{class:"thumb",type:"button","data-k":key,"aria-label":label||(r.caption?`Open "${r.caption}"`:"Open this rat"),onclick:()=>openLightbox(r)},media);
+}
+// Memes fill their square. A tall one keeps its top (where the joke usually is). A wide one is centred,
+// except the two-rat template, which shows its first rat whole rather than half of each.
+export function fitThumbs(root){requestAnimationFrame(()=>root.querySelectorAll(".thumb .media").forEach(m=>{const mm=m.querySelector(".meme");if(!mm||!mm.offsetHeight)return;
+  const sc=Math.max(m.clientWidth/360,m.clientHeight/mm.offsetHeight),x=mm.classList.contains("lay-duo")?0:(m.clientWidth-360*sc)/2;
+  mm.style.transform=`translateX(${x}px) scale(${sc})`}))}
+
 export function postCard(r,o: any = {}){
-  const who=r.by?(S.profiles[r.by]?.name||(r.by===S.uid?"you":"Someone")):(r.legacyBy?"a colleague":"Krysa");
   const canDel=S.canWrite&&((r.by&&r.by===S.uid)||S.isOwner);
-  const del=canDel?armBtn(h("button",{class:"btn small ghost danger extra",type:"button","data-k":"del:"+r.id},"Delete"),"Tap again",async()=>{if(await deleteRat(r))o.close?.()}):null;
-  const reacts=h("div",{class:"reacts"},REACTS.map(([k,label])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
-    const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
-    b.append(reactIcon(k),h("span",{class:"t",text:label}),h("span",{class:"v",text:reactCount(r,k)}));return b}));
+  const del=canDel?armBtn(h("button",{class:"btn small quiet danger",type:"button","data-k":"del:"+r.id},"Delete"),"Tap again",async()=>{if(await deleteRat(r))o.close?.()}):null;
+  const reacts=h("div",{class:"reacts",role:"group","aria-label":"Reactions"},REACTS.map(([k,label])=>{const mine=!!(S.uid&&r[k]&&r[k][S.uid]);
+    const b=h("button",{class:"react",type:"button","data-k":`react:${r.id}:${k}`,"aria-pressed":mine,"aria-label":`${label} (${reactCount(r,k)})`,title:label,disabled:!S.canWrite||!S.uid,onclick:e=>{e.stopPropagation();write(()=>S.db.doc("rats/"+r.id).update({[k]:{[S.uid]:!mine}}))}});
+    b.append(reactIcon(k),h("span",{class:"v",text:reactCount(r,k)}));return b}));
   const media=mediaFor(r,{fresh:o.fresh});
-  if(S.wall.view==="grid")media.append(h("button",{class:"media-hit",type:"button","data-k":"open:"+r.id,"aria-label":r.caption?`Open "${r.caption}"`:"Open this rat",onclick:()=>openLightbox(r)}));
-  return h("article",{class:"post"},media,h("div",{class:"foot"},h("div",null,r.caption&&h("div",{class:"cap",text:r.caption}),h("div",{class:"by",text:"Posted by "+who+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
-    h("div",{class:"post-acts"},reacts,r.type==="meme"&&S.downloads&&h("button",{class:"btn small ghost extra",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small ghost extra",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del)));
+  if(S.wall.view==="grid"&&!o.fresh)media.append(h("button",{class:"media-hit",type:"button","data-k":"open:"+r.id,"aria-label":r.caption?`Open "${r.caption}"`:"Open this rat",onclick:()=>openLightbox(r)}));
+  return h("article",{class:"post"},media,h("div",{class:"post-foot"},
+    h("div",{class:"post-who"},r.caption&&h("p",{class:"cap",text:r.caption}),h("p",{class:"by",text:posterOf(r)+(r.createdAt?" · "+fmtD(r.createdAt.slice(0,10)):"")})),
+    h("div",{class:"post-bar"},reacts,h("div",{class:"post-acts"},r.type==="meme"&&S.downloads&&h("button",{class:"btn small quiet",type:"button","data-k":"save:"+r.id,onclick:()=>saveMemeImage(r,r.id)},"Save image"),r.type==="meme"&&S.canWrite&&h("button",{class:"btn small quiet",type:"button","data-k":"remix:"+r.id,onclick:()=>{o.close?.();postRat(r)}},"Remix"),del))));
 }
 
 export function openLightbox(r){let ov;const close=()=>ov.close();
   const prevView=S.wall.view;S.wall.view="feed";const card=postCard(r,{fresh:true,close});S.wall.view=prevView;
-  ov=openOverlay({cls:"lightbox",label:r.caption?`Rat post: ${r.caption}`:"Rat post",content:[h("button",{class:"btn closex",type:"button",onclick:close},"Close"),card]})}
+  ov=openOverlay({cls:"lightbox",label:r.caption?`Rat post: ${r.caption}`:"Rat post",content:[h("button",{class:"icon-btn closex",type:"button","aria-label":"Close",onclick:close},icon("close")),card]})}
 
 export function wallList(){
   let rs=[...S.rats];
@@ -70,58 +84,33 @@ export function wallList(){
   return rs;
 }
 
-export function ratTV(list){
-  if(!list.length){toast("No rats to broadcast yet");return}
-  // The progress bar is a CSS animation; the next rat comes on its animationend, so pausing it pauses the show.
-  let i=0,paused=false;const bar=h("i");const slot=h("div",{class:"slot"});
-  let ov,root;const close=()=>ov.close();
-  const show=n=>{i=(n+list.length)%list.length;const r=list[i];slot.replaceChildren(...[mediaFor(r,{bare:true,autoplay:!paused}),r.caption&&h("div",{class:"cap",text:r.caption})].filter(Boolean));
-    bar.classList.remove("run");void bar.offsetWidth;bar.style.setProperty("--dur",(r.type==="video"?12:6)+"s");if(!reduced())bar.classList.add("run")};
-  bar.addEventListener("animationend",()=>show(i+1));
-  const pause=h("button",{class:"btn small",type:"button",onclick:()=>setPaused(!paused)},"Pause");
-  const setPaused=v=>{paused=v;root.classList.toggle("paused",v);pause.textContent=v?"Play":"Pause";slot.querySelectorAll("video").forEach(x=>{if(v)x.pause();else x.play().catch(()=>{})})};
-  const key=e=>{if(e.key==="ArrowRight")show(i+1);else if(e.key==="ArrowLeft")show(i-1);else if(e.key===" "&&!e.target.closest?.("button")){e.preventDefault();setPaused(!paused)}};
-  ov=openOverlay({cls:"ratv",label:"Rat TV",backdrop:false,content:[h("div",{class:"ratv-top"},h("span",{class:"onair"},h("i"),"RAT TV · LIVE FROM PRAHA"),h("span",{class:"ratv-acts"},pause,h("button",{class:"btn small",type:"button",onclick:close},"Exit"))),
-    h("div",{class:"ratv-stage"},slot,h("button",{class:"nav prev",type:"button","aria-label":"Previous rat",onclick:()=>show(i-1)}),h("button",{class:"nav next",type:"button","aria-label":"Next rat",onclick:()=>show(i+1)})),
-    h("div",{class:"ratv-bar"},bar)]});root=ov.dlg;root.addEventListener("keydown",key);show(0);
+/** The latest three rats, for Today. */
+export function ratStrip(){
+  const rs=[...S.rats].sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"")).slice(0,3);
+  const sec=h("section",{class:"sec","aria-labelledby":"strip-t"},secHead("On the Rat Wall",h("button",{class:"lnk more",type:"button","data-k":"strip:wall",onclick:()=>goTab("rats")},"Open the wall"),"strip-t"),
+    rs.length?h("div",{class:"strip"},rs.map(r=>thumb(r,"strip:"+r.id))):note("classic","No rats yet. Unacceptable.",S.canWrite&&h("button",{class:"btn small","data-k":"strip:post",onclick:()=>postRat()},"Post the first rat")));
+  fitThumbs(sec);return sec;
 }
 
 export function renderRats(main){
-  // The wall is a feed: one toolbar row, then the posts, with the hall of fame after the third.
+  // One toolbar row, then the posts, with the hall of fame after the third.
   const grid=S.wall.view==="grid";
-  const sel=(label,key,list)=>h("label",{class:"wsel"},h("span",{class:"sr",text:label}),h("select",{"data-k":"wall:"+key,onchange:e=>{S.wall[key]=e.target.value;if(key==="sort"&&S.wall.sort==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()}},list.map(([k,l])=>h("option",{value:k,selected:S.wall[key]===k},l))));
+  const set=(key,v)=>{S.wall[key]=v;if(key==="sort"&&v==="shuffle")S.wall.seed=Math.random()*1e9|0;saveWall();render()};
   main.append(h("div",{class:"wallbar"},
-    sel("Sort","sort",[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]]),
-    sel("Show","filter",[["all","All"],["memes","Memes"],["uploads","Uploads"],["mine","Mine"]]),
-    S.wall.sort==="shuffle"&&h("button",{class:"btn small",type:"button","data-k":"wall:reshuffle",onclick:()=>{S.wall.seed=Math.random()*1e9|0;saveWall();render()}},"Reshuffle"),
-    h("button",{class:"btn small",type:"button","data-k":"wall:view","aria-pressed":grid,onclick:()=>{S.wall.view=grid?"feed":"grid";saveWall();render()}},"Grid")));
+    h("div",{class:"filters",role:"group","aria-label":"Show"},[["all","All"],["memes","Memes"],["uploads","Uploads"],["mine","Mine"]].map(([k,l])=>h("button",{type:"button","data-k":"wall:f:"+k,"aria-pressed":S.wall.filter===k,onclick:()=>set("filter",k)},l))),
+    h("div",{class:"wallbar-r"},
+      h("label",{class:"sel"},h("span",{class:"sr",text:"Sort"}),h("select",{"data-k":"wall:sort",onchange:e=>set("sort",e.target.value)},[["new","Newest"],["top","Most loved"],["shuffle","Shuffle"]].map(([k,l])=>h("option",{value:k,selected:S.wall.sort===k},l)))),
+      S.wall.sort==="shuffle"&&h("button",{class:"btn small",type:"button","data-k":"wall:reshuffle",onclick:()=>{S.wall.seed=Math.random()*1e9|0;saveWall();render()}},"Reshuffle"),
+      h("button",{class:"icon-btn boxed",type:"button","data-k":"wall:view","aria-pressed":grid,"aria-label":"Show as a grid",onclick:()=>{S.wall.view=grid?"feed":"grid";saveWall();render()}},icon("grid")))));
   const top=[...S.rats].filter(r=>loveOf(r)>0).sort((a,b)=>loveOf(b)-loveOf(a)).slice(0,3);
-  const fame=top.length?h("section",{class:"fame"},h("h2",{text:"Rats of the week"}),h("div",{class:"fame-row"},top.map((r,i)=>h("button",{class:"fame-item",type:"button","data-k":"fame:"+r.id,onclick:()=>openLightbox(r)},mediaFor(r,{bare:true}),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"muted",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}))))):null;
-  // Hall-of-fame memes are drawn 360px wide and scaled to the tile, keeping their own shape.
-  if(fame)requestAnimationFrame(()=>fame.querySelectorAll(".fame-item .media").forEach(m=>{const mm=m.querySelector(".meme");if(!mm)return;const s=m.clientWidth/360;mm.style.transform=`scale(${s})`;m.style.aspectRatio="auto";m.style.height=`${mm.offsetHeight*s}px`}));
+  const fame=top.length?h("section",{class:"fame","aria-labelledby":"fame-t"},h("h2",{id:"fame-t",text:"Rats of the week"}),h("ol",{class:"podium"},top.map((r,i)=>h("li",null,thumb(r,"fame:"+r.id,`${["First","Second","Third"][i]} place${r.caption?`: "${r.caption}"`:""}, ${loveOf(r)} reactions`),h("span",{class:"place-n",text:["1st","2nd","3rd"][i]}),h("span",{class:"place-v",text:`${loveOf(r)} reaction${loveOf(r)===1?"":"s"}`}))))):null;
+  if(fame)fitThumbs(fame);
   const rs=wallList();
-  if(!rs.length)main.append(...[h("p",{class:"empty",text:S.rats.length?"No rats match this filter.":"No rats yet. Unacceptable."}),fame].filter(Boolean));
-  else if(grid)main.append(...[h("div",{class:"feed grid"},rs.map(postCard)),fame].filter(Boolean));
+  if(!rs.length)main.append(...[S.rats.length?h("p",{class:"quiet-note",text:"No rats match this filter."}):note("classic","No rats yet. Unacceptable. Post one: a Krysa meme takes ten seconds.",S.canWrite&&h("button",{class:"btn primary","data-k":"wall:first",onclick:()=>postRat()},"Post a rat")),fame].filter(Boolean));
+  else if(grid)main.append(...[h("div",{class:"feed grid"},rs.map(r=>postCard(r))),fame].filter(Boolean));
   else main.append(h("div",{class:"feed"},rs.map((r,i)=>fame&&i===Math.min(2,rs.length-1)?[postCard(r),fame]:postCard(r))));
   ensureProfiles(S.rats.map(r=>r.by));
 }
 
 export function ensureProfiles(ids){ids=[...new Set<any>(ids.filter(Boolean))].filter(id=>!(id in S.profiles));
-  if(ids.length&&S.user&&!(ensureProfiles as any).busy){(ensureProfiles as any).busy=true;S.user.profiles(ids).then(ps=>{Object.assign(S.profiles,ps);(ensureProfiles as any).busy=false;if(S.tab==="rats")render()}).catch(()=>{(ensureProfiles as any).busy=false})}}
-
-/** More → Rat catchers: the scoreboard and the Sneaky rats switch. */
-export function openCatchers(){
-  let ov;const close=()=>ov.close();
-  const sheet=h("div",{class:"sheet"});
-  const draw=()=>keepFocus(sheet,()=>{
-    // Scores are per device; devices with the same name add up (src/lib/catchers.ts).
-    const entries=catchers(S.scores,S.profiles);ensureProfiles(Object.keys(S.scores||{}));
-    const toggle=h("button",{class:"btn small",type:"button","data-k":"sneaky","aria-pressed":IDLE.on,onclick:()=>{IDLE.on=!IDLE.on;try{localStorage.setItem("pw-idle-rats",IDLE.on?"on":"off")}catch(e){}
-      if(IDLE.on)scheduleCameo(true);else{clearTimeout((scheduleCameo as any).t);document.querySelectorAll(".peek,.tail-dangle").forEach(x=>x.remove())}draw()}},IDLE.on?"Sneaky rats: on":"Sneaky rats: off");
-    sheet.replaceChildren(h("h3",{id:"catch-t",tabindex:"-1",autofocus:true,text:"Rat catchers"}),
-      h("div",{class:"sectionhead"},h("p",{text:reduced()?"Sneaky rats are paused because your device is set to reduce motion.":"While the app is open, rats sneak in from the edges now and then. Tap one to catch it."}),toggle),
-      entries.length?h("div",{class:"bal"},entries.flatMap(({ids,name,n},i)=>[h("span",{text:`${i+1}. ${name||(ids.includes(S.uid)?"You":"Someone")}`}),h("span",{class:"money score",text:`${n} rat${n===1?"":"s"}`})]))
-        :h("p",{class:"empty",text:"No rats caught yet. Keep your eyes on the edges."}),
-      h("div",{class:"sheetacts"},h("div",{class:"r"},h("button",{class:"btn ghost",type:"button",onclick:close},"Close"))))});
-  draw();ov=openOverlay({labelledby:"catch-t",content:sheet});
-}
+  if(ids.length&&S.user&&!(ensureProfiles as any).busy){(ensureProfiles as any).busy=true;S.user.profiles(ids).then(ps=>{Object.assign(S.profiles,ps);(ensureProfiles as any).busy=false;if(S.tab==="rats"||S.tab==="today")render()}).catch(()=>{(ensureProfiles as any).busy=false})}}

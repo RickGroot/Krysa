@@ -1,69 +1,61 @@
 /* eslint-disable */
-// Ported from the single-file artifact; types are intentionally loose here (see README).
+// The band at the top of every tab: the tab's Prague scene with its name on an enamel street plate. On Today the
+// scene follows Prague's clock (morning, afternoon, dusk, night) and the plate makes way for the time itself.
+import { krysa } from "../art/rat";
 import { SCENES, groundEl } from "../art/scenes";
-import { daysUntil, dtUTC, fmtD, nowLocalUTC, parseD, todayIso } from "../lib/dates";
+import { EN, MON, daysUntil, fmtD, nowLocalUTC, parseD, todayIso } from "../lib/dates";
 import { fmtCzk } from "../lib/money";
-import { S } from "../state";
+import { S, TABS, TAB_ALIAS, TAB_SPOT } from "../state";
 import { toCzk, todayOn } from "./bound";
 import { h, svg } from "./dom";
-import { openOverlay } from "./overlay";
-import { openNotifications, pushOn } from "./push";
 import { render } from "./tabs";
-import { IDLE } from "./idle";
-import { loveOf, openCatchers, ratTV, wallList } from "./wall";
-import { openWrapped } from "./wrapped";
 
-export const HERO={
-  rats:{title:"Rat Wall",eyebrow:()=>"Praha by night",sub:()=>{const n=S.rats.length,r=S.rats.reduce((a,x)=>a+loveOf(x),0);return `${n} rat${n===1?"":"s"} posted · ${r} reaction${r===1?"":"s"}`},arch:true,
-    acts:()=>[h("button",{class:"btn small",type:"button",onclick:()=>ratTV(wallList())},"Rat TV"),h("button",{class:"btn small",type:"button",onclick:openWrapped},"Rat Wrapped")]},
-  flights:{title:"Flights",eyebrow:()=>"AMS ✈ PRG",sub:()=>{const now=nowLocalUTC();const nx=S.flights.map(f=>({f,t:dtUTC(f.date,f.dep)})).filter(x=>x.t&&x.t>now).sort((a,b)=>a.t-b.t)[0];return nx?`Next up: ${nx.f.flight} · ${fmtD(nx.f.date)} ${nx.f.dep}`:"Everyone's home"},light:true},
-  plan:{title:()=>todayOn()?"Today":"The Plan",eyebrow:()=>todayOn()?fmtD(todayIso()):S.info.startDate&&S.info.endDate?`${fmtD(S.info.startDate)} → ${fmtD(S.info.endDate)}`:"Set the dates",sub:()=>{if(!S.info.startDate)return"";
-    if(todayOn()){const n=daysUntil(todayIso(),S.info.startDate),of=daysUntil(S.info.endDate,S.info.startDate);if(n!=null&&of!=null&&n>=0&&n<=of)return`Day ${n+1} of ${of+1}`}
-    const d=Math.round((+parseD(S.info.startDate)-+parseD(todayIso()))/864e5),e=Math.round((+parseD(S.info.endDate)-+parseD(todayIso()))/864e5);return d>1?`${d} days to go`:d===1?"Tomorrow!":e>=0?"Happening now":"That was a week"},light:true},
-  ideas:{title:"Ideas",eyebrow:()=>"Where to next",sub:()=>`${S.ideas.length} ideas · vote for your favourites`},
-  todo:{title:"To-do",eyebrow:()=>"Seznam úkolů",lang:"cs",sub:()=>{const o=S.todos.filter(t=>!t.done).length;return `${o} open · ${S.todos.length-o} done`},light:true},
-  money:{title:"Money",eyebrow:()=>"Koruna & euro",sub:()=>`${fmtCzk(S.expenses.reduce((a,e)=>a+toCzk(e),0))} spent together`},
-  info:{title:"Info",eyebrow:()=>S.info.hotelAddress?S.info.hotelAddress.split(",")[0]:"The basics",sub:()=>`${S.people.length} travelling`},
+// Light scenes carry dark text; the rest, light text.
+const LIGHT=new Set(["plan","flights","todo"]);
+
+/** Prague's hour picks the sky over Today. */
+export function skyOf(now=nowLocalUTC()){const hr=new Date(now).getUTCHours();return hr>=5&&hr<10?"plan":hr>=10&&hr<17?"flights":hr>=17&&hr<20?"ideas":"rats"}
+
+const PLATES={
+  week:{t:"Week",cs:"Týden",scene:"plan",sub:()=>S.info.startDate&&S.info.endDate?`${fmtD(S.info.startDate)} – ${fmtD(S.info.endDate)}`:"Set the trip dates in Trip"},
+  rats:{t:"Rat Wall",cs:"Krysy",scene:"rats",sub:()=>{const n=S.rats.length;return `${n} rat${n===1?"":"s"} posted`}},
+  money:{t:"Money",cs:"Peníze",scene:"money",sub:()=>`${fmtCzk(S.expenses.reduce((a,e)=>a+toCzk(e),0))} spent together`},
+  trip:{t:"Trip",cs:"Výlet",scene:"info",sub:()=>{const n=S.people.length;return n?`${n} travelling`:"Flights, to-dos and the stay"}},
 };
 
-// Utility tabs get a shorter hero (styles.css). The scenes are bottom-aligned, so a shorter hero slides the art up
-// behind the text: each tab here was checked to keep its title on the sky. To-do keeps the full height, as its lake sits high.
-const HERO_SIZE={plan:"md",flights:"md",ideas:"md",money:"sm",info:"sm"};
-
-export function paintStage(){
-  const tab=SCENES[S.tab]?S.tab:"rats",H=HERO[tab];
-  const slot=document.getElementById("hero-slot");
-  const ht=document.getElementById("hero-text");
-  if(slot.dataset.tab!==tab){slot.dataset.tab=tab;
-    const sv=svg(SCENES[tab](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMax slice");sv.classList.add("scene");
-    slot.replaceChildren(sv,groundEl());slot.classList.remove("fadein");void slot.offsetWidth;slot.classList.add("fadein");
-    // Built once per tab and updated in place below, so a focused hero button stays focused.
-    ht.replaceChildren(...[h("div",{class:"he"}),h("h1",{class:"ht"}),h("div",{class:"hs"}),H.acts&&h("div",{class:"hero-acts"},H.acts())].filter(Boolean))}
-  document.body.dataset.scene=H.light?"light":"dark";document.body.dataset.hero=HERO_SIZE[tab]||"lg";
-  const [he,t,hs]=ht.children as any;he.textContent=H.eyebrow();he.lang=H.lang||"";t.textContent=typeof H.title==="function"?H.title():H.title;hs.textContent=S.loaded?H.sub():"";
+/** Where the trip stands: "Day 3 of 7", "4 days to go"… */
+export function tripStatus(){
+  const a=S.info.startDate,b=S.info.endDate,t=todayIso();if(!a||!b)return"";
+  if(todayOn()){const n=daysUntil(t,a),of=daysUntil(b,a);if(n!=null&&of!=null&&n>=0&&n<=of)return`Day ${n+1} of ${of+1}`}
+  const d=daysUntil(a,t),e=daysUntil(b,t);if(d==null||e==null)return"";
+  return d>1?`${d} days to go`:d===1?"Tomorrow!":e>=0?"Happening now":"That was the week";
 }
 
-export const MORE_ICONS={
-  todo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.5l2.8 2.8L16.5 9"/></svg>',
-  money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>',
-  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8v.01"/></svg>',
-  catch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20.5h7M10 17h4"/></svg>',
-  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
-};
+function sceneEl(key){const sv=svg(SCENES[key](),"0 -110 400 360");sv.setAttribute("preserveAspectRatio","xMidYMax slice");sv.classList.add("scene");return sv}
 
-export function goTab(tab){S.tab=tab;S.tabReady=true;try{sessionStorage.setItem("pw-tab",tab)}catch(e){}render();window.scrollTo(0,0)}
+let painted="";
+export function paintStage(){
+  const tab=S.tab,band=document.getElementById("band"),art=document.getElementById("band-art"),body=document.getElementById("band-body");
+  const key=tab==="today"?skyOf():PLATES[tab].scene;
+  document.body.dataset.tab=tab;band.dataset.scene=LIGHT.has(key)?"light":"dark";
+  if(art.dataset.key!==key){art.dataset.key=key;art.replaceChildren(sceneEl(key),groundEl());art.classList.remove("fadein");void art.offsetWidth;art.classList.add("fadein")}
+  // Built once per tab, then updated in place: the clock ticks without rebuilding the band.
+  if(painted!==tab){painted=tab;
+    if(tab==="today"){const kr=h("span",{class:"band-krysa alive","aria-hidden":"true"});kr.append(krysa("classic"));
+      body.replaceChildren(h("div",{class:"clockface"},h("h1",{class:"sr",text:"Today"}),h("p",{class:"clock"},h("time",{id:"clock"})),h("p",{class:"band-sub",id:"band-sub"})),kr)}
+    else{const p=PLATES[tab];body.replaceChildren(h("div",{class:"plate-wrap"},h("div",{class:"plate"},h("h1",{text:p.t}),h("span",{class:"cs",lang:"cs",text:p.cs})),h("p",{class:"band-sub",id:"band-sub"})))}}
+  const sub=document.getElementById("band-sub");
+  if(tab==="today"){const now=new Date(nowLocalUTC()),hh=String(now.getUTCHours()).padStart(2,"0"),mm=String(now.getUTCMinutes()).padStart(2,"0");
+    const c=document.getElementById("clock");c.textContent=`${hh}:${mm}`;c.setAttribute("datetime",`${todayIso()}T${hh}:${mm}`);
+    const d=parseD(todayIso());sub.replaceChildren(`${EN[d.getUTCDay()]} ${d.getUTCDate()} ${MON[d.getUTCMonth()]}`,...(S.loaded&&tripStatus()?[h("span",{class:"dot","aria-hidden":"true",text:"·"}),tripStatus()]:[]))}
+  else sub.textContent=S.loaded?PLATES[tab].sub():"";
+}
 
-export function openMore(){
-  const more=document.getElementById("more-btn");more.setAttribute("aria-expanded","true");
-  let ov;const close=()=>ov.close();
-  const open=S.todos.filter(t=>!t.done).length,total=S.expenses.reduce((a,e)=>a+toCzk(e),0);
-  const item=(tab,label,sub)=>{const ico=h("span",{class:"ico","aria-hidden":"true"});ico.innerHTML=MORE_ICONS[tab];return h("button",{class:"more-item"+(S.tab===tab?" on":""),type:"button",onclick:()=>{close();goTab(tab)}},ico,h("span",null,h("b",{text:label}),h("small",{text:sub})))};
-  const bell=h("span",{class:"ico","aria-hidden":"true"});bell.innerHTML=MORE_ICONS.bell;
-  const cup=h("span",{class:"ico","aria-hidden":"true"});cup.innerHTML=MORE_ICONS.catch;
-  const pushSub=h("small",{text:"Reminders and new rats on this device"});
-  pushOn().then(on=>{if(on)pushSub.textContent="On for this device"});
-  ov=openOverlay({labelledby:"more-t",onClose:()=>more.setAttribute("aria-expanded","false"),content:h("div",{class:"sheet more-sheet"},h("h3",{id:"more-t",tabindex:"-1",autofocus:true,text:"More"}),
-    item("todo","To-do",open?`${open} open`:"All done"),item("money","Money",`${fmtCzk(total)} spent together`),item("info","Info","Stay, people and Prague basics"),
-    h("button",{class:"more-item",type:"button",onclick:()=>{close();openCatchers()}},cup,h("span",null,h("b",{text:"Rat catchers"}),h("small",{text:IDLE.on?"Scores, and sneaky rats are on":"Scores, and sneaky rats are off"}))),
-    h("button",{class:"more-item",type:"button",onclick:()=>{close();openNotifications()}},bell,h("span",null,h("b",{text:"Notifications"}),pushSub)))});
+export function goTab(tab,spot?){
+  const t=TABS.includes(tab)?tab:TAB_ALIAS[tab]||"today";spot=spot||TAB_SPOT[tab];
+  if(t==="week"&&tab==="ideas")S.week.view="ideas";
+  S.tab=t;try{sessionStorage.setItem("pw-tab",t)}catch(e){}
+  render();
+  const el=spot&&document.getElementById(spot);
+  if(el)el.scrollIntoView({block:"start",behavior:"auto"});else window.scrollTo(0,0);
 }

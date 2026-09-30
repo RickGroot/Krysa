@@ -8,7 +8,6 @@ import { S } from "../state";
 import { write } from "./core";
 import { h, toast } from "./dom";
 import { openOverlay } from "./overlay";
-import { scurry } from "./idle";
 
 export function uploadErr(e){const c=e&&e.code;return c==="too_large"?"That file is over 20 MB. Try a smaller image or a shorter clip.":c==="unsupported_type"?"That format isn't supported. Use JPG, PNG, GIF, WebP, MP4 or WebM.":"Upload failed. Check your connection and try again."}
 
@@ -35,19 +34,20 @@ async function mediaRatio(blob,kind){
 
 export function postRat(prefill?){
   const remix=!!(prefill&&prefill.type==="meme");
-  const st={mode:remix||!S.assets?"meme":"upload",file:null,url:null,caption:"",dirty:false,m:remix?normMeme(prefill):normMeme({bg:"slate"})};
+  // The maker comes first: it needs no file and takes ten seconds. Uploading is one tap away.
+  const st={mode:"meme",file:null,url:null,caption:"",dirty:false,m:remix?normMeme(prefill):normMeme({bg:"slate"})};
   if(!st.m.bg)st.m.bg="slate";
   // A fresh meme starts with a caption, so the preview is never a blank rat. That doesn't count as a change.
   if(!remix&&!st.m.top&&!st.m.bottom){const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b}
   let ov;const close=()=>ov.close();
   const err=h("div",{class:"err",role:"alert"});
   const submit=h("button",{class:"btn primary",type:"submit"},"Post rat");
-  const cancel=h("button",{class:"btn ghost",type:"button",onclick:close},"Cancel");
+  const cancel=h("button",{class:"btn quiet",type:"button",onclick:close},"Cancel");
   const acts=h("div",{class:"sheetacts"},h("div",{class:"r"},cancel,submit));
   // Tapping outside or Escape with work in progress asks first; Cancel is an explicit no.
   const ask=()=>{if(!(st.dirty||st.file||st.caption.trim()))return close();if(acts.querySelector(".discard"))return;
     const keep=h("button",{class:"btn",type:"button",onclick:()=>{acts.replaceChildren(h("div",{class:"r"},cancel,submit));submit.focus()}},"Keep editing");
-    acts.replaceChildren(h("span",{class:"discard",role:"alert",text:"Discard this rat?"}),h("div",{class:"r"},keep,h("button",{class:"btn danger ghost",type:"button",onclick:close},"Discard")));keep.focus()};
+    acts.replaceChildren(h("span",{class:"discard",role:"alert",text:"Discard this rat?"}),h("div",{class:"r"},keep,h("button",{class:"btn quiet danger",type:"button",onclick:close},"Discard")));keep.focus()};
   const changed=()=>{st.dirty=true;err.textContent=""};
   // Meme mode. Every option row is built once; a change updates the pressed states and the preview in place,
   // so the tapped option keeps focus and the sheet keeps its scroll.
@@ -79,7 +79,7 @@ export function postRat(prefill?){
       h("button",{class:"btn",type:"button",onclick:()=>{st.m=surpriseMeme();setText();changed();update()}},"Surprise me"),
       h("button",{class:"btn",type:"button",onclick:()=>{const[t,b]=pickCaption(st.m.layout);st.m.top=t;st.m.bottom=b;setText();changed();paint()}},"New caption"),
       S.downloads&&h("button",{class:"btn",type:"button",onclick:()=>saveMemeImage(st.m,"preview")},"Save image"),
-      h("button",{class:"btn ghost",type:"button",onclick:()=>{st.m=normMeme({bg:"slate",top:st.m.top,bottom:st.m.bottom});changed();update()}},"Reset")),
+      h("button",{class:"btn quiet",type:"button",onclick:()=>{st.m=normMeme({bg:"slate",top:st.m.top,bottom:st.m.bottom});changed();update()}},"Reset")),
     group("Template & text",true,chips("Template",MM.layouts,"layout"),h("div",{class:"field"},topL,top),h("div",{class:"field"},botL,bot),chips("Font",MM.fonts,"font"),chips("Text colour",MM.colors,"color")),
     group("The rat",true,chips("Fur",MM.furs,"fur",{thumbs:"fur"}),chips("Ears",MM.ears,"ears",{thumbs:"ears"}),face,face2,
       chips("Hat",MM.hats,"hat",{thumbs:"hat"}),chips("Face & outfit",MM.gear,"gear",{thumbs:"gear"}),chips("Holding",MM.items,"item",{thumbs:"item"})),
@@ -91,9 +91,9 @@ export function postRat(prefill?){
   const dropName=h("span",{text:"Pick a rat image, GIF or video"}),filePrev=h("div",{class:"preview",hidden:true});
   inp.addEventListener("change",()=>{const f=inp.files&&inp.files[0];if(!f)return;if(st.url)URL.revokeObjectURL(st.url);st.file=f;st.url=URL.createObjectURL(f);changed();
     dropName.textContent=f.name;filePrev.replaceChildren(/^video\//.test(f.type)?h("video",{src:st.url,muted:true,loop:true,autoplay:true,playsinline:true}):h("img",{src:st.url,alt:"Preview"}));filePrev.hidden=false});
-  const uploadSec=h("div",{class:"mk-sec"},h("label",{class:"drop",for:"rat-file"},dropName,h("span",{class:"muted",text:"JPG, PNG, GIF, WebP, MP4 or WebM, up to 20 MB"}),inp),filePrev);
-  const seg=S.assets?h("div",{class:"seg"},[["upload","Upload a meme"],["meme","Make a Krysa meme"]].map(([k,l])=>h("button",{type:"button","data-v":k,onclick:()=>{st.mode=k;showMode()}},l)))
-    :h("p",{class:"muted",text:"Uploads aren't available here. You can still make a Krysa meme."});
+  const uploadSec=h("div",{class:"mk-sec"},h("label",{class:"drop",for:"rat-file"},dropName,h("span",{class:"hint",text:"JPG, PNG, GIF, WebP, MP4 or WebM, up to 20 MB"}),inp),filePrev);
+  const seg=S.assets?h("div",{class:"seg"},[["meme","Make a Krysa meme"],["upload","Upload a file"]].map(([k,l])=>h("button",{type:"button","data-v":k,onclick:()=>{st.mode=k;showMode()}},l)))
+    :h("p",{class:"hint",text:"Uploads aren't available here. You can still make a Krysa meme."});
   const showMode=()=>{memeSec.hidden=st.mode!=="meme";uploadSec.hidden=st.mode!=="upload";if(S.assets)for(const b of seg.children)b.setAttribute("aria-pressed",String(b.dataset.v===st.mode));err.textContent=""};
   showMode();
   const cap=h("input",{id:"rat-cap",maxlength:"140",placeholder:"Optional caption",autocomplete:"off",oninput:e=>{st.caption=e.target.value}});
@@ -107,12 +107,12 @@ export function postRat(prefill?){
           const ar=await mediaRatio(prep.blob,prep.kind);
           const up=await S.assets.upload(prep.blob);
           const ok=await write(()=>S.db.collection("rats").add({...base,type:prep.kind,assetId:up.id,...(ar?{ar:Math.round(ar*1000)/1000}:{})}),"Rat posted");
-          if(ok){close();scurry()}else{try{await S.assets.delete(up.id)}catch(x){}}
+          if(ok)close();else{try{await S.assets.delete(up.id)}catch(x){}}
         }catch(x){err.textContent=uploadErr(x)}finally{submit.disabled=false;submit.textContent="Post rat"}
       }else{
         const m=normMeme(st.m);m.top=m.top.trim();m.bottom=m.bottom.trim();
         const ok=await write(()=>S.db.collection("rats").add({...base,type:"meme",...m}),"Rat posted");
-        if(ok){close();scurry({cheese:true})}
+        if(ok)close();
       }}},
     h("h3",{id:"mk-title",tabindex:"-1",autofocus:true,text:remix?"Remix this rat":"Post a rat"}),body,err,acts);
   ov=openOverlay({labelledby:"mk-title",content:form,onCancel:ask,onClose:()=>{if(st.url)URL.revokeObjectURL(st.url)}});

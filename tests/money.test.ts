@@ -3,7 +3,7 @@ import { balances, defaultPayer, fmtCzk, fmtEur, rateOf, settle, toCzk, type Exp
 
 const people: Person[] = [{ id: "sam" }, { id: "jules" }, { id: "alex" }];
 const sum = (b: Record<string, number>) => Object.values(b).reduce((a, x) => a + x, 0);
-const nbsp = (s: string) => s.replace(/ | /g, " ");
+const nbsp = (s: string) => s.replace(/\u00a0| /g, " ");
 
 describe("rateOf", () => {
   it("uses the stored rate when it is sensible", () => {
@@ -116,7 +116,10 @@ describe("settle", () => {
 describe("formatting", () => {
   it("formats koruna the Czech way", () => {
     expect(nbsp(fmtCzk(1250))).toBe("1 250 Kč");
-    expect(fmtCzk(285.4)).toBe("285 Kč");
+    expect(fmtCzk(285.4)).toBe("285\u00a0Kč");
+  });
+  it("keeps the amount and Kč on one line", () => {
+    expect(fmtCzk(1094)).toMatch(/\u00a0Kč$/);
   });
   it("formats euro with two decimals", () => {
     expect(fmtEur(11.728)).toBe("€11.73");
